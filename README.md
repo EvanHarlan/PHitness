@@ -11,30 +11,33 @@
 - **nodemon**: Development server with hot-reloading
 
 ## Project Structure
+```bash
 /root
-│── backend/            # Node.js & Express backend
-│   │── controllers/    # Handles request logic
-│   │── models/         # Mongoose schemas/models
-|   |-- lib/            # Contains connection logic for various services (Ex. db.js -> Database connection)
-│   │── routes/         # API route definitions
-│   │── middleware/     # Custom middleware functions
-│   │── server.js       # Entry point for backend server
 │
-│── frontend/           # React frontend
-|   |-- public/         # All public assets - images, branding, etc.
-│   │── src/
-│   │   │── components/ # Reusable UI components
-│   │   │── pages/      # Page components
-│   │   │── context/    # React Context for global state
-│   │   │── services/   # API request functions
-│   │   │── App.js      # Main React component
-│   │   │── index.css   # Global CSS file containing Tailwind imports
-|   |   |-- Main.js
+├── backend/
+│   ├── controllers/
+│   ├── models/
+│   ├── lib/
+│   ├── routes/
+│   ├── middleware/
+│   └── server.js
 │
-│── .env                # Environment variables
-│── package.json        # Project dependencies & scripts
-│── README.md           # Project documentation
-|-- ViteConfig, etc.
+├── frontend/
+│   ├── public/
+│   └── src/
+│       ├── components/
+│       ├── pages/
+│       ├── context/
+│       ├── services/
+│       ├── App.js
+│       ├── index.css
+│       └── Main.js
+│
+├── .env
+├── package.json
+├── README.md
+└── vite.config.js
+```
 
 
 ### Key File Descriptions
