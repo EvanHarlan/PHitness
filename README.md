@@ -14,29 +14,28 @@
 ```bash
 /root
 │
-├── backend/
-│   ├── controllers/
-│   ├── models/
-│   ├── lib/
-│   ├── routes/
-│   ├── middleware/
-│   └── server.js
+├── backend/ # Node.js & Express backend
+│   ├── controllers/ # Request handling logic
+│   ├── models/ # Mongoose schemas & models
+│   ├── lib/ # Service connections (db.js, redis.js)
+│   ├── routes/ # API endpoint definitions
+│   ├── middleware/ # Custom middleware functions
+│   └── server.js # Backend entry point
 │
-├── frontend/
-│   ├── public/
+├── frontend/ # React application
+│   ├── public/ # Static assets (images, fonts)
 │   └── src/
-│       ├── components/
-│       ├── pages/
-│       ├── context/
-│       ├── services/
-│       ├── App.js
-│       ├── index.css
-│       └── Main.js
+│       ├── components/ # Reusable UI components
+│       ├── pages/ # Page-level components
+│       ├── services/ # API communication layer
+│       ├── App.js # Root React component
+│       ├── index.css # Global styles with Tailwind imports
+│       └── Main.js # ReactDOM render point
 │
-├── .env
-├── package.json
-├── README.md
-└── vite.config.js
+├── .env # Environment variables
+├── package.json # Project dependencies & scripts
+├── README.md # Project documentation
+└── vite.config.js # Vite configuration
 ```
 
 
