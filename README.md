@@ -48,3 +48,14 @@
 **Frontend**
 - `index.css`: Contains Tailwind CSS directives (`@tailwind base`, etc.)
 - `services/api.js`: Axios instance with base URL configuration
+
+
+# Application Color Palette
+- **Neon Green** → `#32CD32`
+- **Balanced Green** → `#4CAF50`
+- **Dark Gray** → `#1E1E1E`
+- **Black** → `#121212`
+- **Medium Gray** → `#2A2A2A`
+- **Light Gray** → `#B0B0B0`
+- **White** → `#F5F5F5`
+
