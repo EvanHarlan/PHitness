@@ -1,6 +1,6 @@
 ## Initial Setup
 
-### Packages
+## Packages
 - **express**: Web framework for Node.js
 - **dotenv**: Loads environment variables from `.env` file
 - **mongoose**: MongoDB object modeling
@@ -9,6 +9,7 @@
 - **bcryptjs**: Password hashing and data encryption
 - **ioredis**: Redis client for caching frequent data (JWTs/cookies)
 - **nodemon**: Development server with hot-reloading
+- **lucide-react**: React icon package
 
 ## Project Structure
 ```bash
@@ -39,7 +40,7 @@
 ```
 
 
-### Key File Descriptions
+## Key File Descriptions
 **Backend**
 - `lib/db.js`: Handles MongoDB connection
 - `lib/redis.js`: Manages Redis client instance
@@ -50,7 +51,7 @@
 - `services/api.js`: Axios instance with base URL configuration
 
 
-# Application Color Palette
+## Application Color Palette
 - **Neon Green** → `#32CD32`
 - **Balanced Green** → `#4CAF50`
 - **Dark Gray** → `#1E1E1E`
