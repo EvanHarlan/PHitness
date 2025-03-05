@@ -5,6 +5,8 @@ import ProfilePage from './pages/ProfilePage';
 import SocialPage from './pages/SocialPage';
 import NutritionPage from './pages/NutritionPage';
 import WorkoutPage from './pages/WorkoutPage';
+import SignUpPage from "./pages/SignUpPage";
+import LoginPage from "./pages/LoginPage";
 
 // Color Constants
 export const COLORS = {
@@ -35,6 +37,8 @@ const App = () => {
             <Route path="/social" element={<SocialPage />} />
             <Route path="/nutrition" element={<NutritionPage />} />
             <Route path="/workout" element={<WorkoutPage />} />
+            <Route path="/signup" element={<SignUpPage />} />
+            <Route path="/login" element={<LoginPage />} />
           </Routes>
         </main>
       </div>

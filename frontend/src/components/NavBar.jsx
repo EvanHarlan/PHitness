@@ -10,7 +10,9 @@ const Navbar = () => {
     { path: '/profile', label: 'Profile' },
     { path: '/social', label: 'Social/Friends' },
     { path: '/nutrition', label: 'Nutrition/Meal Plan' },
-    { path: '/workout', label: 'Workout' }
+    { path: '/workout', label: 'Workout' },
+    {path: '/login', label:'Login'},
+    {path: '/signup', label:'SignUp'}
   ];
 
   return (
