@@ -1,0 +1,74 @@
+# Node modules
+node_modules/
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Environment variables
+.env
+
+# Compiled source
+dist/
+build/
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Debug files
+*.stackdump
+*.swp
+
+# IDE specific files
+.idea/
+.vscode/
+*.code-workspace
+
+# Dependency directories
+/backend/node_modules/
+/frontend/node_modules/
+
+# Static bundle files
+/frontend/public/*.map
+/frontend/public/assets/
+
+# TailwindCSS specific cache
+.tailwind/
+
+# Temporary files and cache
+*.tmp
+*.cache
+.cache/
+.temp/
+
+# NPM and Yarn dependency files
+package-lock.json
+yarn.lock
+
+# Exclude ESLint and Prettier cache
+.eslintcache
+.prettiercache
+
+# Vite-related files
+frontend/.vite/
+
+# Ignore lockfiles and security logs
+pnpm-lock.yaml
+yarn-error.log
+
+# Miscellaneous
+*.bak
+*.orig
+
+# Git-specific files
+.git/
