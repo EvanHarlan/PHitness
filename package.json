@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "main": "backend/server.js",
   "scripts": {
-    "dev":"nodemon backend/server.js",
-    "prod":"node backend/server.js"
+    "dev": "nodemon backend/server.js",
+    "prod": "node backend/server.js"
   },
   "keywords": [],
   "author": "",
@@ -14,11 +14,13 @@
   "dependencies": {
     "bcryptjs": "^3.0.2",
     "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "ioredis": "^5.5.0",
     "jsonwebtoken": "^9.0.2",
-    "mongoose": "^8.10.2"
+    "mongoose": "^8.10.2",
+    "phitness": "file:"
   },
   "devDependencies": {
     "nodemon": "^3.1.9"
