@@ -1,20 +1,65 @@
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { COLORS } from '../App';
+import { useState, useContext } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { UserPlus, Mail, Lock, User } from 'lucide-react';
+import axios from '../api/axios'; // Import our configured axios
+import { AuthContext } from '../context/AuthContext';
+import { COLORS } from '../App'; // Adjust the import path if needed
 
 const SignUpPage = () => {
+  const navigate = useNavigate();
+  const { login } = useContext(AuthContext);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    password: "",
-    confirmPassword: "",
+    name: '',
+    email: '',
+    password: '',
+    confirmPassword: '',
   });
-
-  const handleSubmit = (e) => {
+  
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Placeholder for future signup logic
-    console.log("Signup attempt");
+    
+    // Reset error state
+    setError('');
+    
+    // Validate passwords match
+    if (formData.password !== formData.confirmPassword) {
+      setError('Passwords do not match');
+      return;
+    }
+    
+    try {
+      setLoading(true);
+      
+      // Make API request to your backend
+      const response = await axios.post('/api/auth/signup', {
+        name: formData.name,
+        email: formData.email,
+        password: formData.password
+      });
+      
+      // If successful, store the token using our context
+      if (response.data.token) {
+        login(response.data.token, {
+          name: formData.name,
+          email: formData.email
+        });
+        
+        // Redirect to home page or dashboard
+        navigate('/');
+      }
+    } catch (err) {
+      // Handle specific error messages from backend
+      if (err.response && err.response.data.message) {
+        setError(err.response.data.message);
+      } else {
+        setError('Something went wrong. Please try again.');
+      }
+      console.error('Signup error:', err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -202,6 +247,12 @@ const SignUpPage = () => {
                 </div>
               </div>
 
+              {/* Show loading state */}
+              {loading && <div className="text-center text-lg text-white">Loading...</div>}
+
+              {/* Show error message */}
+              {error && <div className="text-center text-red-500">{error}</div>}
+
               {/* Submit Button */}
               <button
                 type="submit"
@@ -250,3 +301,4 @@ const SignUpPage = () => {
 };
 
 export default SignUpPage;
+
