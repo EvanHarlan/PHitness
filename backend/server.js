@@ -1,24 +1,36 @@
 import express from 'express';
 import cors from 'cors';
-import { connectDB } from './db.js'; // Import your db.js
-import authRoutes from './routes/auth.js'; // Import your auth routes
+import dotenv from 'dotenv'; 
+import authRoutes from './routes/authenticate.js'; 
+import { connectDB } from './lib/db.js';
 
-dotenv.config();
+dotenv.config(); 
 
-// Initialize express app
 const app = express();
+const port = process.env.PORT || 5001;
 
-// Middleware
-app.use(cors()); // To enable CORS for frontend requests
-app.use(express.json()); // To parse incoming JSON requests
+app.use(cors({
+  origin: 'http://localhost:5173', 
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  credentials: true,
+}));
 
-// Connect to MongoDB
-connectDB(); // Calling your connectDB function
+app.get('/', (req, res) => {
+  res.send('Welcome to the API!');
+});
 
-// Routes
-app.use('../backend/routes/authenticate.js', authRoutes); // Auth routes for handling user sign up, login, etc.
+app.use(express.json()); 
 
-// Start the server
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+app.use('/api/auth', authRoutes);
+
+app.listen(port, async () => {
+  try {
+    console.log(`Server running at http://localhost:${port}`);
+    await connectDB();
+  } catch (error) {
+    console.error('Error starting the server or connecting to the DB:', error.message);
+    process.exit(1);  // Exit the process with failure if unable to start server or connect DB
+  }
+});
+
 
