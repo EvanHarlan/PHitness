@@ -1,3 +1,4 @@
+import { COLORS } from '../lib/constants';
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { LogIn, Mail, Lock, ArrowRight, Loader } from "lucide-react";
@@ -16,10 +17,14 @@ const LoginPage = () => {
   return (
     <div className="min-h-screen bg-[#0a0a0a]/90 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
-        <div className="bg-[#0a0a0a]/90 rounded-2xl shadow-xl overflow-hidden border border-red-800">
+        <div className="bg-[#0a0a0a]/90 rounded-2xl shadow-xl overflow-hidden"
+        style={{
+          backgroundColor: COLORS.MEDIUM_GRAY,
+        }}>
           {/* Header Section */}
-          <div className="bg-gradient-to-r from-red-600 to-red-700 px-8 py-12">
-            <h2 className="text-3xl font-bold text-white text-center">
+          <div className="bg-gradient-to-r from-green-600 to-gray-700 px-8 py-12">
+            <h2 className="text-3xl font-bold text-white text-center"
+            >
               Welcome Back
             </h2>
             <p className="text-red-200 text-center mt-2">
@@ -44,11 +49,16 @@ const LoginPage = () => {
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="block w-full pl-10 px-3 py-3 border border-red-600 rounded-xl 
+                    className="block w-full pl-10 px-3 py-3 rounded-xl 
                     bg-[#0a0a0a]/90 text-gray-100 placeholder-gray-400 
-                    focus:outline-none focus:ring-2 focus:ring-red-500 
+                    focus:outline-none 
                     focus:border-transparent transition duration-200"
                     placeholder="you@example.com"
+                    style={{
+                        
+                      borderColor: COLORS.NEON_GREEN,
+                      borderWidth: '1px'
+                    }}
                   />
                 </div>
               </div>
@@ -67,11 +77,16 @@ const LoginPage = () => {
                     required
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="block w-full pl-10 px-3 py-3 border border-red-600 rounded-xl 
+                    className="block w-full pl-10 px-3 py-3 border border-gray-600 rounded-xl 
                     bg-[#0a0a0a]/90 text-gray-100 placeholder-gray-400 
-                    focus:outline-none focus:ring-2 focus:ring-red-500 
+                    focus:outline-none focus:ring-2 focus:ring-gray-500 
                     focus:border-transparent transition duration-200"
                     placeholder="••••••••"
+                    style={{
+                        
+                      borderColor: COLORS.NEON_GREEN,
+                      borderWidth: '1px'
+                    }}
                   />
                 </div>
               </div>
@@ -80,10 +95,13 @@ const LoginPage = () => {
                 type="submit"
                 disabled={loading}
                 className="w-full py-3 px-4 flex justify-center items-center bg-gradient-to-r 
-                from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 
+                from-green-600 to-gray-700 hover:from-green-700 hover:to-gray-800 
                 text-white text-sm font-semibold rounded-xl shadow-lg hover:shadow-xl 
                 transition duration-200 disabled:opacity-50"
-              >
+                style={{
+                  backgroundColor: COLORS.DARK_GRAY,
+                 
+                }}>
                 {loading ? (
                   <>
                     <Loader className="mr-2 h-5 w-5 animate-spin" />
@@ -103,9 +121,11 @@ const LoginPage = () => {
                 Don't have an account?{" "}
                 <Link
                   to="/signup"
-                  className="font-medium text-red-400 hover:text-red-300 
+                  className="font-medium text-gray-400 hover:text-green-300 
                   inline-flex items-center transition duration-200"
-                >
+                  style={{
+                    backgroundColor: COLORS.MEDIUM_GRAY,
+                  }}> 
                   Create one now
                   <ArrowRight className="ml-1 h-4 w-4" />
                 </Link>

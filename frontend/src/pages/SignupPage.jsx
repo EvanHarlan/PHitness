@@ -1,3 +1,4 @@
+import { COLORS } from '../lib/constants';
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { UserPlus, Mail, Lock, User, ArrowRight, Loader } from "lucide-react";
@@ -22,9 +23,13 @@ const SignUpPage = () => {
   return (
     <div className="min-h-screen bg-[#0a0a0a]/90 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
-        <div className="bg-[#0a0a0a]/90 rounded-2xl shadow-xl overflow-hidden border border-red-800">
+        <div className="bg-[#0a0a0a]/90 rounded-2xl shadow-xl overflow-hidden "
+        style={{
+          backgroundColor: COLORS.MEDIUM_GRAY,
+        }}>
+        
           {/* Header Section */}
-          <div className="bg-gradient-to-r from-red-600 to-red-700 px-8 py-12">
+          <div className="bg-gradient-to-r from-green-600 to-gray-700 px-8 py-12">
             <motion.div
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -60,12 +65,16 @@ const SignUpPage = () => {
                       required
                       value={formData.name}
                       onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                      className="block w-full pl-10 px-3 py-3 border border-red-600 rounded-xl 
+                      className="block w-full pl-10 px-3 py-3 rounded-xl 
                       bg-[#0a0a0a]/90 text-gray-100 placeholder-gray-400 
-                      focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent 
+                      focus:outline-none focus:border-transparent 
                       transition duration-200"
                       placeholder="John Doe"
-                    />
+                      style={{
+                        
+                        borderColor: COLORS.NEON_GREEN,
+                        borderWidth: '1px'
+                      }}/>
                   </div>
                 </div>
 
@@ -83,12 +92,16 @@ const SignUpPage = () => {
                       required
                       value={formData.email}
                       onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                      className="block w-full pl-10 px-3 py-3 border border-red-600 rounded-xl 
+                      className="block w-full pl-10 px-3 py-3 rounded-xl 
                       bg-[#0a0a0a]/90 text-gray-100 placeholder-gray-400 
-                      focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent 
+                      focus:outline-none focus:border-transparent 
                       transition duration-200"
                       placeholder="you@example.com"
-                    />
+                      style={{
+                        
+                        borderColor: COLORS.NEON_GREEN,
+                        borderWidth: '1px'
+                      }}/>
                   </div>
                 </div>
 
@@ -106,12 +119,16 @@ const SignUpPage = () => {
                       required
                       value={formData.password}
                       onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                      className="block w-full pl-10 px-3 py-3 border border-red-600 rounded-xl 
+                      className="block w-full pl-10 px-3 py-3 rounded-xl 
                       bg-[#0a0a0a]/90 text-gray-100 placeholder-gray-400 
                       focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent 
                       transition duration-200"
                       placeholder="••••••••"
-                    />
+                      style={{
+                        
+                        borderColor: COLORS.NEON_GREEN,
+                        borderWidth: '1px'
+                      }}/>
                   </div>
                 </div>
 
@@ -131,11 +148,16 @@ const SignUpPage = () => {
                       onChange={(e) =>
                         setFormData({ ...formData, confirmPassword: e.target.value })
                       }
-                      className="block w-full pl-10 px-3 py-3 border border-red-600 rounded-xl 
+                      className="block w-full pl-10 px-3 py-3  rounded-xl 
                       bg-[#0a0a0a]/90 text-gray-100 placeholder-gray-400 
-                      focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent 
+                      focus:outline-none focus:ring-2 
                       transition duration-200"
                       placeholder="••••••••"
+                      style={{
+                        
+                        borderColor: COLORS.NEON_GREEN,
+                        borderWidth: '1px'
+                      }}
                     />
                   </div>
                 </div>
@@ -144,10 +166,10 @@ const SignUpPage = () => {
                   type="submit"
                   disabled={loading}
                   className="w-full py-3 px-4 flex justify-center items-center bg-gradient-to-r 
-                  from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 
+                  from-green-600 to-gray-700 hover:from-green-700 hover:to-gray-800 
                   text-white text-sm font-semibold rounded-xl shadow-lg hover:shadow-xl 
                   transition duration-200 disabled:opacity-50"
-                >
+                  >
                   {loading ? (
                     <>
                       <Loader className="mr-2 h-5 w-5 animate-spin" />
@@ -167,8 +189,8 @@ const SignUpPage = () => {
                   Already have an account?{" "}
                   <Link
                     to="/login"
-                    className="font-medium text-red-400 hover:text-red-300 inline-flex items-center transition duration-200"
-                  >
+                    className="font-medium hover:text-green-300 inline-flex items-center transition duration-200"
+                    >
                     Sign in now
                     <ArrowRight className="ml-1 h-4 w-4" />
                   </Link>
