@@ -2,18 +2,21 @@ import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
 
 const userSchema = new mongoose.Schema({
-  name: {
+  name:{
     type: String,
-    required: true,
+    required: [true, "Name is required"]
   },
-  email: {
+  email:{
     type: String,
-    required: true,
+    required: [true, "Email is required"],
     unique: true,
+    lowercase: true,
+    trim: true
   },
-  password: {
+  password:{
     type: String,
-    required: true,
+    required: [true, "Password is required"],
+    minLength: [6, "Password must be at least 6 characters long"]
   },
 }, {
   timestamps: true // This is optional but recommended
@@ -33,7 +36,7 @@ userSchema.pre('save', async function(next) {
 });
 
 // Method to compare entered password with stored hashed password
-userSchema.methods.matchPassword = async function(enteredPassword) {
+userSchema.methods.comparePassword = async function(enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
 };
 
