@@ -38,7 +38,7 @@ const SignUpPage = () => {
               <h2 className="text-3xl font-bold text-white text-center">
                 Create Account
               </h2>
-              <p className="text-red-200 text-center mt-2">
+              <p className="text-white text-center mt-2">
                 Join us to start your journey
               </p>
             </motion.div>
@@ -121,7 +121,7 @@ const SignUpPage = () => {
                       onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                       className="block w-full pl-10 px-3 py-3 rounded-xl 
                       bg-[#0a0a0a]/90 text-gray-100 placeholder-gray-400 
-                      focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent 
+                      focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent 
                       transition duration-200"
                       placeholder="••••••••"
                       style={{

@@ -27,7 +27,7 @@ const LoginPage = () => {
             >
               Welcome Back
             </h2>
-            <p className="text-red-200 text-center mt-2">
+            <p className="text-white text-center mt-2">
               Enter your credentials to access your account
             </p>
           </div>
