@@ -6,7 +6,10 @@ function Navbar() {
   const { user, logout } = useUserStore();
 
   return (
-    <nav className="bg-gray-800 text-white shadow-md">
+    <nav className=" text-white shadow-md"
+    style={{
+      backgroundColor: COLORS.MEDIUM_GRAY,
+      }}>
       <div className="container mx-auto px-4 py-3 flex justify-between items-center">
         <Link to="/" className="text-xl font-bold" style={{ color: COLORS.NEON_GREEN }}>
           PHitness
