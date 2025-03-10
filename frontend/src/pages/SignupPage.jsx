@@ -1,7 +1,9 @@
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { COLORS } from '../App';
-import { UserPlus, Mail, Lock, User } from 'lucide-react';
+import { COLORS } from '../lib/constants';
+import { useState } from "react";
+import { Link } from "react-router-dom";
+import { UserPlus, Mail, Lock, User, ArrowRight, Loader } from "lucide-react";
+import { motion } from "framer-motion";
+import { useUserStore } from "../stores/useUserStore";
 
 const SignUpPage = () => {
   const [formData, setFormData] = useState({
@@ -11,238 +13,191 @@ const SignUpPage = () => {
     confirmPassword: "",
   });
 
+  const { signup, loading } = useUserStore();
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Placeholder for future signup logic
-    console.log("Signup attempt");
+    signup(formData);
   };
 
   return (
-    <div 
-      className="min-h-screen flex items-center justify-center p-4"
-      style={{ 
-        backgroundColor: COLORS.BLACK 
-      }}
-    >
+    <div className="min-h-screen bg-[#0a0a0a]/90 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
-        <div 
-          className="rounded-2xl overflow-hidden shadow-lg"
-          style={{ 
-            backgroundColor: COLORS.MEDIUM_GRAY 
-          }}
-        >
+        <div className="bg-[#0a0a0a]/90 rounded-2xl shadow-xl overflow-hidden "
+        style={{
+          backgroundColor: COLORS.MEDIUM_GRAY,
+        }}>
+        
           {/* Header Section */}
-          <div 
-            className="px-8 py-12 text-center"
-            style={{ 
-              backgroundColor: COLORS.DARK_GRAY 
-            }}
-          >
-            <h2 
-              className="text-3xl font-bold"
-              style={{ 
-                color: COLORS.NEON_GREEN 
-              }}
+          <div className="bg-gradient-to-r from-green-600 to-gray-700 px-8 py-12">
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8 }}
             >
-              Create Account
-            </h2>
-            <p 
-              className="mt-2"
-              style={{ 
-                color: COLORS.LIGHT_GRAY 
-              }}
-            >
-              Join us to start your journey
-            </p>
-          </div>
-
-          <div className="p-8">
-            <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Full Name Input */}
-              <div className="space-y-2">
-                <label 
-                  htmlFor="name" 
-                  className="text-sm font-medium"
-                  style={{ 
-                    color: COLORS.WHITE 
-                  }}
-                >
-                  Full name
-                </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <User 
-                      className="h-5 w-5" 
-                      color={COLORS.LIGHT_GRAY} 
-                    />
-                  </div>
-                  <input
-                    id="name"
-                    type="text"
-                    required
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    className="block w-full pl-10 px-3 py-3 rounded-xl transition duration-200"
-                    style={{
-                      backgroundColor: COLORS.DARK_GRAY,
-                      color: COLORS.WHITE,
-                      borderColor: COLORS.NEON_GREEN,
-                      borderWidth: '1px'
-                    }}
-                    placeholder="John Doe"
-                  />
-                </div>
-              </div>
-
-              {/* Email Input */}
-              <div className="space-y-2">
-                <label 
-                  htmlFor="email" 
-                  className="text-sm font-medium"
-                  style={{ 
-                    color: COLORS.WHITE 
-                  }}
-                >
-                  Email address
-                </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Mail 
-                      className="h-5 w-5" 
-                      color={COLORS.LIGHT_GRAY} 
-                    />
-                  </div>
-                  <input
-                    id="email"
-                    type="email"
-                    required
-                    value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    className="block w-full pl-10 px-3 py-3 rounded-xl transition duration-200"
-                    style={{
-                      backgroundColor: COLORS.DARK_GRAY,
-                      color: COLORS.WHITE,
-                      borderColor: COLORS.NEON_GREEN,
-                      borderWidth: '1px'
-                    }}
-                    placeholder="you@example.com"
-                  />
-                </div>
-              </div>
-
-              {/* Password Input */}
-              <div className="space-y-2">
-                <label 
-                  htmlFor="password" 
-                  className="text-sm font-medium"
-                  style={{ 
-                    color: COLORS.WHITE 
-                  }}
-                >
-                  Password
-                </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Lock 
-                      className="h-5 w-5" 
-                      color={COLORS.LIGHT_GRAY} 
-                    />
-                  </div>
-                  <input
-                    id="password"
-                    type="password"
-                    required
-                    value={formData.password}
-                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                    className="block w-full pl-10 px-3 py-3 rounded-xl transition duration-200"
-                    style={{
-                      backgroundColor: COLORS.DARK_GRAY,
-                      color: COLORS.WHITE,
-                      borderColor: COLORS.NEON_GREEN,
-                      borderWidth: '1px'
-                    }}
-                    placeholder="••••••••"
-                  />
-                </div>
-              </div>
-
-              {/* Confirm Password Input */}
-              <div className="space-y-2">
-                <label 
-                  htmlFor="confirmPassword" 
-                  className="text-sm font-medium"
-                  style={{ 
-                    color: COLORS.WHITE 
-                  }}
-                >
-                  Confirm Password
-                </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Lock 
-                      className="h-5 w-5" 
-                      color={COLORS.LIGHT_GRAY} 
-                    />
-                  </div>
-                  <input
-                    id="confirmPassword"
-                    type="password"
-                    required
-                    value={formData.confirmPassword}
-                    onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
-                    className="block w-full pl-10 px-3 py-3 rounded-xl transition duration-200"
-                    style={{
-                      backgroundColor: COLORS.DARK_GRAY,
-                      color: COLORS.WHITE,
-                      borderColor: COLORS.NEON_GREEN,
-                      borderWidth: '1px'
-                    }}
-                    placeholder="••••••••"
-                  />
-                </div>
-              </div>
-
-              {/* Submit Button */}
-              <button
-                type="submit"
-                className="w-full py-3 px-4 rounded-xl transition duration-200"
-                style={{
-                  backgroundColor: COLORS.NEON_GREEN,
-                  color: COLORS.BLACK,
-                  ':hover': {
-                    backgroundColor: COLORS.BALANCED_GREEN
-                  }
-                }}
-              >
-                <UserPlus className="mr-2 h-5 w-5 inline-block" />
-                Create account
-              </button>
-            </form>
-
-            {/* Login Link */}
-            <div className="mt-8 text-center">
-              <p 
-                className="text-sm"
-                style={{ 
-                  color: COLORS.LIGHT_GRAY 
-                }}
-              >
-                Already have an account?{" "}
-                <Link
-                  to="/login"
-                  className="transition duration-200"
-                  style={{ 
-                    color: COLORS.NEON_GREEN,
-                    ':hover': {
-                      color: COLORS.BALANCED_GREEN
-                    }
-                  }}
-                >
-                  Sign in now
-                </Link>
+              <h2 className="text-3xl font-bold text-white text-center">
+                Create Account
+              </h2>
+              <p className="text-white text-center mt-2">
+                Join us to start your journey
               </p>
-            </div>
+            </motion.div>
           </div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+          >
+            <div className="p-8">
+              <form onSubmit={handleSubmit} className="space-y-6">
+                <div className="space-y-2">
+                  <label htmlFor="name" className="text-sm font-medium text-gray-300">
+                    Full name
+                  </label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <User className="h-5 w-5 text-gray-400" />
+                    </div>
+                    <input
+                      id="name"
+                      type="text"
+                      required
+                      value={formData.name}
+                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                      className="block w-full pl-10 px-3 py-3 rounded-xl 
+                      bg-[#0a0a0a]/90 text-gray-100 placeholder-gray-400 
+                      focus:outline-none focus:border-transparent 
+                      transition duration-200"
+                      placeholder="John Doe"
+                      style={{
+                        
+                        borderColor: COLORS.NEON_GREEN,
+                        borderWidth: '1px'
+                      }}/>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <label htmlFor="email" className="text-sm font-medium text-gray-300">
+                    Email address
+                  </label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <Mail className="h-5 w-5 text-gray-400" />
+                    </div>
+                    <input
+                      id="email"
+                      type="email"
+                      required
+                      value={formData.email}
+                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                      className="block w-full pl-10 px-3 py-3 rounded-xl 
+                      bg-[#0a0a0a]/90 text-gray-100 placeholder-gray-400 
+                      focus:outline-none focus:border-transparent 
+                      transition duration-200"
+                      placeholder="you@example.com"
+                      style={{
+                        
+                        borderColor: COLORS.NEON_GREEN,
+                        borderWidth: '1px'
+                      }}/>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <label htmlFor="password" className="text-sm font-medium text-gray-300">
+                    Password
+                  </label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <Lock className="h-5 w-5 text-gray-400" />
+                    </div>
+                    <input
+                      id="password"
+                      type="password"
+                      required
+                      value={formData.password}
+                      onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                      className="block w-full pl-10 px-3 py-3 rounded-xl 
+                      bg-[#0a0a0a]/90 text-gray-100 placeholder-gray-400 
+                      focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent 
+                      transition duration-200"
+                      placeholder="••••••••"
+                      style={{
+                        
+                        borderColor: COLORS.NEON_GREEN,
+                        borderWidth: '1px'
+                      }}/>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <label htmlFor="confirmPassword" className="text-sm font-medium text-gray-300">
+                    Confirm Password
+                  </label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <Lock className="h-5 w-5 text-gray-400" />
+                    </div>
+                    <input
+                      id="confirmPassword"
+                      type="password"
+                      required
+                      value={formData.confirmPassword}
+                      onChange={(e) =>
+                        setFormData({ ...formData, confirmPassword: e.target.value })
+                      }
+                      className="block w-full pl-10 px-3 py-3  rounded-xl 
+                      bg-[#0a0a0a]/90 text-gray-100 placeholder-gray-400 
+                      focus:outline-none focus:ring-2 
+                      transition duration-200"
+                      placeholder="••••••••"
+                      style={{
+                        
+                        borderColor: COLORS.NEON_GREEN,
+                        borderWidth: '1px'
+                      }}
+                    />
+                  </div>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full py-3 px-4 flex justify-center items-center bg-gradient-to-r 
+                  from-green-600 to-gray-700 hover:from-green-700 hover:to-gray-800 
+                  text-white text-sm font-semibold rounded-xl shadow-lg hover:shadow-xl 
+                  transition duration-200 disabled:opacity-50"
+                  >
+                  {loading ? (
+                    <>
+                      <Loader className="mr-2 h-5 w-5 animate-spin" />
+                      Creating account...
+                    </>
+                  ) : (
+                    <>
+                      <UserPlus className="mr-2 h-5 w-5" />
+                      Create account
+                    </>
+                  )}
+                </button>
+              </form>
+
+              <div className="mt-8 text-center">
+                <p className="text-sm text-gray-400">
+                  Already have an account?{" "}
+                  <Link
+                    to="/login"
+                    className="font-medium hover:text-green-300 inline-flex items-center transition duration-200"
+                    >
+                    Sign in now
+                    <ArrowRight className="ml-1 h-4 w-4" />
+                  </Link>
+                </p>
+              </div>
+            </div>
+          </motion.div>
         </div>
       </div>
     </div>
