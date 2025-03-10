@@ -1,4 +1,6 @@
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { useEffect } from 'react';
+import { Route, Routes, Navigate, useLocation } from 'react-router-dom';
+import PropTypes from 'prop-types';
 import Navbar from './components/NavBar';
 import HomePage from './pages/HomePage';
 import ProfilePage from './pages/ProfilePage';
@@ -7,43 +9,60 @@ import NutritionPage from './pages/NutritionPage';
 import WorkoutPage from './pages/WorkoutPage';
 import SignUpPage from "./pages/SignUpPage";
 import LoginPage from "./pages/LoginPage";
+import LoadingSpinner from "./components/LoadingSpinner";
+import { useUserStore } from './stores/useUserStore';
 
-// Color Constants
-export const COLORS = {
-  NEON_GREEN: '#32CD32',
-  BALANCED_GREEN: '#4CAF50',
-  DARK_GRAY: '#1E1E1E',
-  BLACK: '#121212',
-  MEDIUM_GRAY: '#2A2A2A',
-  LIGHT_GRAY: '#B0B0B0',
-  WHITE: '#F5F5F5'
+// ProtectedRoute component definition
+const ProtectedRoute = ({ element }) => {
+  const { user } = useUserStore();
+  const location = useLocation();
+  
+  if (!user) {
+    // Redirect to login but remember where the user was trying to go
+    return <Navigate to="/login" state={{ from: location.pathname }} replace />;
+  }
+  
+  return element;
 };
 
-const App = () => {
+// Add PropTypes validation
+ProtectedRoute.propTypes = {
+  element: PropTypes.element.isRequired
+};
+
+function App() {
+  const { user, checkAuth, checkingAuth } = useUserStore();
+  
+  useEffect(() => {
+    checkAuth();
+  }, [checkAuth]);
+
+  if (checkingAuth) return <LoadingSpinner />;
+  
   return (
-    <Router>
-      <div 
-        className="min-h-screen bg-[#121212] text-[#F5F5F5] flex flex-col"
-        style={{ 
-          backgroundColor: COLORS.BLACK, 
-          color: COLORS.WHITE 
-        }}
-      >
-        <Navbar />
-        <main className="flex-grow container mx-auto px-4 py-6 md:px-6 lg:px-8">
-          <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/profile" element={<ProfilePage />} />
-            <Route path="/social" element={<SocialPage />} />
-            <Route path="/nutrition" element={<NutritionPage />} />
-            <Route path="/workout" element={<WorkoutPage />} />
-            <Route path="/signup" element={<SignUpPage />} />
-            <Route path="/login" element={<LoginPage />} />
-          </Routes>
-        </main>
-      </div>
-    </Router>
+    <div className="relative">
+      <Navbar />
+      <main>
+        <Routes>
+          {/* Home page is accessible to everyone */}
+          <Route path="/" element={<HomePage />} />
+          
+          {/* Protected routes - only accessible if logged in */}
+          <Route path="/profile" element={<ProtectedRoute element={<ProfilePage />} />} />
+          <Route path="/social" element={<ProtectedRoute element={<SocialPage />} />} />
+          <Route path="/nutrition" element={<ProtectedRoute element={<NutritionPage />} />} />
+          <Route path="/workout" element={<ProtectedRoute element={<WorkoutPage />} />} />
+          
+          {/* Auth routes - only accessible if NOT logged in */}
+          <Route path="/signup" element={user ? <Navigate to="/" /> : <SignUpPage />} />
+          <Route path="/login" element={user ? <Navigate to="/" /> : <LoginPage />} />
+          
+          {/* Catch-all route */}
+          <Route path="*" element={<Navigate to="/" />} />
+        </Routes>
+      </main>
+    </div>
   );
-};
+}
 
 export default App;
