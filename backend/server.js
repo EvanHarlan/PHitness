@@ -6,22 +6,35 @@ import workoutRoutes from "./routes/workoutRoutes.js";
 import authRoutes from "./routes/authenticate.js";
 import { connectDB } from "./lib/db.js";
 
-dotenv.config();
+dotenv.config(); // Load environment variables
+
 const app = express();
-const port = process.env.PORT || 5001;
+const PORT = process.env.PORT || 5000; // Change to 5000 for consistency
 
-app.use(cors({ origin: "http://localhost:5173", methods: ["GET", "POST", "PUT", "DELETE"], credentials: true }));
-app.use(express.json()); 
+// Middleware
+app.use(cors({ 
+  origin: "http://localhost:5173", 
+  methods: ["GET", "POST", "PUT", "DELETE"], 
+  credentials: true 
+}));
 
+app.use(express.json());
+
+// Routes
 app.use("/api/auth", authRoutes); 
 app.use("/api/workouts", workoutRoutes);
 
-app.listen(port, async () => {
+// Start server only after successful DB connection
+const startServer = async () => {
   try {
-    console.log(` Server running at http://localhost:${port}`);
-    await connectDB();
+    await connectDB(); // Ensure DB is connected before listening
+    app.listen(PORT, () => {
+      console.log(` Server running at http://localhost:${PORT}`);
+    });
   } catch (error) {
     console.error(" Error connecting to MongoDB:", error.message);
-    process.exit(1);
+    process.exit(1); // Exit process on DB failure
   }
-});
+};
+
+startServer();
