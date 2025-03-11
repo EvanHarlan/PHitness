@@ -71,4 +71,4 @@ yarn-error.log
 *.orig
 
 # Git-specific files
-.git/
+.git/.env
