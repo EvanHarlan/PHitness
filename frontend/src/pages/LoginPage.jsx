@@ -7,11 +7,31 @@ import { useUserStore } from "../stores/useUserStore";
 const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [errors, setErrors] = userState({});
   const { login, loading } = useUserStore();
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    login(email, password);
+      let newErrors = {};
+
+      if (!email.trim()) {
+          newErrors.email = "Email is required.";
+      }
+      if (!password.trim()) {
+          newErrors.password = "Password is required.";
+      }
+
+      if (Object.keys(newErrors).length > 0) {
+          setErrors(newErrors);
+          return;
+      }
+
+      setErrors({});
+      const success = await login(email, password);
+
+      if (!success) {
+          setErrors({ general: "Invalid email or password." });
+      }
   };
 
   return (
@@ -60,7 +80,8 @@ const LoginPage = () => {
                       borderWidth: '1px'
                     }}
                   />
-                </div>
+                              </div>
+                              {errors.email && <p className="text-red-500 text-sm">{errors.email}</p>} {/* Inline error */}
               </div>
 
               <div className="space-y-2">
@@ -89,7 +110,10 @@ const LoginPage = () => {
                     }}
                   />
                 </div>
+                 {errors.password && <p className="text-red-500 text-sm">{errors.password}</p>} {/* Inline error */}
               </div>
+
+              {errors.general && <p className="text-red-500 text-sm text-center">{errors.general}</p>} {/* Centered error */}
 
               <button
                 type="submit"
