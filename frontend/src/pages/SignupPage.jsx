@@ -13,11 +13,34 @@ const SignUpPage = () => {
     confirmPassword: "",
   });
 
+    const [errors, setErrors] = useState({});
+
   const { signup, loading } = useUserStore();
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    signup(formData);
+  const handleSubmit = async (e) => {
+      e.preventDefault();
+      let newErrors = {};
+
+      if (formData.password.length < 6) {
+          newErrors.password = "Password needs to be at least 6 characters";
+          return;
+      }
+
+      if (formData.password !== formData.confirmPassword) {
+          newErrors.confirmPassword = "Passwords do not match";
+      }
+
+      if (Object.keys(newErrors).length > 0) {
+          setErrors(newErrors);
+          return;
+      }
+
+      setErrors({});
+      const success = await signup(formData);
+
+      if (!success) {
+          setErrors({ general: "Signup failed. Please check your details." })
+      }
   };
 
   return (
@@ -128,7 +151,8 @@ const SignUpPage = () => {
                         
                         borderColor: COLORS.NEON_GREEN,
                         borderWidth: '1px'
-                      }}/>
+                                          }} />
+                                      {errors.password && <p className="text-red-500 text-sm">{errors.password}</p>} {/* Inline error */}
                   </div>
                 </div>
 
@@ -158,7 +182,8 @@ const SignUpPage = () => {
                         borderColor: COLORS.NEON_GREEN,
                         borderWidth: '1px'
                       }}
-                    />
+                                      />
+                                      {errors.confirmPassword && <p className="text-red-500 text-sm">{errors.confirmPassword}</p>} {/* Inline error */}
                   </div>
                 </div>
 
