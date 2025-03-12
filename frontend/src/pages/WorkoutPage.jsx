@@ -7,6 +7,7 @@ const WorkoutPage = () => {
   const [question, setQuestion] = useState("");
   const [answer, setAnswer] = useState("");
   const [loading, setLoading] = useState(false);
+  const [workoutAmount, setWorkoutAmount] = useState(0);
 
   const handleQuestionChange = (e) => {
     setQuestion(e.target.value);
@@ -23,8 +24,17 @@ const WorkoutPage = () => {
     } finally {
       setLoading(false);
     }
-  };
+    };
 
+    const addWorkout = () => {
+            try {
+                setWorkoutAmount(prevAmount => prevAmount + 1);
+                console.log("Added 1 to workoutAmount")
+            }
+            catch (error) {
+                console.error(error);
+            }
+    };
   return (
     <div 
       className="min-h-screen p-6 md:p-8"
@@ -64,7 +74,7 @@ const WorkoutPage = () => {
         >
           {loading ? "Processing..." : "Ask"}
         </button>
-      </div>
+          </div>
 
       {loading && <div className="text-xl font-bold">Loading...</div>}
       
@@ -75,7 +85,18 @@ const WorkoutPage = () => {
           </strong>
           <p className="text-lg">{answer}</p>
         </div>
-      )}
+          )}
+
+          <div className="mb-7">
+              <p className="text-lg">Today's workout amount: {workoutAmount}</p>
+              <button
+                  className="mt-2 px-4 py-2 rounded font-bold"
+                  style={{ backgroundColor: COLORS.NEON_GREEN, color: COLORS.BLACK }}
+                  onClick={addWorkout}
+              >
+                Add Workout
+              </button>
+          </div>
     </div>
   );
 };
