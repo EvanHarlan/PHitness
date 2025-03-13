@@ -1,3 +1,40 @@
+# PHitness
+
+An AI-powered fitness web platform designed to help users create, track, and optimize their workouts and nutrition plans.
+
+## Environment Setup
+
+1. Copy `.env.example` to create your own `.env` file:
+```bash
+cp backend/.env.example backend/.env
+```
+
+2. Update the `.env` file with your actual values:
+- `PORT`: Server port (default: 5000)
+- `MONGODB_URI`: Your MongoDB connection string
+- `JWT_SECRET`: A secure random string for JWT encryption
+- `OPENAI_API_KEY`: Your OpenAI API key (Get one from https://platform.openai.com/api-keys)
+
+**IMPORTANT: Never commit your `.env` file or share your API keys publicly!**
+
+## Development Setup
+
+1. Install dependencies:
+```bash
+npm install
+cd frontend && npm install
+cd ../backend && npm install
+```
+
+2. Start the development servers:
+```bash
+# Start backend server
+cd backend && npm run dev
+
+# In a new terminal, start frontend
+cd frontend && npm run dev
+```
+
 ## Initial Setup
 
 ## Packages

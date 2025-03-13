@@ -4,6 +4,11 @@ import asyncHandler from "express-async-handler"; // Handles async errors gracef
 
 const router = express.Router();
 
+// Test route - Good for learning!
+router.get("/test", (req, res) => {
+  res.json({ message: "Hello! Your first API endpoint is working! 🎉" });
+});
+
 // GET all workouts (Sorted by newest first)
 router.get(
   "/",

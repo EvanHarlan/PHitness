@@ -1,6 +1,7 @@
 import express from "express";
 import MealPlan from "../models/MealPlan.js";
 import asyncHandler from "express-async-handler";
+import { generateMealSuggestions } from "../services/openai.service.js";
 
 const router = express.Router();
 
@@ -157,6 +158,73 @@ router.get(
       remainingCarbs: mealPlan.dailyCarbsGoal - dailyTotals.carbs,
       remainingFats: mealPlan.dailyFatsGoal - dailyTotals.fats
     });
+  })
+);
+
+// POST generate AI meal suggestions
+router.post(
+  "/suggest",
+  asyncHandler(async (req, res) => {
+    const {
+      targetCalories,
+      targetProtein,
+      targetCarbs,
+      targetFats,
+      dietaryRestrictions,
+      preferences
+    } = req.body;
+
+    // Validate required fields
+    if (!targetCalories) {
+      return res.status(400).json({
+        message: "Daily calorie goal is required for meal suggestions"
+      });
+    }
+
+    try {
+      const suggestions = await generateMealSuggestions({
+        targetCalories,
+        targetProtein,
+        targetCarbs,
+        targetFats,
+        dietaryRestrictions,
+        preferences
+      });
+
+      res.json(suggestions);
+    } catch (error) {
+      console.error('Error generating meal suggestions:', error);
+      res.status(500).json({
+        message: "Failed to generate meal suggestions",
+        error: error.message
+      });
+    }
+  })
+);
+
+// POST save AI suggestions as meal plan
+router.post(
+  "/suggest/save",
+  asyncHandler(async (req, res) => {
+    const { name, suggestions } = req.body;
+
+    if (!name || !suggestions || !suggestions.meals) {
+      return res.status(400).json({
+        message: "Name and valid meal suggestions are required"
+      });
+    }
+
+    const newMealPlan = new MealPlan({
+      name,
+      meals: suggestions.meals,
+      dailyCalorieGoal: suggestions.dailyTotals.calories,
+      dailyProteinGoal: suggestions.dailyTotals.protein,
+      dailyCarbsGoal: suggestions.dailyTotals.carbs,
+      dailyFatsGoal: suggestions.dailyTotals.fats
+    });
+
+    const savedMealPlan = await newMealPlan.save();
+    res.status(201).json(savedMealPlan);
   })
 );
 

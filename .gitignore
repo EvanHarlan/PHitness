@@ -16,6 +16,8 @@ pids
 
 # Environment variables
 .env
+.env.local
+.env.*.local
 
 # Compiled source
 dist/
