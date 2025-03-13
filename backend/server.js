@@ -4,6 +4,7 @@ import mongoose from "mongoose";
 import cors from "cors";
 import workoutRoutes from "./routes/workoutRoutes.js"; 
 import authRoutes from "./routes/authenticate.js";
+import mealPlanRoutes from "./routes/mealPlanRoutes.js";
 import { connectDB } from "./lib/db.js";
 
 dotenv.config(); // Load environment variables
@@ -23,6 +24,7 @@ app.use(express.json());
 // Routes
 app.use("/api/auth", authRoutes); 
 app.use("/api/workouts", workoutRoutes);
+app.use("/api/meal-plans", mealPlanRoutes);
 
 // Start server only after successful DB connection
 const startServer = async () => {
