@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react"; 
 import { COLORS } from '../lib/constants';
 import axios from "axios";
+import { Dumbbell, Utensils, Trophy } from "lucide-react"; 
 
 const ProfilePage = () =>
 {
@@ -44,28 +45,46 @@ const ProfilePage = () =>
 
     const achievements = [
         { title: "Account Created", description: "Welcome to PHitness! Your journey begins here.", threshold: 0, count: 1 },
-        { title: "Completed 1 Workout", description: "Your first workout completed!", threshold: 1, count: workoutAmount },
-        { title: "Completed 5 Workouts", description: "You're getting into the routine!", threshold: 5, count: workoutAmount },
-        { title: "Completed 10 Workouts", description: "A true fitness enthusiast!", threshold: 10, count: workoutAmount },
-        { title: "Created 1 Meal", description: "Your first meal tracked!", threshold: 1, count: mealAmount },
-        { title: "Created 5 Meals", description: "You're building healthy habits!", threshold: 5, count: mealAmount },
-        { title: "Created 10 Meals", description: "A dedicated meal planner!", threshold: 10, count: mealAmount },
+        { title: "Completed 1 Workout", description: "Your first workout completed!", threshold: 1, count: workoutAmount, iconType: "workout_bronze" },
+        { title: "Completed 5 Workouts", description: "You're getting into the routine!", threshold: 5, count: workoutAmount, iconType: "workout_silver"  },
+        { title: "Completed 10 Workouts", description: "A true fitness enthusiast!", threshold: 10, count: workoutAmount, iconType: "workout_gold"  },
+        { title: "Completed 25 Workouts", description: "Dominating this routine!", threshold: 25, count: workoutAmount, iconType: "workout_diam"  },
+        { title: "Completed 50 Workouts", description: "You should go pro!", threshold: 50, count: workoutAmount, iconType: "workout_ruby"  },
+        { title: "Completed 100 Workouts", description: "A PHitness workout!", threshold: 100, count: workoutAmount, iconType: "workout_phit"  },
+        { title: "Created 1 Meal", description: "Your first meal tracked!", threshold: 1, count: mealAmount, iconType: "meal_bronze" },
+        { title: "Created 5 Meals", description: "You're building healthy habits!", threshold: 5, count: mealAmount, iconType: "meal_silver" },
+        { title: "Created 10 Meals", description: "A dedicated meal planner!", threshold: 10, count: mealAmount, iconType: "meal_gold" },
+        { title: "Created 25 Meals", description: "A chef in the making!", threshold: 25, count: workoutAmount, iconType: "meal_diam"},
+        { title: "Created 50 Meals", description: "The meal prep king!", threshold: 50, count: workoutAmount, iconType: "meal_ruby" },
+        { title: "Created 100 Meals", description: "A Phitness meal planer!", threshold: 100, count: workoutAmount, iconType: "meal_phit" },
     ];
 
 
-    const StarIcon = ({ filled }) => (
-        <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            fill={filled ? "gold" : "COLORS.GRAY"}
-            stroke="none"
-            width="24"
-            height="24"
-            className="mr-2"
-        >
-            <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.62L12 2 9.19 8.62 2 9.24l5.46 4.73L5.82 21z" />
-        </svg>
-    );
+    const AchievementIcon = ({ type, filled }) => {
+      const color = filled ? "#FFD700" : COLORS.GRAY; 
+
+    const icons = {
+        account_made: <Trophy size={24} color={filled ? "#FFD700" : COLORS.GRAY} />,
+        workout_bronze: <Dumbbell size={24} color={filled ? "#CD7F32" : COLORS.GRAY} />,  
+        meal_bronze: <Utensils size={24} color={filled ? "#CD7F32" : COLORS.GRAY} />,
+        milestone_bronze: <Trophy size={24} color={filled ? "#CD7F32" : COLORS.GRAY} />,
+        workout_silver: <Dumbbell size={24} color={filled ? "#C0C0C0" : COLORS.GRAY} />,  
+        meal_silver: <Utensils size={24} color={filled ? "#C0C0C0" : COLORS.GRAY} />,
+        workout_gold: <Dumbbell size={24} color={filled ? "#FFD700" : COLORS.GRAY} />,  
+        meal_gold: <Utensils size={24} color={filled ? "#FFD700" : COLORS.GRAY} />,
+        workout_diam: <Dumbbell size={24} color={filled ? "#0F52BA" : COLORS.GRAY} />, 
+        meal_diam: <Utensils size={24} color={filled ? "#0F52BA" : COLORS.GRAY} />,
+        workout_ruby: <Dumbbell size={24} color={filled ? "#9B111E" : COLORS.GRAY} />,  
+        meal_ruby: <Utensils size={24} color={filled ? "#9B111E" : COLORS.GRAY} />,
+        workout_phit: <Dumbbell size={24} color={filled ? "#32CD32" : COLORS.GRAY} />,  
+        meal_phit: <Utensils size={24} color={filled ? "#32CD32" : COLORS.GRAY} />,
+         
+         
+      };
+  
+      return icons[type] || <Trophy size={24} color={color} />; 
+  };
+    
 
     if (loading)
     {
@@ -125,7 +144,7 @@ const ProfilePage = () =>
               {achievements.map((achievement, index) => (
                   <li key={index} className="flex flex-col mb-4 p-3 rounded-lg" style={{ backgroundColor: COLORS.DARK_GRAY }}>
                       <div className="flex items-center text-lg font-bold">
-                          <StarIcon filled={achievement.count >= achievement.threshold} />
+                      <AchievementIcon type={achievement.iconType} filled={achievement.count >= achievement.threshold} />
                           {achievement.title}
                       </div>
                       <p className="text-sm text-[#B0B0B0] ml-8">{achievement.description}</p>
