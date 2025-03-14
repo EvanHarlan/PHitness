@@ -1,7 +1,9 @@
 import { useState, useEffect } from "react"; 
 import { COLORS } from '../lib/constants';
 import axios from "axios";
-import { Dumbbell, Utensils, Trophy } from "lucide-react"; 
+import { Dumbbell, Utensils, Trophy } from "lucide-react";
+import { useUserStore } from "../stores/useUserStore"; 
+
 
 const ProfilePage = () =>
 {
@@ -9,6 +11,13 @@ const ProfilePage = () =>
     const [mealAmount, setMealAmount] = useState(0);
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [isEditing, setIsEditing] = useState(false); // State to toggle the edit form
+    const [editedProfile, setEditedProfile] = useState({
+        name: "",
+        username: "",
+        bio: "",
+        age: ""
+    });
 
     useEffect(() =>
     {
@@ -21,6 +30,12 @@ const ProfilePage = () =>
                 });
 
                 setUser(profileResponse.data);
+                setEditedProfile({
+                  name: profileResponse.data.name || "",
+                  username: profileResponse.data.username || "",
+                  bio: profileResponse.data.bio || "",
+                  age: profileResponse.data.age || "",
+              });
 
                 const countsResponse = await axios.get("http://localhost:5000/api/tracker/counts", {
                     withCredentials: true,
@@ -42,6 +57,30 @@ const ProfilePage = () =>
 
         fetchProfileAndCounts();
     }, []);
+
+    const handleSaveChanges = async () => {
+      try {
+        const success = await useUserStore.getState().updateUserProfile(editedProfile);
+        if (success) {
+          // Get the updated user from the store
+          setUser(useUserStore.getState().user);
+          setIsEditing(false);
+        } else {
+          alert("Failed to save profile. Please try again.");
+        }
+      } catch (error) {
+        console.error("Error saving profile:", error);
+        alert("Failed to save profile. Please try again.");
+      }
+    };
+
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        setEditedProfile(prev => ({
+            ...prev,
+            [name]: value
+        }));
+    };
 
     const achievements = [
         { title: "Account Created", description: "Welcome to PHitness! Your journey begins here.", threshold: 0, count: 1 },
@@ -83,7 +122,7 @@ const ProfilePage = () =>
       };
   
       return icons[type] || <Trophy size={24} color={color} />; 
-  };
+    };
     
 
     if (loading)
@@ -113,45 +152,138 @@ const ProfilePage = () =>
         Profile Page
       </h1>
       <div 
-        className="flex items-center p-6 rounded-lg"
+        className="flex flex-col p-6 rounded-lg"
         style={{ 
           backgroundColor: COLORS.MEDIUM_GRAY 
         }}
       >
-        <img 
-          src="/api/placeholder/96/96" 
-          alt="Profile" 
-          className="w-24 h-24 rounded-full mr-4 border-2"
-          style={{ 
-            borderColor: COLORS.NEON_GREEN 
-          }}
-        />
-        <div>
-          <h2 
-            className="text-xl font-semibold"
-            style={{ color: COLORS.NEON_GREEN }}
-          >
-                      Username: {user?.name || "Guest"}
-          </h2>
-                  <p className="text-[#B0B0B0]">Email: {user?.email || "No email provided"}</p>
+        <div className="flex justify-between items-center mb-4">
+          <div className="flex items-center">
+            <img 
+              src="/api/placeholder/96/96" 
+              alt="Profile" 
+              className="w-24 h-24 rounded-full mr-4 border-2"
+              style={{ 
+                borderColor: COLORS.NEON_GREEN 
+              }}
+            />
+            {!isEditing ? (
+              <div>
+                <h2 
+                  className="text-xl font-semibold"
+                  style={{ color: COLORS.NEON_GREEN }}
+                >
+                  Name: {user?.name || "Guest"}
+                </h2>
+                <p className="text-[#B0B0B0]">Username: {user?.username || "No username provided"}</p>
+                <p className="text-[#B0B0B0]">Email: {user?.email || "No email provided"}</p>
+                <p className="text-[#B0B0B0]">Age: {user?.age || "No age provided"}</p>
+                <p className="text-[#B0B0B0]">Bio: {user?.bio || "No bio provided"}</p>
+              </div>
+            ) : (
+              <div className="flex-1">
+                <div className="mb-2">
+                  <label className="block text-sm" style={{ color: COLORS.NEON_GREEN }}>Name:</label>
+                  <input
+                    type="text"
+                    name="name"
+                    value={editedProfile.name}
+                    onChange={handleInputChange}
+                    className="w-full p-2 rounded bg-gray-800 text-white border"
+                    style={{ borderColor: COLORS.NEON_GREEN }}
+                  />
+                </div>
+                <div className="mb-2">
+                  <label className="block text-sm" style={{ color: COLORS.NEON_GREEN }}>Username:</label>
+                  <input
+                    type="text"
+                    name="username"
+                    value={editedProfile.username}
+                    onChange={handleInputChange}
+                    className="w-full p-2 rounded bg-gray-800 text-white border"
+                    style={{ borderColor: COLORS.NEON_GREEN }}
+                  />
+                </div>
+                <div className="mb-2">
+                  <label className="block text-sm" style={{ color: COLORS.NEON_GREEN }}>Age:</label>
+                  <input
+                    type="text"
+                    name="age"
+                    value={editedProfile.age}
+                    onChange={handleInputChange}
+                    className="w-full p-2 rounded bg-gray-800 text-white border"
+                    style={{ borderColor: COLORS.NEON_GREEN }}
+                  />
+                </div>
+                <div className="mb-2">
+                  <label className="block text-sm" style={{ color: COLORS.NEON_GREEN }}>Bio:</label>
+                  <textarea
+                    name="bio"
+                    value={editedProfile.bio}
+                    onChange={handleInputChange}
+                    className="w-full p-2 rounded bg-gray-800 text-white border"
+                    style={{ borderColor: COLORS.NEON_GREEN }}
+                    rows="3"
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+          <div>
+            {!isEditing ? (
+              <button
+                onClick={() => setIsEditing(true)}
+                className="px-4 py-2 rounded font-medium"
+                style={{ 
+                  backgroundColor: COLORS.NEON_GREEN,
+                  color: COLORS.BLACK
+                }}
+              >
+                Edit Profile
+              </button>
+            ) : (
+              <div className="flex flex-col gap-2">
+                <button
+                  onClick={handleSaveChanges}
+                  className="px-4 py-2 rounded font-medium"
+                  style={{ 
+                    backgroundColor: COLORS.NEON_GREEN,
+                    color: COLORS.BLACK
+                  }}
+                >
+                  Save Changes
+                </button>
+                <button
+                  onClick={() => setIsEditing(false)}
+                  className="px-4 py-2 rounded font-medium"
+                  style={{ 
+                    backgroundColor: COLORS.DARK_GRAY,
+                    color: COLORS.WHITE
+                  }}
+                >
+                  Cancel
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
-          <div className="mt-6">
-              <h2 className="text-2xl font-bold mb-4" style={{ color: COLORS.NEON_GREEN }} >
-                  Achievements
-              </h2>
-              <ul>
-              {achievements.map((achievement, index) => (
-                  <li key={index} className="flex flex-col mb-4 p-3 rounded-lg" style={{ backgroundColor: COLORS.DARK_GRAY }}>
-                      <div className="flex items-center text-lg font-bold">
-                      <AchievementIcon type={achievement.iconType} filled={achievement.count >= achievement.threshold} />
-                          {achievement.title}
-                      </div>
-                      <p className="text-sm text-[#B0B0B0] ml-8">{achievement.description}</p>
-                  </li>
-              ))}
-              </ul>
-          </div>
+      <div className="mt-6">
+        <h2 className="text-2xl font-bold mb-4" style={{ color: COLORS.NEON_GREEN }} >
+          Achievements
+        </h2>
+        <ul>
+        {achievements.map((achievement, index) => (
+          <li key={index} className="flex flex-col mb-4 p-3 rounded-lg" style={{ backgroundColor: COLORS.DARK_GRAY }}>
+            <div className="flex items-center text-lg font-bold">
+              <AchievementIcon type={achievement.iconType} filled={achievement.count >= achievement.threshold} />
+              {achievement.title}
+            </div>
+            <p className="text-sm text-[#B0B0B0] ml-8">{achievement.description}</p>
+          </li>
+        ))}
+        </ul>
+      </div>
     </div>
   );
 };

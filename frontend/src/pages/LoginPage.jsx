@@ -1,37 +1,32 @@
 import { COLORS } from '../lib/constants';
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { LogIn, Mail, Lock, ArrowRight, Loader } from "lucide-react";
 import { useUserStore } from "../stores/useUserStore";
 
 const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [errors, setErrors] = useState({});
+  const [errors, setError] = useState({});
   const { login, loading } = useUserStore();
+  const navigate = useNavigate();
 
   const handleSubmit = (e) => {
     e.preventDefault();
-      let newErrors = {};
-
-      if (!email.trim()) {
-          newErrors.email = "Email is required.";
-      }
-      if (!password.trim()) {
-          newErrors.password = "Password is required.";
-      }
-
-      if (Object.keys(newErrors).length > 0) {
-          setErrors(newErrors);
-          return;
-      }
-
-      setErrors({});
-      const success = await login(email, password);
-
-      if (!success) {
-          setErrors({ general: "Invalid email or password." });
-      }
+    setError({}); // Reset error messages on form submission
+    login(email, password)
+      .then((success) => {
+        if (success) {
+          navigate("/profile"); // Redirect to profile page after successful login
+        } else {
+          // Set error message if login fails
+          setError({ general: "Invalid email or password. Please try again." });
+        }
+      })
+      .catch(() => {
+        // Handle unexpected errors (e.g., network issues)
+        setError({ general: "Something went wrong. Please try again later." });
+      });
   };
 
   return (
@@ -43,8 +38,7 @@ const LoginPage = () => {
         }}>
           {/* Header Section */}
           <div className="bg-gradient-to-r from-green-600 to-gray-700 px-8 py-12">
-            <h2 className="text-3xl font-bold text-white text-center"
-            >
+            <h2 className="text-3xl font-bold text-white text-center">
               Welcome Back
             </h2>
             <p className="text-white text-center mt-2">
@@ -75,13 +69,12 @@ const LoginPage = () => {
                     focus:border-transparent transition duration-200"
                     placeholder="you@example.com"
                     style={{
-                        
                       borderColor: COLORS.NEON_GREEN,
                       borderWidth: '1px'
                     }}
                   />
-                              </div>
-                              {errors.email && <p className="text-red-500 text-sm">{errors.email}</p>} {/* Inline error */}
+                  {errors.email && <p className="text-red-500 text-sm">{errors.email}</p>} {/* Inline error */}
+                </div>
               </div>
 
               <div className="space-y-2">
@@ -104,16 +97,15 @@ const LoginPage = () => {
                     focus:border-transparent transition duration-200"
                     placeholder="••••••••"
                     style={{
-                        
                       borderColor: COLORS.NEON_GREEN,
                       borderWidth: '1px'
                     }}
                   />
                 </div>
-                 {errors.password && <p className="text-red-500 text-sm">{errors.password}</p>} {/* Inline error */}
+                {errors.password && <p className="text-red-500 text-sm">{errors.password}</p>} {/* Inline error */}
               </div>
 
-              {errors.general && <p className="text-red-500 text-sm text-center">{errors.general}</p>} {/* Centered error */}
+              {errors.general && <p className="text-red-500 text-sm text-center">{errors.general}</p>} {/* Centered error for general issues */}
 
               <button
                 type="submit"
@@ -124,7 +116,6 @@ const LoginPage = () => {
                 transition duration-200 disabled:opacity-50"
                 style={{
                   backgroundColor: COLORS.DARK_GRAY,
-                 
                 }}>
                 {loading ? (
                   <>

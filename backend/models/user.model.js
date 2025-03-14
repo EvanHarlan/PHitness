@@ -18,6 +18,22 @@ const userSchema = new mongoose.Schema({
     required: [true, "Password is required"],
     minLength: [6, "Password must be at least 6 characters long"]
   },
+  username: {
+    type: String,
+    required: [true, "Username is required"], 
+    unique: true, 
+    trim: true
+  },
+  age: {
+    type: Number, 
+    required: true,
+    min: [13, "Age must be at least 13"] 
+  },
+  bio: {
+    type: String, 
+    required: true, 
+    maxlength: [500, "Bio cannot be longer than 500 characters"] 
+  }
 }, {
   timestamps: true // This is optional but recommended
 });
