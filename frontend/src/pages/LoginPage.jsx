@@ -7,7 +7,7 @@ import { useUserStore } from "../stores/useUserStore";
 const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [errors, setErrors] = userState({});
+  const [errors, setErrors] = useState({});
   const { login, loading } = useUserStore();
 
   const handleSubmit = async (e) => {
