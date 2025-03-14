@@ -82,6 +82,18 @@ export const useUserStore = create((set, get) => ({
       throw error;
     }
   },
+  updateUserProfile: async (updatedData) => {
+    set({ loading: true });
+    try {
+      const res = await axios.put("/auth/profile", updatedData); // Make sure your API supports this route
+      set({ user: res.data, loading: false }); // Update the user store with the new profile data
+      return true;
+    } catch (error) {
+      set({ loading: false });
+      toast.error(error.response?.data?.message || "Failed to update profile");
+      return false;
+    }
+  },
 }));
 
 // Axios interceptor for token refresh
