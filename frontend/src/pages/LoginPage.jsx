@@ -10,7 +10,7 @@ const LoginPage = () => {
   const [errors, setErrors] = useState({});
   const { login, loading } = useUserStore();
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
       let newErrors = {};
 
