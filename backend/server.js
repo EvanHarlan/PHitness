@@ -7,6 +7,8 @@ import { connectDB } from "./lib/db.js";
 import questionHandler from "./question.js";
 import authRoutes from "./routes/auth.route.js";
 import trackerRoutes from "./routes/tracker.route.js";
+import friendRoutes from './routes/friend.route.js';
+
 
 // Load environment variables
 dotenv.config();
@@ -36,6 +38,7 @@ app.use((req, res, next) => {
 // API Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/tracker", trackerRoutes);
+app.use("/api/friend", friendRoutes);
 
 // Health & test routes
 app.get('/health', (req, res) => {

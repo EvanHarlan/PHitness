@@ -2,45 +2,46 @@ import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
 
 const userSchema = new mongoose.Schema({
-  name:{
+  name: {
     type: String,
     required: [true, "Name is required"]
   },
-  email:{
+  email: {
     type: String,
     required: [true, "Email is required"],
     unique: true,
     lowercase: true,
     trim: true
   },
-  password:{
+  password: {
     type: String,
     required: [true, "Password is required"],
     minLength: [6, "Password must be at least 6 characters long"]
   },
-  username: {
+  friends: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  }],
+  friendRequests: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  }],
+  sentRequests: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  }],
+  profileVisibility: {
     type: String,
-    required: [true, "Username is required"], 
-    unique: true, 
-    trim: true
-  },
-  age: {
-    type: Number, 
-    required: true,
-    min: [13, "Age must be at least 13"] 
-  },
-  bio: {
-    type: String, 
-    required: true, 
-    maxlength: [500, "Bio cannot be longer than 500 characters"] 
+    enum: ['public', 'friends', 'private'],
+    default: 'friends'
   }
 }, {
-  timestamps: true // This is optional but recommended
+  timestamps: true
 });
 
 // Hash the password before saving it to the database
 userSchema.pre('save', async function(next) {
-  if (!this.isModified('password')) return next(); // Only hash if password is modified or new
+  if (!this.isModified('password')) return next();
   
   try {
     const salt = await bcrypt.genSalt(10);
