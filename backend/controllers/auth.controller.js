@@ -36,6 +36,9 @@ const setCookies = (res, accessToken, refreshToken) => {
 export const signup = async (req, res) => {
 	const { email, password, name } = req.body;
 	try {
+		if (password.length < 6) {
+			return res.status(400).json({ message: "Passwords needs to be at least 6 characters long"})
+		}
 		const userExists = await User.findOne({ email });
 
 		if (userExists) {

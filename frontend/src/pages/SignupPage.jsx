@@ -13,11 +13,38 @@ const SignUpPage = () => {
     confirmPassword: "",
   });
 
+    const [errors, setErrors] = useState({});
+
   const { signup, loading } = useUserStore();
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    signup(formData);
+  const handleSubmit = async (e) => {
+      e.preventDefault();
+      let newErrors = {};
+
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(formData.email)) {
+          newErrors.email = "Please enter a valid email address.";
+      }
+
+      if (formData.password.length < 6) {
+          newErrors.password = "Password needs to be at least 6 characters";
+      }
+
+      if (formData.password !== formData.confirmPassword) {
+          newErrors.confirmPassword = "Passwords do not match";
+      }
+
+      if (Object.keys(newErrors).length > 0) {
+          setErrors(newErrors);
+          return;
+      }
+
+      setErrors({});
+      const success = await signup(formData);
+
+      if (!success) {
+          setErrors({ general: "Signup failed. Please check your details." })
+      }
   };
 
   return (
@@ -92,17 +119,19 @@ const SignUpPage = () => {
                       required
                       value={formData.email}
                       onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                      className="block w-full pl-10 px-3 py-3 rounded-xl 
+                      className={`block w-full pl-10 px-3 py-3 rounded-xl 
                       bg-[#0a0a0a]/90 text-gray-100 placeholder-gray-400 
                       focus:outline-none focus:border-transparent 
-                      transition duration-200"
+                      transition duration-200
+                      ${errors.email ? "border-red-500 focus:ring-red-500" : "border-green-500 focus:ring-green-500"}`}
                       placeholder="you@example.com"
                       style={{
                         
-                        borderColor: COLORS.NEON_GREEN,
+                        borderColor: errors.email ? "red" : COLORS.NEON_GREEN,
                         borderWidth: '1px'
                       }}/>
-                  </div>
+                                  </div>
+                                  {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
                 </div>
 
                 <div className="space-y-2">
@@ -110,7 +139,7 @@ const SignUpPage = () => {
                     Password
                   </label>
                   <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center h-full pointer-events-none">
                       <Lock className="h-5 w-5 text-gray-400" />
                     </div>
                     <input
@@ -119,17 +148,20 @@ const SignUpPage = () => {
                       required
                       value={formData.password}
                       onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                      className="block w-full pl-10 px-3 py-3 rounded-xl 
+                      className={`block w-full pl-10 px-3 py-3 rounded-xl 
                       bg-[#0a0a0a]/90 text-gray-100 placeholder-gray-400 
                       focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent 
-                      transition duration-200"
+                      transition duration-200
+                      ${errors.password ? "border-red-500 focus:ring-red-500" : "border-green-500 focus:ring-green-500"}`}
                       placeholder="••••••••"
                       style={{
                         
-                        borderColor: COLORS.NEON_GREEN,
+                        borderColor: errors.password ? "red" : COLORS.NEON_GREEN,
                         borderWidth: '1px'
-                      }}/>
-                  </div>
+                       }} 
+                    />
+                                  </div>
+                                  {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password}</p>}
                 </div>
 
                 <div className="space-y-2">
@@ -137,7 +169,7 @@ const SignUpPage = () => {
                     Confirm Password
                   </label>
                   <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center h-full pointer-events-none">
                       <Lock className="h-5 w-5 text-gray-400" />
                     </div>
                     <input
@@ -148,18 +180,20 @@ const SignUpPage = () => {
                       onChange={(e) =>
                         setFormData({ ...formData, confirmPassword: e.target.value })
                       }
-                      className="block w-full pl-10 px-3 py-3  rounded-xl 
+                      className={`block w-full pl-10 px-3 py-3  rounded-xl 
                       bg-[#0a0a0a]/90 text-gray-100 placeholder-gray-400 
                       focus:outline-none focus:ring-2 
-                      transition duration-200"
+                      transition duration-200
+                      ${errors.confirmPassword ? "border-red-500 focus:ring-red-500" : "border-green-500 focus:ring-green-500"}`}
                       placeholder="••••••••"
                       style={{
                         
-                        borderColor: COLORS.NEON_GREEN,
+                        borderColor: errors.confirmPassword ? "red" : COLORS.NEON_GREEN,
                         borderWidth: '1px'
                       }}
-                    />
-                  </div>
+                     />
+                                  </div>
+                                  {errors.confirmPassword && <p className="text-red-500 text-sm mt-1">{errors.confirmPassword}</p>}
                 </div>
 
                 <button
