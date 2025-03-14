@@ -27,7 +27,7 @@ const LoginPage = () => {
       }
 
       setErrors({});
-      const success = await login(email, password);
+      const success = login(email, password);
 
       if (!success) {
           setErrors({ general: "Invalid email or password." });
