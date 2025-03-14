@@ -166,3 +166,45 @@ export const updateProfile = async (req, res) => {
 	  res.status(500).json({ message: "Error updating profile" });
 	}
   };
+
+// In auth.controller.js
+
+export const searchUsers = async (req, res) => {
+	try {
+	  const { q } = req.query;
+	  const userId = req.user._id;
+	  
+	  console.log(`Searching for users matching: "${q}"`);
+	  
+	  // Find users whose name or email matches the query
+	  const users = await User.find({
+		$and: [
+		  { _id: { $ne: userId } }, // Don't include current user
+		  {
+			$or: [
+			  { name: new RegExp(q, 'i') },
+			  { email: new RegExp(q, 'i') }
+			]
+		  }
+		]
+	  }).select('name email');
+	  
+	  console.log(`Found ${users.length} users matching search criteria`);
+	  
+	  // Get user's friends and sent requests to check status
+	  const currentUser = await User.findById(userId);
+	  
+	  // Add status flags to each user
+	  const usersWithStatus = users.map(user => {
+		const userData = user.toObject();
+		userData.isFriend = currentUser.friends.some(id => id.toString() === user._id.toString());
+		userData.requestSent = currentUser.sentRequests.some(id => id.toString() === user._id.toString());
+		return userData;
+	  });
+	  
+	  res.status(200).json({ users: usersWithStatus });
+	} catch (error) {
+	  console.error('Error searching users:', error);
+	  res.status(500).json({ message: error.message });
+	}
+  };
