@@ -6,6 +6,7 @@ import cors from "cors";
 import { connectDB } from "./lib/db.js";
 import questionHandler from "./question.js";
 import authRoutes from "./routes/auth.route.js";
+import trackerRoutes from "./routes/tracker.route.js";
 
 // Load environment variables
 dotenv.config();
@@ -17,7 +18,7 @@ const __dirname = path.resolve();
 
 // Configure middleware
 app.use(cors({
-  origin: process.env.NODE_ENV === "production" ? false : ['http://localhost:5173', 'http://localhost:3000'],
+    origin: process.env.NODE_ENV === "production" ? false : ['http://localhost:5173', 'http://localhost:3000'],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
@@ -34,6 +35,7 @@ app.use((req, res, next) => {
 
 // API Routes
 app.use("/api/auth", authRoutes);
+app.use("/api/tracker", trackerRoutes);
 
 // Health & test routes
 app.get('/health', (req, res) => {

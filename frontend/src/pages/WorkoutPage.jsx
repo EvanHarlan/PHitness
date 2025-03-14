@@ -1,12 +1,33 @@
 import { COLORS } from '../lib/constants';
 import axios from "axios";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import React from "react";
+
 
 const WorkoutPage = () => {
   const [question, setQuestion] = useState("");
   const [answer, setAnswer] = useState("");
   const [loading, setLoading] = useState(false);
+  const [workoutAmount, setWorkoutAmount] = useState(0);
+
+    useEffect(() =>
+    {
+        const fetchWorkoutCount = async () =>
+        {
+            try
+            {
+                const response = await axios.get("http://localhost:5000/api/tracker/counts", { withCredentials: true });
+                setWorkoutAmount(response.data.workoutCount || 0);
+            }
+            catch (error)
+            {
+                console.error("Error fetching workout count:", error);
+            }
+        };
+
+        fetchWorkoutCount();
+    }, []);
+
 
   const handleQuestionChange = (e) => {
     setQuestion(e.target.value);
@@ -23,8 +44,24 @@ const WorkoutPage = () => {
     } finally {
       setLoading(false);
     }
-  };
+    };
 
+    const addWorkout = async () => {
+        try
+        {
+            const response = await axios.post("http://localhost:5000/api/tracker",
+                { type: "workout" },
+                { withCredentials: true }
+            );
+
+            console.log("Api Response:", response.data)
+                setWorkoutAmount(prevWorkoutAmount => prevWorkoutAmount + 1);
+                console.log("Added 1 to workoutAmount")
+            }
+            catch (error) {
+                console.error(error);
+            }
+    };
   return (
     <div 
       className="min-h-screen p-6 md:p-8"
@@ -64,7 +101,7 @@ const WorkoutPage = () => {
         >
           {loading ? "Processing..." : "Ask"}
         </button>
-      </div>
+          </div>
 
       {loading && <div className="text-xl font-bold">Loading...</div>}
       
@@ -75,7 +112,18 @@ const WorkoutPage = () => {
           </strong>
           <p className="text-lg">{answer}</p>
         </div>
-      )}
+          )}
+
+          <div className="mb-7">
+              <p className="text-lg">Total workouts: {workoutAmount}</p>
+              <button
+                  className="mt-2 px-4 py-2 rounded font-bold"
+                  style={{ backgroundColor: COLORS.NEON_GREEN, color: COLORS.BLACK }}
+                  onClick={addWorkout}
+              >
+                Add Workout
+              </button>
+          </div>
     </div>
   );
 };
