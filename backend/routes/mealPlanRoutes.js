@@ -2,12 +2,42 @@ import express from "express";
 import MealPlan from "../models/MealPlan.js";
 import asyncHandler from "express-async-handler";
 import { generateMealSuggestions } from "../services/openai.service.js";
+import { protect } from "./authenticate.js";
 
 const router = express.Router();
+
+// Generate meal suggestions
+router.post(
+  "/generate",
+  protect,
+  asyncHandler(async (req, res) => {
+    const { targetCalories, targetProtein, targetCarbs, targetFats, dietaryRestrictions, preferences } = req.body;
+    
+    try {
+      const mealSuggestions = await generateMealSuggestions({
+        targetCalories,
+        targetProtein,
+        targetCarbs,
+        targetFats,
+        dietaryRestrictions,
+        preferences
+      });
+      
+      res.json(mealSuggestions);
+    } catch (error) {
+      console.error("Error generating meal suggestions:", error);
+      res.status(500).json({ 
+        message: "Error generating meal suggestions",
+        error: error.message 
+      });
+    }
+  })
+);
 
 // GET all meal plans
 router.get(
   "/",
+  protect,
   asyncHandler(async (req, res) => {
     const mealPlans = await MealPlan.find().sort({ createdAt: -1 });
     res.json(mealPlans);
@@ -17,6 +47,7 @@ router.get(
 // GET single meal plan
 router.get(
   "/:id",
+  protect,
   asyncHandler(async (req, res) => {
     const mealPlan = await MealPlan.findById(req.params.id);
     if (!mealPlan) {
@@ -29,6 +60,7 @@ router.get(
 // POST new meal plan
 router.post(
   "/",
+  protect,
   asyncHandler(async (req, res) => {
     const { name, meals, dailyCalorieGoal, dailyProteinGoal, dailyCarbsGoal, dailyFatsGoal } = req.body;
 
@@ -58,6 +90,7 @@ router.post(
     });
 
     const newMealPlan = new MealPlan({
+      user: req.user._id,
       name,
       meals: processedMeals,
       dailyCalorieGoal,
@@ -74,6 +107,7 @@ router.post(
 // PUT (Update) meal plan
 router.put(
   "/:id",
+  protect,
   asyncHandler(async (req, res) => {
     const { name, meals, dailyCalorieGoal, dailyProteinGoal, dailyCarbsGoal, dailyFatsGoal } = req.body;
 
@@ -122,6 +156,7 @@ router.put(
 // DELETE meal plan
 router.delete(
   "/:id",
+  protect,
   asyncHandler(async (req, res) => {
     const mealPlan = await MealPlan.findById(req.params.id);
 
@@ -137,6 +172,7 @@ router.delete(
 // GET meal plan daily totals
 router.get(
   "/:id/totals",
+  protect,
   asyncHandler(async (req, res) => {
     const mealPlan = await MealPlan.findById(req.params.id);
     
@@ -164,6 +200,7 @@ router.get(
 // POST generate AI meal suggestions
 router.post(
   "/suggest",
+  protect,
   asyncHandler(async (req, res) => {
     const {
       targetCalories,
@@ -205,6 +242,7 @@ router.post(
 // POST save AI suggestions as meal plan
 router.post(
   "/suggest/save",
+  protect,
   asyncHandler(async (req, res) => {
     const { name, suggestions } = req.body;
 
@@ -215,6 +253,7 @@ router.post(
     }
 
     const newMealPlan = new MealPlan({
+      user: req.user._id,
       name,
       meals: suggestions.meals,
       dailyCalorieGoal: suggestions.dailyTotals.calories,

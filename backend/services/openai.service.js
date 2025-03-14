@@ -1,8 +1,16 @@
 import OpenAI from 'openai';
+import dotenv from 'dotenv';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY
-});
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Ensure environment variables are loaded
+dotenv.config({ path: path.join(__dirname, '../../.env') });
+
+// Initialize OpenAI client
+const openai = new OpenAI();
 
 /**
  * Generate meal suggestions based on user preferences and goals
@@ -77,7 +85,7 @@ Format the response as a JSON object with this structure:
       messages: [
         {
           role: "system",
-          content: "You are a certified nutritionist and meal planning expert. Provide detailed, realistic meal plans that meet the specified nutritional requirements."
+          content: "You are a certified nutritionist and meal planning expert. Provide detailed, realistic meal plans that meet the specified nutritional requirements. Return the response in JSON format."
         },
         {
           role: "user",
@@ -85,7 +93,6 @@ Format the response as a JSON object with this structure:
         }
       ],
       model: "gpt-4",
-      response_format: { type: "json_object" },
       temperature: 0.7,
     });
 

@@ -6,37 +6,41 @@ import workoutRoutes from "./routes/workoutRoutes.js";
 import authRoutes from "./routes/authenticate.js";
 import mealPlanRoutes from "./routes/mealPlanRoutes.js";
 import { connectDB } from "./lib/db.js";
+import path from 'path';
+import { fileURLToPath } from 'url';
 
-dotenv.config(); // Load environment variables
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Load environment variables from root .env file
+dotenv.config({ path: path.join(__dirname, '../.env') });
 
 const app = express();
-const PORT = process.env.PORT || 5000; // Change to 5000 for consistency
 
-// Middleware
-app.use(cors({ 
-  origin: "http://localhost:5173", 
-  methods: ["GET", "POST", "PUT", "DELETE"], 
-  credentials: true 
-}));
-
+// Basic middleware
 app.use(express.json());
+app.use(cors());
+
+// Simple test route
+app.get('/test', (req, res) => {
+  res.json({ message: 'Server is working!' });
+});
 
 // Routes
-app.use("/api/auth", authRoutes); 
+app.use("/api/auth", authRoutes);
 app.use("/api/workouts", workoutRoutes);
 app.use("/api/meal-plans", mealPlanRoutes);
 
-// Start server only after successful DB connection
-const startServer = async () => {
-  try {
-    await connectDB(); // Ensure DB is connected before listening
-    app.listen(PORT, () => {
-      console.log(` Server running at http://localhost:${PORT}`);
-    });
-  } catch (error) {
-    console.error(" Error connecting to MongoDB:", error.message);
-    process.exit(1); // Exit process on DB failure
-  }
-};
+const PORT = process.env.PORT || 5000;
 
-startServer();
+// Connect to database and start server
+connectDB()
+  .then(() => {
+    app.listen(PORT, () => {
+      console.log(`Server is running on port ${PORT}`);
+    });
+  })
+  .catch((error) => {
+    console.error('Failed to connect to database:', error);
+    process.exit(1);
+  });
