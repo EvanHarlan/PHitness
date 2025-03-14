@@ -8,3 +8,5 @@ export const COLORS = {
     LIGHT_GRAY: '#B0B0B0',
     WHITE: '#F5F5F5'
   };
+
+export default COLORS
