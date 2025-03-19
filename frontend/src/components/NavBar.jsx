@@ -26,8 +26,11 @@ function Navbar() {
             className="text-2xl font-bold flex items-center"
             style={{ color: COLORS.NEON_GREEN }}
           >
-            <span className="mr-1">PH</span>
-            <span className="text-white">itness</span>
+            <img 
+              src="/PHitnessLogo.png" 
+              alt="PHitness Logo" 
+              className="h-12 mr-2" 
+            />
           </Link>
           
           {/* Desktop Navigation */}
