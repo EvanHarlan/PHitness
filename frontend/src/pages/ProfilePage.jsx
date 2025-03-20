@@ -160,12 +160,9 @@ const ProfilePage = () =>
         <div className="flex justify-between items-center mb-4">
           <div className="flex items-center">
             <img 
-              src="/api/placeholder/96/96" 
+              src="../../public/profileIcon.png" 
               alt="Profile" 
-              className="w-24 h-24 rounded-full mr-4 border-2"
-              style={{ 
-                borderColor: COLORS.NEON_GREEN 
-              }}
+              className="w-24 h-24 rounded-full mr-4"
             />
             {!isEditing ? (
               <div>
