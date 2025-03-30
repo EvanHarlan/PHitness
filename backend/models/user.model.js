@@ -18,6 +18,22 @@ const userSchema = new mongoose.Schema({
     required: [true, "Password is required"],
     minLength: [6, "Password must be at least 6 characters long"]
   },
+  username: {
+    type: String,
+    required: [true, "Username is required"],
+    unique: true, // Ensures the username is unique
+    minLength: [3, "Username must be at least 3 characters long"]
+  },
+  age: {
+    type: Number,
+    required: [true, "Age is required"],
+    min: [13, "Age must be at least 18"],
+    max: [120, "Age cannot be more than 120"]
+  },
+  bio:{
+    type: String,
+    required: [true, "Bio is required"]
+  },
   friends: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User'
