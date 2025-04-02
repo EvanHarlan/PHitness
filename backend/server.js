@@ -4,10 +4,11 @@ import cookieParser from "cookie-parser";
 import path from "path";
 import cors from "cors";
 import { connectDB } from "./lib/db.js";
-import questionHandler from "./question.js";
+import questionHandler from "./controllers/workout.controller.js";
 import authRoutes from "./routes/auth.route.js";
 import trackerRoutes from "./routes/tracker.route.js";
 import friendRoutes from './routes/friend.route.js';
+import workoutRoutes from "./routes/workout.route.js"; 
 
 
 // Load environment variables
@@ -44,6 +45,10 @@ app.use("/api/friend", friendRoutes);
 app.get('/health', (req, res) => {
   res.status(200).send('OK');
 });
+
+// WORKOUT ROUTES
+app.use("/api/auth", authRoutes); 
+app.use("/api/workouts", workoutRoutes);
 
 app.get('/test', (req, res) => {
   console.log('Test route hit');
