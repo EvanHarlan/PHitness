@@ -11,6 +11,7 @@ import SignUpPage from "./pages/SignUpPage";
 import LoginPage from "./pages/LoginPage";
 import LoadingSpinner from "./components/LoadingSpinner";
 import { useUserStore } from './stores/useUserStore';
+import Dashboard from './pages/DashboardPage'
 
 // ProtectedRoute component definition
 const ProtectedRoute = ({ element }) => {
@@ -52,6 +53,7 @@ function App() {
           <Route path="/social" element={<ProtectedRoute element={<SocialPage />} />} />
           <Route path="/nutrition" element={<ProtectedRoute element={<NutritionPage />} />} />
           <Route path="/workout" element={<ProtectedRoute element={<WorkoutPage />} />} />
+          <Route path="/dashboard" element={<ProtectedRoute element={<Dashboard />} />} />
           
           {/* Auth routes - only accessible if NOT logged in */}
           <Route path="/signup" element={user ? <Navigate to="/" /> : <SignUpPage />} />

@@ -14,6 +14,9 @@ export default async (req, res) => {
     question // Keep backward compatibility with free-form questions
   } = req.body;
 
+  // Get the user ID from the request (assumes auth middleware adds user info)
+  const userId = req.user?._id;
+
   // Determine if we're handling a structured fitness request or a free-form question
   const isStructuredRequest = height && weight && fitnessGoal;
   
@@ -33,14 +36,28 @@ export default async (req, res) => {
     
     if (isStructuredRequest) {
       // Using backticks for multi-line strings
-      systemPrompt = `You are a fitness coach providing exactly ONE workout routine. You MUST follow this EXACT format for EVERY response without ANY deviation:
-
-2. For EACH of the 6 exercises (you MUST provide EXACTLY 5 exercises):
-   - Number each exercise (1-6)
-   - Bold the exercise name
-   - On the next line write 'Sets/Reps:' followed by the specific sets and reps
-   - On the next line provide a link using format '<a href="YOUTUBE_URL" target="_blank" style="background-color: #39FF14; color: #000000; padding: 4px 8px; border-radius: 4px; font-weight: bold; text-decoration: none; display: inline-block; margin-top: 4px;">Watch Tutorial</a>'
-   - Add a blank line after each exercise
+      systemPrompt = `You are a fitness coach providing exactly ONE workout routine with 6 exercises. 
+      
+You MUST return your response as valid, parseable JSON with the following structure:
+{
+  "workoutTitle": "String - workout title based on time, equipment, and goal",
+  "workoutType": "String - category of workout based on goal",
+  "estimatedCaloriesBurned": Number - realistic estimated calories burned for entire workout,
+  "recommendedFrequency": "String - how often this workout should be performed per week",
+  "exercises": [
+    {
+      "title": "String - name of exercise",
+      "briefDescription": "String - one sentence description",
+      "detailedDescription": "String - 2-3 sentences on proper form and benefits",
+      "muscleGroups": ["String array of primary and secondary muscles worked"],
+      "sets": Number,
+      "reps": "String - can be a range or specific number",
+      "estimatedCaloriesBurned": Number - realistic estimate per set,
+      "difficultyLevel": "String - beginner, intermediate, or advanced",
+      "youtubeUrl": "String - full URL to a tutorial from established fitness channels"
+    }
+  ]
+}
 
 EXTREMELY IMPORTANT: For your YouTube links, ONLY use videos from major fitness channels like Athlean-X, Jeff Nippard, Jeremy Ethier, FitnessBlender, or NASM. These are established channels with stable videos that won't be taken down. DO NOT use obscure or random videos as they might not exist.`;
       
@@ -70,27 +87,26 @@ EXTREMELY IMPORTANT: For your YouTube links, ONLY use videos from major fitness 
         '2-hours': '2 Hour'
       };
       
-      content = `Create ONE single workout routine with EXACTLY 5 exercises that fits these parameters:
+      content = `Create ONE JSON workout routine with EXACTLY 6 exercises that fits these parameters:
 
 Height: ${height}
 Weight: ${weight} lbs
+Age: ${age || "Not specified"}
+Gender: ${gender || "Not specified"}
 Goal: ${goalMap[fitnessGoal] || fitnessGoal}
 Experience: ${experienceLevel.charAt(0).toUpperCase() + experienceLevel.slice(1)}
 Equipment: ${equipmentMap[equipment] || equipment}
 Time: ${timeFrameMap[timeFrame] || timeFrame}
 
-You MUST follow this EXACT format without ANY deviation:
-1. Start with a bolded title like "**[Time] [Equipment] [Goal] Workout**"
-2. For EACH of the 6 exercises (you MUST provide EXACTLY 6 exercises):
-   - Number each exercise (1-6)
-   - Bold the exercise name
-   - On the next line write 'Sets/Reps:' followed by the specific sets and reps
-   - On the next line provide a link using format '<a href="YOUTUBE_URL" target="_blank" style="background-color: #39FF14; color: #000000; padding: 4px 8px; border-radius: 4px; font-weight: bold; text-decoration: none; display: inline-block; margin-top: 4px;">Watch Tutorial</a>'
-   - Add a blank line after each exercise
+Your response MUST be valid JSON following the specified schema.
 
-EXTREMELY IMPORTANT: For the YouTube URLs, ONLY use videos from major fitness channels like Athlean-X, Jeff Nippard, Jeremy Ethier, FitnessBlender, or NASM. These channels have reliable, high-quality videos that won't be taken down.
+For calorie estimates, use realistic values based on the exercise intensity, the user's weight (${weight} lbs), and approximate duration of each exercise.
 
-DO NOT DEVIATE FROM THIS FORMAT. NO EXTRA TEXT. NO INTRODUCTION. NO CONCLUSION.`;
+For muscle groups, include all relevant primary and secondary muscles worked by the exercise.
+
+For YouTube URLs, ONLY use videos from major fitness channels like Athlean-X, Jeff Nippard, Jeremy Ethier, FitnessBlender, or NASM. These channels have reliable, high-quality videos that won't be taken down.
+
+Return ONLY the JSON with no additional text or explanations.`;
     } else {
       // Handle free-form questions
       systemPrompt = "You are a knowledgeable fitness expert providing accurate, evidence-based information about exercise, nutrition, and wellness.";
@@ -104,89 +120,100 @@ DO NOT DEVIATE FROM THIS FORMAT. NO EXTRA TEXT. NO INTRODUCTION. NO CONCLUSION.`
       messages: [
         { 
           role: "system", 
-          content: `${systemPrompt}\n\nIMPORTANT: For each exercise, provide a POPULAR YouTube tutorial video URL. Look for official fitness channels like Athlean-X, Jeff Nippard, Jeremy Ethier, FitnessBlender, or NASM. These are more likely to be stable, long-term videos that won't be taken down.` 
+          content: systemPrompt
         },
         { 
           role: "user", 
-          content: `${content}\n\nIMPORTANT: For EACH exercise, include a YouTube tutorial link from a POPULAR fitness channel (like Athlean-X, Jeff Nippard, etc.). Choose well-established videos with millions of views when possible, as these are less likely to be removed.` 
+          content: content 
         }
       ],
-      max_tokens: 500
+      response_format: isStructuredRequest ? { type: "json_object" } : undefined,
+      max_tokens: 2000
     });
     
-    // Get the initial response
+    // Get the response
     let responseContent = response.choices[0].message.content;
     
-    // Check basic structure
     if (isStructuredRequest) {
-      // Completely rewrite the response to ensure consistent formatting
       try {
-        // Extract the original response components, but don't use any defaults
-        const titleMatch = responseContent.match(/^\s*\*\*([^*]+)\*\*/);
-        const title = titleMatch ? titleMatch[1].trim() : "";
+        // Parse the JSON response to validate it
+        const workoutData = JSON.parse(responseContent);
         
-        // Try to extract YouTube links from the response
-        const urlRegex = /<a href="(https:\/\/www\.youtube\.com\/watch\?v=[^"]+)"/g;
-        let extractedLinks = [];
-        let match;
-        while ((match = urlRegex.exec(responseContent)) !== null) {
-          extractedLinks.push(match[1]);
-        }
-        
-        // Extract exercises names
-        const exerciseMatches = responseContent.match(/\d+\.\s+\*\*([^*]+)\*\*/g);
-        let extractedExercises = [];
-        if (exerciseMatches) {
-          extractedExercises = exerciseMatches.map(match => {
-            const name = match.replace(/\d+\.\s+\*\*/, "").replace(/\*\*$/, "").trim();
-            return name;
-          });
-        }
-        
-        // Extract sets/reps information
-        const setsRepsMatches = responseContent.match(/Sets\/Reps:\s*([^\n]+)/g);
-        let extractedSetsReps = [];
-        if (setsRepsMatches) {
-          extractedSetsReps = setsRepsMatches.map(match => {
-            return match.replace(/Sets\/Reps:\s*/, "").trim();
-          });
-        }
-        
-        // If we couldn't extract enough data, return the original AI response
-        if (extractedExercises.length < 3) {
-          console.log("Not enough exercises extracted, using original response");
-          return res.json({ answer: responseContent });
-        }
-        
-        // Build a formatted response with the AI's content
-        let newResponse = title ? `**${title}**\n\n` : "";
-        
-        for (let i = 0; i < Math.min(extractedExercises.length, 5); i++) {
-          const exerciseName = extractedExercises[i];
-          const setsReps = i < extractedSetsReps.length ? extractedSetsReps[i] : "";
-          const videoUrl = i < extractedLinks.length ? extractedLinks[i] : "";
+        // Validate that the response has all required fields
+        if (!workoutData.workoutTitle || !Array.isArray(workoutData.exercises) || workoutData.exercises.length !== 6) {
+          console.error("Invalid workout data structure");
           
-          newResponse += `${i+1}. **${exerciseName}**\n`;
-          if (setsReps) {
-            newResponse += `Sets/Reps: ${setsReps}\n`;
+          // If structure is wrong, throw error to trigger fallback
+          throw new Error("Invalid workout data structure");
+        }
+        
+        // Ensure each exercise has all required fields
+        workoutData.exercises.forEach((exercise, index) => {
+          if (!exercise.title || !exercise.briefDescription || !exercise.detailedDescription || 
+              !exercise.sets || !exercise.reps || !exercise.youtubeUrl) {
+            console.error(`Exercise ${index + 1} is missing required fields`);
+            throw new Error(`Exercise ${index + 1} is missing required fields`);
           }
-          if (videoUrl) {
-            newResponse += `<a href="${videoUrl}" target="_blank" style="background-color: #39FF14; color: #000000; padding: 4px 8px; border-radius: 4px; font-weight: bold; text-decoration: none; display: inline-block; margin-top: 4px;">Watch Tutorial</a>\n\n`;
-          } else {
-            // If no video URL, recommend searching for the exercise on YouTube
-            newResponse += `<a href="https://www.youtube.com/results?search_query=${encodeURIComponent(exerciseName + ' exercise tutorial')}" target="_blank" style="background-color: #39FF14; color: #000000; padding: 4px 8px; border-radius: 4px; font-weight: bold; text-decoration: none; display: inline-block; margin-top: 4px;">Watch Tutorial</a>\n\n`;
+          
+          // Validate YouTube URL - must be from YouTube
+          if (!exercise.youtubeUrl.includes('youtube.com/') && !exercise.youtubeUrl.includes('youtu.be/')) {
+            exercise.youtubeUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(exercise.title + ' exercise tutorial')}`;
+          }
+        });
+
+        // Add timestamp for database tracking
+        workoutData.createdAt = new Date().toISOString();
+        workoutData.userParameters = {
+          height,
+          weight,
+          age: age || null,
+          gender: gender || null,
+          fitnessGoal,
+          experienceLevel,
+          equipment,
+          timeFrame
+        };
+        
+        // If user is authenticated, save the workout to the database
+        let savedWorkout = null;
+        if (userId) {
+          try {
+            // Add the user ID to the workout data
+            workoutData.userId = userId;
+            
+            // Create a new workout document
+            const workout = new Workout(workoutData);
+            
+            // Save to database
+            savedWorkout = await workout.save();
+            console.log(`Workout saved to database with ID: ${savedWorkout._id}`);
+          } catch (dbError) {
+            console.error("Error saving workout to database:", dbError);
+            // Continue even if database save fails - still return the workout to user
           }
         }
         
-        // Update the response with our properly formatted version
-        responseContent = newResponse.trim();
+        // Return the validated and enhanced workout data
+        responseContent = JSON.stringify(workoutData);
+        
+        // Add the saved workout ID to the response if available
+        return res.json({ 
+          answer: responseContent,
+          ...(savedWorkout && { workoutId: savedWorkout._id })
+        });
+        
       } catch (error) {
-        console.error("Error formatting workout response:", error);
-        // If our formatting fails, just return the original response
+        console.error("Error processing workout JSON:", error);
+        
+        // If our JSON processing fails, create a basic error response
+        return res.status(500).json({
+          error: "Failed to generate valid workout data",
+          message: error.message
+        });
       }
     }
     
-    console.log("Final response prepared:", responseContent);
+    console.log("Final response prepared");
     
     return res.json({ answer: responseContent });
   } catch (error) {
@@ -206,5 +233,96 @@ DO NOT DEVIATE FROM THIS FORMAT. NO EXTRA TEXT. NO INTRODUCTION. NO CONCLUSION.`
         message: error.message
       });
     }
+  }
+};
+
+// Additional helper functions for workout management
+
+// Get all workouts for a user
+export const getUserWorkouts = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    
+    const workouts = await Workout.find({ userId })
+      .sort({ createdAt: -1 })
+      .limit(req.query.limit ? parseInt(req.query.limit) : 20);
+    
+    res.json(workouts);
+  } catch (error) {
+    console.error("Error retrieving workouts:", error);
+    res.status(500).json({ error: "Failed to retrieve workouts" });
+  }
+};
+
+// Get a specific workout by ID
+export const getWorkoutById = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const workoutId = req.params.id;
+    
+    const workout = await Workout.findOne({ 
+      _id: workoutId,
+      userId // Security: ensure user owns this workout
+    });
+    
+    if (!workout) {
+      return res.status(404).json({ error: "Workout not found" });
+    }
+    
+    res.json(workout);
+  } catch (error) {
+    console.error("Error retrieving workout:", error);
+    res.status(500).json({ error: "Failed to retrieve workout" });
+  }
+};
+
+// Delete a workout
+export const deleteWorkout = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const workoutId = req.params.id;
+    
+    const result = await Workout.deleteOne({
+      _id: workoutId,
+      userId // Security: ensure user owns this workout
+    });
+    
+    if (result.deletedCount === 0) {
+      return res.status(404).json({ error: "Workout not found or not authorized" });
+    }
+    
+    res.json({ message: "Workout deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting workout:", error);
+    res.status(500).json({ error: "Failed to delete workout" });
+  }
+};
+
+// Update a workout (e.g., mark as completed, add notes)
+export const updateWorkout = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const workoutId = req.params.id;
+    const updates = req.body;
+    
+    // Remove fields that shouldn't be updated directly
+    delete updates._id;
+    delete updates.userId;
+    delete updates.createdAt;
+    
+    const workout = await Workout.findOneAndUpdate(
+      { _id: workoutId, userId },
+      { $set: updates },
+      { new: true, runValidators: true }
+    );
+    
+    if (!workout) {
+      return res.status(404).json({ error: "Workout not found or not authorized" });
+    }
+    
+    res.json(workout);
+  } catch (error) {
+    console.error("Error updating workout:", error);
+    res.status(500).json({ error: "Failed to update workout" });
   }
 };

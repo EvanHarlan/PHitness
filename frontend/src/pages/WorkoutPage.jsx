@@ -1,303 +1,217 @@
-import { COLORS } from '../lib/constants';
-import axios from "axios";
-import { useState, useEffect } from "react";
-import React from "react";
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import { useParams, useNavigate } from 'react-router-dom';
+import LoadingSpinner from '../components/LoadingSpinner';
+import NavBar from '../components/NavBar';
 
 const WorkoutPage = () => {
-  // State variables for workout count
-  const [workoutAmount, setWorkoutAmount] = useState(0);
-  const [loading, setLoading] = useState(false);
-  const [answer, setAnswer] = useState("");
+  const [workout, setWorkout] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const { workoutId } = useParams();
+  const navigate = useNavigate();
   
-  // Form state for user parameters
-  const [userParams, setUserParams] = useState({
-    height: "",
-    weight: "",
-    age: "",
-    gender: "not-specified",
-    fitnessGoal: "",
-    experienceLevel: "beginner",
-    equipment: "minimal",
-    timeFrame: "30-minutes"
-  });
-
   useEffect(() => {
-    const fetchWorkoutCount = async () => {
+    const fetchWorkout = async () => {
       try {
-        const response = await axios.get("http://localhost:5000/api/tracker/counts", { withCredentials: true });
-        setWorkoutAmount(response.data.workoutCount || 0);
-      } catch (error) {
-        console.error("Error fetching workout count:", error);
+        setLoading(true);
+        const response = await axios.get(`/api/workouts/${workoutId}`);
+        setWorkout(response.data);
+      } catch (err) {
+        console.error('Error fetching workout:', err);
+        setError('Failed to load workout. Please try again later.');
+      } finally {
+        setLoading(false);
       }
     };
-
-    fetchWorkoutCount();
-  }, []);
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setUserParams(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
-
-  const generateWorkoutPlan = async () => {
-    // Validate required fields
-    if (!userParams.height || !userParams.weight || !userParams.fitnessGoal) {
-      alert("Please fill in the required fields: Height, Weight, and Fitness Goal");
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const response = await axios.post('http://localhost:5000/question', { 
-        ...userParams
-      });
-      setAnswer(response.data.answer);
-    } catch (error) {
-      console.error(error);
-      setAnswer("An error has occurred. Please try again.");
-    } finally {
+    
+    if (workoutId) {
+      fetchWorkout();
+    } else {
       setLoading(false);
+      setError('No workout ID provided');
+    }
+  }, [workoutId]);
+  
+  const handleDelete = async () => {
+    if (window.confirm('Are you sure you want to delete this workout?')) {
+      try {
+        await axios.delete(`/api/workouts/${workoutId}`);
+        navigate('/dashboard');
+      } catch (err) {
+        console.error('Error deleting workout:', err);
+        setError('Failed to delete workout. Please try again later.');
+      }
     }
   };
-
-  const addWorkout = async () => {
-    try {
-      const response = await axios.post("http://localhost:5000/api/tracker",
-        { type: "workout" },
-        { withCredentials: true }
-      );
-
-      console.log("Api Response:", response.data)
-      setWorkoutAmount(prevWorkoutAmount => prevWorkoutAmount + 1);
-      console.log("Added 1 to workoutAmount")
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  return (
-    <div 
-      className="min-h-screen p-6 md:p-8"
-      style={{ 
-        backgroundColor: COLORS.BLACK, 
-        color: COLORS.WHITE 
-      }}
-    >
-      <div className="container mx-auto">
-        <h1 
-          className="text-3xl md:text-4xl font-bold mb-4"
-          style={{ color: COLORS.NEON_GREEN }}
+  
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <LoadingSpinner />
+      </div>
+    );
+  }
+  
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center h-screen">
+        <h2 className="text-2xl font-bold text-red-600 mb-4">Error</h2>
+        <p className="text-gray-700">{error}</p>
+        <button 
+          className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
+          onClick={() => navigate('/dashboard')}
         >
-          Personalized Workout Plan
-        </h1>
-        <p className="text-lg text-[#B0B0B0] mb-6">
-          Get a custom tailored workout plan based on your specific goals and body type.
-        </p>
+          Back to Dashboard
+        </button>
       </div>
-
-      <div className="mb-6 p-4 rounded" style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}>
-        <h2 className="text-xl font-bold mb-4" style={{ color: COLORS.NEON_GREEN }}>
-          Tell us about yourself
-        </h2>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* Basic Stats */}
-          <div>
-            <label className="block text-white text-sm font-bold mb-2">
-              Height *
-            </label>
-            <select
-              className="shadow border rounded w-full py-2 px-3 text-black"
-              name="height"
-              value={userParams.height}
-              onChange={handleInputChange}
-              required
-            >
-              <option value="">Select your height</option>
-              <option value="5'0&quot;">5'0"</option>
-              <option value="5'1&quot;">5'1"</option>
-              <option value="5'2&quot;">5'2"</option>
-              <option value="5'3&quot;">5'3"</option>
-              <option value="5'4&quot;">5'4"</option>
-              <option value="5'5&quot;">5'5"</option>
-              <option value="5'6&quot;">5'6"</option>
-              <option value="5'7&quot;">5'7"</option>
-              <option value="5'8&quot;">5'8"</option>
-              <option value="5'9&quot;">5'9"</option>
-              <option value="5'10&quot;">5'10"</option>
-              <option value="5'11&quot;">5'11"</option>
-              <option value="6'0&quot;">6'0"</option>
-              <option value="6'1&quot;">6'1"</option>
-              <option value="6'2&quot;">6'2"</option>
-              <option value="6'3&quot;">6'3"</option>
-              <option value="6'4&quot;">6'4"</option>
-              <option value="6'5&quot;">6'5"</option>
-              <option value="6'6&quot;">6'6"</option>
-              <option value="6'7&quot;">6'7"</option>
-              <option value="6'8&quot;">6'8"</option>
-              <option value="6'9&quot;">6'9"</option>
-              <option value="6'10&quot;">6'10"</option>
-              <option value="6'11&quot;">6'11"</option>
-              <option value="7'0&quot;">7'0"</option>
-            </select>
+    );
+  }
+  
+  if (!workout) {
+    return (
+      <div className="flex flex-col items-center justify-center h-screen">
+        <h2 className="text-2xl font-bold text-gray-700 mb-4">Workout Not Found</h2>
+        <button 
+          className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
+          onClick={() => navigate('/dashboard')}
+        >
+          Back to Dashboard
+        </button>
+      </div>
+    );
+  }
+  
+  // Format date
+  const formattedDate = new Date(workout.createdAt).toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  });
+  
+  return (
+    <div className="min-h-screen bg-gray-100">
+      <NavBar />
+      <div className="container mx-auto px-4 py-8">
+        {/* Workout Header */}
+        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+          <div className="flex justify-between items-start">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-800">{workout.workoutTitle}</h1>
+              <p className="text-gray-600 mt-1">Type: {workout.workoutType}</p>
+              <p className="text-gray-600">Created: {formattedDate}</p>
+              <div className="mt-4 flex flex-wrap gap-4">
+                <div className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">
+                  {workout.userParameters.experienceLevel.charAt(0).toUpperCase() + workout.userParameters.experienceLevel.slice(1)}
+                </div>
+                <div className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm">
+                  {workout.userParameters.equipment.charAt(0).toUpperCase() + workout.userParameters.equipment.slice(1).replace('-', ' ')}
+                </div>
+                <div className="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm">
+                  {workout.userParameters.timeFrame.replace('-', ' ').charAt(0).toUpperCase() + workout.userParameters.timeFrame.replace('-', ' ').slice(1)}
+                </div>
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <button 
+                className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600"
+                onClick={handleDelete}
+              >
+                Delete
+              </button>
+            </div>
           </div>
           
-          <div>
-            <label className="block text-white text-sm font-bold mb-2">
-              Weight (lbs) *
-            </label>
-            <input 
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-black"
-              type="number"
-              name="weight"
-              value={userParams.weight}
-              onChange={handleInputChange}
-              placeholder="e.g., 160"
-              required
-            />
-          </div>
-          
-          <div>
-            <label className="block text-white text-sm font-bold mb-2">
-              Age
-            </label>
-            <input 
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-black"
-              type="number"
-              name="age"
-              value={userParams.age}
-              onChange={handleInputChange}
-              placeholder="e.g., 25"
-            />
-          </div>
-          
-          <div>
-            <label className="block text-white text-sm font-bold mb-2">
-              Gender
-            </label>
-            <select
-              className="shadow border rounded w-full py-2 px-3 text-black"
-              name="gender"
-              value={userParams.gender}
-              onChange={handleInputChange}
-            >
-              <option value="not-specified">Prefer not to say</option>
-              <option value="male">Male</option>
-              <option value="female">Female</option>
-              <option value="other">Other</option>
-            </select>
-          </div>
-          
-          {/* Fitness Parameters */}
-          <div>
-            <label className="block text-white text-sm font-bold mb-2">
-              Fitness Goal *
-            </label>
-            <select
-              className="shadow border rounded w-full py-2 px-3 text-black"
-              name="fitnessGoal"
-              value={userParams.fitnessGoal}
-              onChange={handleInputChange}
-              required
-            >
-              <option value="">Select a goal</option>
-              <option value="weight-loss">Weight Loss</option>
-              <option value="muscle-gain">Muscle Gain</option>
-              <option value="strength">Strength</option>
-              <option value="endurance">Endurance</option>
-              <option value="flexibility">Flexibility</option>
-              <option value="overall-fitness">Overall Fitness</option>
-            </select>
-          </div>
-          
-          <div>
-            <label className="block text-white text-sm font-bold mb-2">
-              Experience Level
-            </label>
-            <select
-              className="shadow border rounded w-full py-2 px-3 text-black"
-              name="experienceLevel"
-              value={userParams.experienceLevel}
-              onChange={handleInputChange}
-            >
-              <option value="beginner">Beginner</option>
-              <option value="intermediate">Intermediate</option>
-              <option value="advanced">Advanced</option>
-            </select>
-          </div>
-          
-          <div>
-            <label className="block text-white text-sm font-bold mb-2">
-              Available Equipment
-            </label>
-            <select
-              className="shadow border rounded w-full py-2 px-3 text-black"
-              name="equipment"
-              value={userParams.equipment}
-              onChange={handleInputChange}
-            >
-              <option value="minimal">Minimal/Home Equipment</option>
-              <option value="gym">Full Gym Access</option>
-              <option value="bodyweight">Bodyweight Only</option>
-              <option value="resistance-bands">Resistance Bands</option>
-              <option value="dumbbells">Dumbbells Only</option>
-            </select>
-          </div>
-          
-          <div>
-            <label className="block text-white text-sm font-bold mb-2">
-              Workout Time Frame
-            </label>
-            <select
-              className="shadow border rounded w-full py-2 px-3 text-black"
-              name="timeFrame"
-              value={userParams.timeFrame}
-              onChange={handleInputChange}
-            >
-              <option value="15-minutes">15 Minutes</option>
-              <option value="30-minutes">30 Minutes</option>
-              <option value="1-hour">1 Hour</option>
-              <option value="2-hours">2 Hours</option>
-            </select>
+          <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="bg-gray-50 p-4 rounded-md">
+              <h3 className="font-semibold text-gray-700">Stats</h3>
+              <div className="mt-2 space-y-2">
+                <div className="flex justify-between">
+                  <span>Estimated Calories:</span>
+                  <span className="font-semibold">{workout.estimatedCaloriesBurned} cal</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Recommended Frequency:</span>
+                  <span className="font-semibold">{workout.recommendedFrequency}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Total Exercises:</span>
+                  <span className="font-semibold">{workout.exercises.length}</span>
+                </div>
+              </div>
+            </div>
+            
+            <div className="bg-gray-50 p-4 rounded-md">
+              <h3 className="font-semibold text-gray-700">User Parameters</h3>
+              <div className="mt-2 space-y-2">
+                <div className="flex justify-between">
+                  <span>Height:</span>
+                  <span className="font-semibold">{workout.userParameters.height}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Weight:</span>
+                  <span className="font-semibold">{workout.userParameters.weight} lbs</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Goal:</span>
+                  <span className="font-semibold">{workout.userParameters.fitnessGoal.replace('-', ' ')}</span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
         
-        <div className="mt-6">
-          <button 
-            className="px-4 py-2 rounded font-bold"
-            style={{ backgroundColor: COLORS.NEON_GREEN, color: COLORS.BLACK }}
-            onClick={generateWorkoutPlan}
-            disabled={loading}
-          >
-            {loading ? "Creating Workout..." : "Get Workout"}
-          </button>
-        </div>
-      </div>
-
-      {loading && <div className="text-xl font-bold">Creating your workout...</div>}
-      
-      {answer && (
-        <div className="mt-4 p-4 rounded" style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}>
-          <strong className="block text-xl mb-2" style={{ color: COLORS.NEON_GREEN }}>
-            Your Workout:
-          </strong>
-          <p className="text-lg whitespace-pre-line" dangerouslySetInnerHTML={{ __html: answer }}></p>
-        </div>
-      )}
-
-      <div className="mt-8 mb-7">
-        <div className="p-4 rounded" style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}>
-          <p className="text-lg mb-2">Total workouts completed: <span className="font-bold">{workoutAmount}</span></p>
-          <button
-            className="mt-2 px-4 py-2 rounded font-bold"
-            style={{ backgroundColor: COLORS.NEON_GREEN, color: COLORS.BLACK }}
-            onClick={addWorkout}
-          >
-            Log Completed Workout
-          </button>
+        {/* Exercise List */}
+        <h2 className="text-2xl font-bold text-gray-800 mb-4">Exercises</h2>
+        <div className="space-y-6">
+          {workout.exercises.map((exercise, index) => (
+            <div key={index} className="bg-white rounded-lg shadow-md overflow-hidden">
+              <div className="p-6">
+                <h3 className="text-xl font-bold text-gray-800">{index + 1}. {exercise.title}</h3>
+                <p className="text-gray-600 mt-1">{exercise.briefDescription}</p>
+                
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {exercise.muscleGroups.map((muscle, i) => (
+                    <span key={i} className="bg-gray-100 text-gray-700 px-2 py-1 rounded-md text-xs">
+                      {muscle}
+                    </span>
+                  ))}
+                </div>
+                
+                <div className="mt-6">
+                  <p className="text-gray-700">{exercise.detailedDescription}</p>
+                </div>
+                
+                <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="bg-gray-50 p-3 rounded-md">
+                    <h4 className="font-semibold text-gray-700">Sets</h4>
+                    <p className="text-gray-800 text-lg">{exercise.sets}</p>
+                  </div>
+                  
+                  <div className="bg-gray-50 p-3 rounded-md">
+                    <h4 className="font-semibold text-gray-700">Reps</h4>
+                    <p className="text-gray-800 text-lg">{exercise.reps}</p>
+                  </div>
+                  
+                  <div className="bg-gray-50 p-3 rounded-md">
+                    <h4 className="font-semibold text-gray-700">Calories/Set</h4>
+                    <p className="text-gray-800 text-lg">{exercise.estimatedCaloriesBurned} cal</p>
+                  </div>
+                </div>
+                
+                <div className="mt-6">
+                  <a 
+                    href={exercise.youtubeUrl} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center justify-center px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
+                  >
+                    Watch Tutorial
+                  </a>
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     </div>

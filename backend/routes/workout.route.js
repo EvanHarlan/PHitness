@@ -1,62 +1,28 @@
-import express from "express";
-import Workout from "../models/workout.model.js";
-import asyncHandler from "express-async-handler"; // Handles async errors gracefully
+import express from 'express';
+import generateWorkout, { 
+  getUserWorkouts, 
+  getWorkoutById, 
+  deleteWorkout, 
+  updateWorkout 
+} from '../controllers/workout.controller.js';
+import { protectRoute } from "../middleware/auth.middleware.js";
 
 const router = express.Router();
 
-// GET all workouts (Sorted by newest first)
-router.get(
-  "/",
-  asyncHandler(async (req, res) => {
-    const workouts = await Workout.find().sort({ createdAt: -1 });
-    res.json(workouts);
-  })
-);
+// Generate a new workout
+// This endpoint needs authentication to save the workout to the user's account
+router.post('/generate', protectRoute, generateWorkout);
 
-// POST a new workout (With validation)
-router.post(
-  "/",
-  asyncHandler(async (req, res) => {
-    const { name, exercises } = req.body;
+// Get all workouts for the current user
+router.get('/', protectRoute, getUserWorkouts);
 
-    if (!name || !Array.isArray(exercises) || exercises.length === 0) {
-      return res.status(400).json({ message: "Invalid workout data" });
-    }
+// Get a specific workout by ID
+router.get('/:id', protectRoute, getWorkoutById);
 
-    const newWorkout = new Workout({ name, exercises });
-    const savedWorkout = await newWorkout.save();
+// Delete a workout
+router.delete('/:id', protectRoute, deleteWorkout);
 
-    res.status(201).json(savedWorkout);
-  })
-);
-
-// PUT (Update) a workout
-router.put(
-  "/:id",
-  asyncHandler(async (req, res) => {
-    const updatedWorkout = await Workout.findByIdAndUpdate(req.params.id, req.body, { new: true });
-
-    if (!updatedWorkout) {
-      return res.status(404).json({ message: "Workout not found" });
-    }
-
-    res.json(updatedWorkout);
-  })
-);
-
-// DELETE a workout
-router.delete(
-  "/:id",
-  asyncHandler(async (req, res) => {
-    const workout = await Workout.findById(req.params.id);
-
-    if (!workout) {
-      return res.status(404).json({ message: "Workout not found" });
-    }
-
-    await workout.deleteOne();
-    res.json({ message: "Workout deleted successfully" });
-  })
-);
+// Update a workout (e.g., for marking as completed or adding notes)
+router.put('/:id', protectRoute, updateWorkout);
 
 export default router;

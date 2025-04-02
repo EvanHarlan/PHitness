@@ -1,43 +1,33 @@
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
 
-const workoutSchema = new mongoose.Schema(
-  {
-    user: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      required: [true, "User ID is required"],
-    },
-    name: {
-      type: String,
-      required: [true, "Workout name is required"],
-      trim: true,
-    },
-    exercises: {
-      type: [
-        {
-          name: { type: String, required: [true, "Exercise name is required"] },
-          sets: {
-            type: Number,
-            required: [true, "Number of sets is required"],
-            min: [1, "Sets must be at least 1"],
-          },
-          reps: {
-            type: Number,
-            required: [true, "Number of reps is required"],
-            min: [1, "Reps must be at least 1"],
-          },
-          weight: {
-            type: Number,
-            default: 0,
-            min: [0, "Weight must be at least 0"],
-          },
-        },
-      ],
-      default: [], // Ensures an empty array instead of undefined
-    },
+const ExerciseSchema = new mongoose.Schema({
+  title: { type: String, required: true },
+  briefDescription: { type: String, required: true },
+  detailedDescription: { type: String, required: true },
+  muscleGroups: [String],
+  sets: { type: Number, required: true },
+  reps: { type: String, required: true },
+  estimatedCaloriesBurned: Number,
+  difficultyLevel: String,
+  youtubeUrl: String
+});
+
+const WorkoutSchema = new mongoose.Schema({
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  workoutTitle: { type: String, required: true },
+  workoutType: String,
+  estimatedCaloriesBurned: Number,
+  recommendedFrequency: String,
+  exercises: [ExerciseSchema],
+  userParameters: {
+    height: String,
+    weight: Number,
+    age: Number,
+    gender: String,
+    fitnessGoal: String,
+    experienceLevel: String,
+    equipment: String,
+    timeFrame: String
   },
-  { timestamps: true } // Automatically creates createdAt & updatedAt
-);
-
-const Workout = mongoose.model("Workout", workoutSchema);
-export default Workout;
+  createdAt: { type: Date, default: Date.now }
+});

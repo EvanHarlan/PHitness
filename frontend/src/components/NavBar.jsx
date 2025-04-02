@@ -43,6 +43,7 @@ function Navbar() {
                 <Link to="/social" className="hover:text-green-400 transition duration-200">Social</Link>
                 <Link to="/nutrition" className="hover:text-green-400 transition duration-200">Nutrition</Link>
                 <Link to="/workout" className="hover:text-green-400 transition duration-200">Workouts</Link>
+                <Link to="/dashboard" className="hover:text-green-400 transition duration-200">Dashboard</Link>
                 <button 
                   onClick={logout} 
                   className="ml-2 px-4 py-2 rounded bg-red-600 hover:bg-red-700 transition duration-200"
@@ -126,6 +127,13 @@ function Navbar() {
                   onClick={() => setIsMenuOpen(false)}
                 >
                   Workouts
+                </Link>
+                <Link 
+                  to="/dashboard" 
+                  className="block px-3 py-2 rounded hover:bg-gray-700 transition duration-200"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Dashboard
                 </Link>
                 <button 
                   onClick={() => {
