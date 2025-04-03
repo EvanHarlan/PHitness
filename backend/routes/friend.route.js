@@ -1,6 +1,6 @@
 // friend.route.js
 import express from 'express';
-import { sendFriendRequest, acceptFriendRequest, rejectFriendRequest, getFriends, getFriendRequests, removeFriend } from '../controllers/friend.controller.js';
+import { sendFriendRequest, acceptFriendRequest, rejectFriendRequest, getFriends, getFriendRequests, removeFriend, nudgeFriend, listenForNudges } from '../controllers/friend.controller.js';
 import { protectRoute } from '../middleware/auth.middleware.js';
 
 const router = express.Router();
@@ -14,5 +14,7 @@ router.post('/reject-request', rejectFriendRequest);
 router.get('/list', getFriends);
 router.get('/requests', getFriendRequests);
 router.post('/remove', removeFriend);
+router.post('/nudge', nudgeFriend);
+router.get('/listenForNudges', listenForNudges);
 
 export default router;

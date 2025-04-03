@@ -148,3 +148,43 @@ export const removeFriend = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+const activeConnections = {};
+
+export const listenForNudges = (req, res) => {
+  const userId = req.user._id;
+  res.setHeader('Content-Type', 'text/event-stream');
+  res.setHeader('Cache-Control', 'no-cache');
+  res.setHeader('Connection', 'keep-alive');
+
+  activeConnections[userId] = res;
+
+  req.on('close', () => {
+    delete activeConnections[userId];
+  });
+};
+
+export const nudgeFriend = async (req, res) => {
+  try {
+    const { friendId } = req.body;
+    const userId = req.user._id;
+
+    const friend = await User.findById(friendId);
+    if (!friend) return res.status(404).json({ message: 'User not found' });
+
+    const sender = await User.findById(userId);
+    if (!sender) return res.status(404).json({ message: 'Sender not found' });
+
+  
+    if (activeConnections[friendId]) {
+      activeConnections[friendId].write(
+        `data: ${JSON.stringify({ from: userId, fromName: sender.name, message: 'nudged you!' })}\n\n`
+      );
+    }
+
+    res.status(200).json({ message: 'Nudge sent successfully' });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+

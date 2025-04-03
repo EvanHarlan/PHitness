@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import COLORS from '../lib/constants'
+import NudgeListener from '../components/NudgeListener';
 
 axios.defaults.withCredentials = true;
 
@@ -114,6 +115,16 @@ const SocialPage = () => {
       setError("Failed to remove friend. Please try again.");
     }
   };
+  const sendNudge = async (friendId) => {
+    try {
+      const response = await axios.post('http://localhost:5000/api/friend/nudge', { friendId });
+      alert(response.data.message || 'Nudge sent!');
+    } catch (error) {
+      console.error('Error sending nudge:', error);
+      setError("Failed to send nudge. Please try again.");
+    }
+  };
+
 
   if (loading) {
     return (
@@ -133,8 +144,18 @@ const SocialPage = () => {
 
   return (
     <div className="min-h-screen p-6" style={{ backgroundColor: COLORS.BLACK }}>
+       
       <div className="max-w-5xl mx-auto">
         <h1 className="text-3xl font-bold mb-8" style={{ color: COLORS.WHITE }}>Social</h1>
+        
+        
+        <div className="mt-8 rounded-xl shadow-sm p-6 border mb-4" style={{ backgroundColor: COLORS.DARK_GRAY, borderColor: COLORS.MEDIUM_GRAY }}>
+          <h2 className="text-xl font-semibold mb-4" style={{ color: COLORS.WHITE }}>Notifcations</h2>
+          <NudgeListener /> 
+          <div className="flex gap-2 mb-6">
+        </div>
+        </div>
+        
         
         <div className="grid gap-8 md:grid-cols-1 lg:grid-cols-2">
           {/* Friend Search */}
@@ -299,6 +320,13 @@ const SocialPage = () => {
                     onClick={() => removeFriend(friend._id)}
                   >
                     Remove
+                  </button>
+                  <button
+                    className="px-3 py-1 rounded-md text-sm transition font-medium"
+                    style={{ backgroundColor: COLORS.MEDIUM_GRAY, color: COLORS.NEON_GREEN }}
+                    onClick={() => sendNudge(friend._id)}
+                  >
+                    Nudge
                   </button>
                 </div>
               ))}
