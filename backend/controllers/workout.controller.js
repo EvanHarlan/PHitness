@@ -11,6 +11,8 @@ export default async (req, res) => {
     experienceLevel, 
     equipment,
     timeFrame,
+    healthConditions,
+    frequency,
     question // Keep backward compatibility with free-form questions
   } = req.body;
 
@@ -35,8 +37,9 @@ export default async (req, res) => {
       // Using backticks for multi-line strings
       systemPrompt = `You are a fitness coach providing exactly ONE workout routine. You MUST follow this EXACT format for EVERY response without ANY deviation:
 
-2. For EACH of the 6 exercises (you MUST provide EXACTLY 5 exercises):
-   - Number each exercise (1-6)
+1. Start with a bolded title like "**[Time] [Equipment] [Goal] Workout**"
+2. For EACH of the 5 exercises (you MUST provide EXACTLY 5 exercises):
+   - Number each exercise (1-5)
    - Bold the exercise name
    - On the next line write 'Sets/Reps:' followed by the specific sets and reps
    - On the next line provide a link using format '<a href="YOUTUBE_URL" target="_blank" style="background-color: #39FF14; color: #000000; padding: 4px 8px; border-radius: 4px; font-weight: bold; text-decoration: none; display: inline-block; margin-top: 4px;">Watch Tutorial</a>'
@@ -70,19 +73,43 @@ EXTREMELY IMPORTANT: For your YouTube links, ONLY use videos from major fitness 
         '2-hours': '2 Hour'
       };
       
+      // Map health conditions
+      const healthConditionMap = {
+        'none': 'No health concerns',
+        'back-pain': 'Back pain/injury (avoid exercises that strain the back)',
+        'knee-pain': 'Knee pain/injury (avoid high-impact and heavy knee loading)',
+        'shoulder-pain': 'Shoulder pain/injury (avoid overhead movements)',
+        'heart-condition': 'Heart condition (focus on low to moderate intensity)',
+        'pregnancy': 'Pregnancy (focus on safe, pregnancy-appropriate exercises)',
+        'other': 'Unspecified health concern (focus on low-impact, safe movements)'
+      };
+      
+      // Map frequency
+      const frequencyMap = {
+        '1-2': '1-2 times per week',
+        '3-4': '3-4 times per week',
+        '5-6': '5-6 times per week',
+        'daily': 'Daily workouts'
+      };
+      
+      const healthInfo = healthConditions ? `Health Considerations: ${healthConditionMap[healthConditions] || healthConditions}\n` : '';
+      const ageInfo = age ? `Age: ${age}\n` : '';
+      const genderInfo = gender && gender !== 'not-specified' ? `Gender: ${gender.charAt(0).toUpperCase() + gender.slice(1)}\n` : '';
+      const frequencyInfo = frequency ? `Workout Frequency: ${frequencyMap[frequency] || frequency}\n` : '';
+      
       content = `Create ONE single workout routine with EXACTLY 5 exercises that fits these parameters:
 
 Height: ${height}
 Weight: ${weight} lbs
-Goal: ${goalMap[fitnessGoal] || fitnessGoal}
+${ageInfo}${genderInfo}Goal: ${goalMap[fitnessGoal] || fitnessGoal}
 Experience: ${experienceLevel.charAt(0).toUpperCase() + experienceLevel.slice(1)}
 Equipment: ${equipmentMap[equipment] || equipment}
 Time: ${timeFrameMap[timeFrame] || timeFrame}
-
+${healthInfo}${frequencyInfo}
 You MUST follow this EXACT format without ANY deviation:
 1. Start with a bolded title like "**[Time] [Equipment] [Goal] Workout**"
-2. For EACH of the 6 exercises (you MUST provide EXACTLY 6 exercises):
-   - Number each exercise (1-6)
+2. For EACH of the 5 exercises (you MUST provide EXACTLY 5 exercises):
+   - Number each exercise (1-5)
    - Bold the exercise name
    - On the next line write 'Sets/Reps:' followed by the specific sets and reps
    - On the next line provide a link using format '<a href="YOUTUBE_URL" target="_blank" style="background-color: #39FF14; color: #000000; padding: 4px 8px; border-radius: 4px; font-weight: bold; text-decoration: none; display: inline-block; margin-top: 4px;">Watch Tutorial</a>'
@@ -111,7 +138,7 @@ DO NOT DEVIATE FROM THIS FORMAT. NO EXTRA TEXT. NO INTRODUCTION. NO CONCLUSION.`
           content: `${content}\n\nIMPORTANT: For EACH exercise, include a YouTube tutorial link from a POPULAR fitness channel (like Athlean-X, Jeff Nippard, etc.). Choose well-established videos with millions of views when possible, as these are less likely to be removed.` 
         }
       ],
-      max_tokens: 500
+      max_tokens: 750 // Increased token limit for more detailed responses
     });
     
     // Get the initial response
@@ -176,6 +203,11 @@ DO NOT DEVIATE FROM THIS FORMAT. NO EXTRA TEXT. NO INTRODUCTION. NO CONCLUSION.`
             // If no video URL, recommend searching for the exercise on YouTube
             newResponse += `<a href="https://www.youtube.com/results?search_query=${encodeURIComponent(exerciseName + ' exercise tutorial')}" target="_blank" style="background-color: #39FF14; color: #000000; padding: 4px 8px; border-radius: 4px; font-weight: bold; text-decoration: none; display: inline-block; margin-top: 4px;">Watch Tutorial</a>\n\n`;
           }
+        }
+        
+        // Add a note about health considerations if applicable
+        if (healthConditions && healthConditions !== 'none') {
+          newResponse += `\n**Note:** This workout has been adapted for your health condition (${healthConditionMap[healthConditions] || healthConditions}). If you experience pain, stop immediately and consult a healthcare professional.`;
         }
         
         // Update the response with our properly formatted version

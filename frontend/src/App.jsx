@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { Route, Routes, Navigate, useLocation } from 'react-router-dom';
 import PropTypes from 'prop-types';
+import { Toaster } from 'react-hot-toast';
 import Navbar from './components/NavBar';
 import HomePage from './pages/HomePage';
 import ProfilePage from './pages/ProfilePage';
@@ -11,6 +12,7 @@ import SignUpPage from "./pages/SignUpPage";
 import LoginPage from "./pages/LoginPage";
 import LoadingSpinner from "./components/LoadingSpinner";
 import { useUserStore } from './stores/useUserStore';
+import COLORS from './lib/constants';
 
 // ProtectedRoute component definition
 const ProtectedRoute = ({ element }) => {
@@ -41,6 +43,34 @@ function App() {
   
   return (
     <div className="relative">
+      {/* Toast Provider with app-specific styling */}
+      <Toaster 
+        position="top-center"
+        toastOptions={{
+          // Default options for all toasts
+          style: {
+            background: COLORS.DARK_GRAY,
+            color: COLORS.WHITE,
+            border: `1px solid ${COLORS.MEDIUM_GRAY}`,
+          },
+          // Customize success toasts
+          success: {
+            duration: 3000,
+            iconTheme: {
+              primary: COLORS.NEON_GREEN,
+              secondary: COLORS.BLACK,
+            },
+          },
+          // Customize error toasts
+          error: {
+            duration: 4000,
+            iconTheme: {
+              primary: '#ff4b4b',
+              secondary: COLORS.WHITE,
+            },
+          },
+        }}
+      />
       <Navbar />
       <main>
         <Routes>

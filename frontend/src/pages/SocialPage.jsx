@@ -133,9 +133,7 @@ const SocialPage = () => {
 
   return (
     <div className="min-h-screen p-6" style={{ backgroundColor: COLORS.BLACK }}>
-      <div className="max-w-5xl mx-auto">
-        <h1 className="text-3xl font-bold mb-8" style={{ color: COLORS.WHITE }}>Social</h1>
-        
+      <div className="max-w-5xl mx-auto">        
         <div className="grid gap-8 md:grid-cols-1 lg:grid-cols-2">
           {/* Friend Search */}
           <div className="rounded-xl shadow-sm p-6 border" style={{ backgroundColor: COLORS.DARK_GRAY, borderColor: COLORS.MEDIUM_GRAY }}>
