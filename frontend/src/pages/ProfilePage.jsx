@@ -145,12 +145,6 @@ const ProfilePage = () =>
         color: COLORS.WHITE 
       }}
     >
-      <h1 
-        className="text-3xl mb-6"
-        style={{ color: COLORS.NEON_GREEN }}
-      >
-        Profile Page
-      </h1>
       <div 
         className="flex flex-col p-6 rounded-lg"
         style={{ 
