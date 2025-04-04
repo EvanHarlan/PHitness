@@ -37,17 +37,39 @@ export default async (req, res) => {
     
     if (isStructuredRequest) {
       // Using backticks for multi-line strings
-      systemPrompt = `You are a fitness coach providing exactly ONE workout routine. You MUST follow this EXACT format for EVERY response without ANY deviation:
+      systemPrompt = `You are a fitness coach providing exactly ONE workout routine. Your response should be detailed and comprehensive, focusing on content quality rather than styling.
 
-1. Start with a bolded title like "**[Time] [Equipment] [Goal] Workout**"
-2. For EACH of the 5 exercises (you MUST provide EXACTLY 5 exercises):
-   - Number each exercise (1-5)
-   - Bold the exercise name
-   - On the next line write 'Sets/Reps:' followed by the specific sets and reps
-   - On the next line provide a link using format '<a href="YOUTUBE_URL" target="_blank" style="background-color: #39FF14; color: #000000; padding: 4px 8px; border-radius: 4px; font-weight: bold; text-decoration: none; display: inline-block; margin-top: 4px;">Watch Tutorial</a>'
-   - Add a blank line after each exercise
+RESPONSE FORMAT:
+Provide a structured JSON response with the following fields (do not include HTML formatting or styling):
+{
+  "title": "Descriptive title including time, equipment, and goal",
+  "exercises": [
+    {
+      "name": "Exercise Name",
+      "sets": number,
+      "reps": "number or range (e.g., '10-12')",
+      "description": "Brief explanation of form and technique",
+      "targetMuscles": "Main muscles worked",
+      "videoKeywords": "Keywords for finding a tutorial video"
+    }
+  ],
+  "notes": "Any special considerations or additional guidance",
+  "difficulty": "A rating from 1-5 indicating workout difficulty",
+  "estimatedCalories": "Estimated calories burned during the session",
+  "restPeriods": "Recommended rest between sets/exercises",
+  "progression": "How to progress this workout over time",
+  "alternatives": {
+    "beginner": "Simpler version of an exercise if needed",
+    "advanced": "More challenging version if too easy"
+  }
+}
 
-EXTREMELY IMPORTANT: For your YouTube links, ONLY use videos from major fitness channels like Athlean-X, Jeff Nippard, Jeremy Ethier, FitnessBlender, or NASM. These are established channels with stable videos that won't be taken down. DO NOT use obscure or random videos as they might not exist.`;
+IMPORTANT GUIDELINES:
+1. Include EXACTLY 5 exercises in your response
+2. Ensure exercises are appropriate for the specified fitness goal and equipment availability
+3. Consider health conditions and experience level when selecting exercises
+4. Provide detailed but concise descriptions focused on proper form
+5. Include specific sets and reps appropriate for the goal`;
       
       // Map coded values to human-readable text
       const goalMap = {
@@ -108,18 +130,10 @@ Experience: ${experienceLevel.charAt(0).toUpperCase() + experienceLevel.slice(1)
 Equipment: ${equipmentMap[equipment] || equipment}
 Time: ${timeFrameMap[timeFrame] || timeFrame}
 ${healthInfo}${frequencyInfo}
-You MUST follow this EXACT format without ANY deviation:
-1. Start with a bolded title like "**[Time] [Equipment] [Goal] Workout**"
-2. For EACH of the 5 exercises (you MUST provide EXACTLY 5 exercises):
-   - Number each exercise (1-5)
-   - Bold the exercise name
-   - On the next line write 'Sets/Reps:' followed by the specific sets and reps
-   - On the next line provide a link using format '<a href="YOUTUBE_URL" target="_blank" style="background-color: #39FF14; color: #000000; padding: 4px 8px; border-radius: 4px; font-weight: bold; text-decoration: none; display: inline-block; margin-top: 4px;">Watch Tutorial</a>'
-   - Add a blank line after each exercise
 
-EXTREMELY IMPORTANT: For the YouTube URLs, ONLY use videos from major fitness channels like Athlean-X, Jeff Nippard, Jeremy Ethier, FitnessBlender, or NASM. These channels have reliable, high-quality videos that won't be taken down.
+Include detailed form instructions, difficulty rating (1-5), recommended rest periods, progression options, and estimated calories burned. Also consider appropriate modifications for the specified health conditions if applicable.
 
-DO NOT DEVIATE FROM THIS FORMAT. NO EXTRA TEXT. NO INTRODUCTION. NO CONCLUSION.`;
+Provide this workout as structured JSON with exactly 5 exercises - NO HTML formatting, NO styling tags.`;
     } else {
       // Handle free-form questions
       systemPrompt = "You are a knowledgeable fitness expert providing accurate, evidence-based information about exercise, nutrition, and wellness.";
@@ -133,100 +147,48 @@ DO NOT DEVIATE FROM THIS FORMAT. NO EXTRA TEXT. NO INTRODUCTION. NO CONCLUSION.`
       messages: [
         { 
           role: "system", 
-          content: `${systemPrompt}\n\nIMPORTANT: For each exercise, provide a POPULAR YouTube tutorial video URL. Look for official fitness channels like Athlean-X, Jeff Nippard, Jeremy Ethier, FitnessBlender, or NASM. These are more likely to be stable, long-term videos that won't be taken down.` 
+          content: systemPrompt
         },
         { 
           role: "user", 
-          content: `${content}\n\nIMPORTANT: For EACH exercise, include a YouTube tutorial link from a POPULAR fitness channel (like Athlean-X, Jeff Nippard, etc.). Choose well-established videos with millions of views when possible, as these are less likely to be removed.` 
+          content: content
         }
       ],
-      max_tokens: 750 // Increased token limit for more detailed responses
+      max_tokens: 1000, // Increased token limit for more detailed responses
+      response_format: isStructuredRequest ? { type: "json_object" } : { type: "text" }
     });
     
-    // Get the initial response
+    // Get the response content
     let responseContent = response.choices[0].message.content;
     
-    // Check basic structure
     if (isStructuredRequest) {
-      // Completely rewrite the response to ensure consistent formatting
       try {
-        // Extract the original response components, but don't use any defaults
-        const titleMatch = responseContent.match(/^\s*\*\*([^*]+)\*\*/);
-        const title = titleMatch ? titleMatch[1].trim() : "";
+        // Parse the JSON response
+        const workoutData = JSON.parse(responseContent);
         
-        // Try to extract YouTube links from the response
-        const urlRegex = /<a href="(https:\/\/www\.youtube\.com\/watch\?v=[^"]+)"/g;
-        let extractedLinks = [];
-        let match;
-        while ((match = urlRegex.exec(responseContent)) !== null) {
-          extractedLinks.push(match[1]);
-        }
-        
-        // Extract exercises names
-        const exerciseMatches = responseContent.match(/\d+\.\s+\*\*([^*]+)\*\*/g);
-        let extractedExercises = [];
-        if (exerciseMatches) {
-          extractedExercises = exerciseMatches.map(match => {
-            const name = match.replace(/\d+\.\s+\*\*/, "").replace(/\*\*$/, "").trim();
-            return name;
-          });
-        }
-        
-        // Extract sets/reps information
-        const setsRepsMatches = responseContent.match(/Sets\/Reps:\s*([^\n]+)/g);
-        let extractedSetsReps = [];
-        if (setsRepsMatches) {
-          extractedSetsReps = setsRepsMatches.map(match => {
-            return match.replace(/Sets\/Reps:\s*/, "").trim();
-          });
-        }
-        
-        // If we couldn't extract enough data, return the original AI response
-        if (extractedExercises.length < 3) {
-          console.log("Not enough exercises extracted, using original response");
-          return res.json({ answer: responseContent });
-        }
-        
-        // Build a formatted response with the AI's content
-        let newResponse = title ? `**${title}**\n\n` : "";
-        
-        for (let i = 0; i < Math.min(extractedExercises.length, 5); i++) {
-          const exerciseName = extractedExercises[i];
-          const setsReps = i < extractedSetsReps.length ? extractedSetsReps[i] : "";
-          const videoUrl = i < extractedLinks.length ? extractedLinks[i] : "";
-          
-          newResponse += `${i+1}. **${exerciseName}**\n`;
-          if (setsReps) {
-            newResponse += `Sets/Reps: ${setsReps}\n`;
-          }
-          if (videoUrl) {
-            newResponse += `<a href="${videoUrl}" target="_blank" style="background-color: #39FF14; color: #000000; padding: 4px 8px; border-radius: 4px; font-weight: bold; text-decoration: none; display: inline-block; margin-top: 4px;">Watch Tutorial</a>\n\n`;
-          } else {
-            // If no video URL, recommend searching for the exercise on YouTube
-            newResponse += `<a href="https://www.youtube.com/results?search_query=${encodeURIComponent(exerciseName + ' exercise tutorial')}" target="_blank" style="background-color: #39FF14; color: #000000; padding: 4px 8px; border-radius: 4px; font-weight: bold; text-decoration: none; display: inline-block; margin-top: 4px;">Watch Tutorial</a>\n\n`;
-          }
-        }
-        
-        // Add a note about health considerations if applicable
-        if (healthConditions && healthConditions !== 'none') {
-          newResponse += `\n**Note:** This workout has been adapted for your health condition (${healthConditionMap[healthConditions] || healthConditions}). If you experience pain, stop immediately and consult a healthcare professional.`;
-        }
-        
-        // Update the response with our properly formatted version
-        responseContent = newResponse.trim();
-
-        // After getting the AI response, save the workout to MongoDB
-        const exercises = extractedExercises.map((name, index) => ({
-          name,
-          sets: parseInt(extractedSetsReps[index]?.split('x')[0] || '3'),
-          reps: parseInt(extractedSetsReps[index]?.split('x')[1] || '10'),
-          weight: 0 // Default weight, can be updated later
+        // Extract exercises for database storage
+        const exercises = workoutData.exercises.map(exercise => ({
+          name: exercise.name,
+          sets: parseInt(exercise.sets),
+          reps: typeof exercise.reps === 'string' && exercise.reps.includes('-') 
+            ? parseInt(exercise.reps.split('-')[0]) 
+            : parseInt(exercise.reps),
+          weight: 0, // Default weight, can be updated later
+          description: exercise.description,
+          targetMuscles: exercise.targetMuscles,
+          videoKeywords: exercise.videoKeywords
         }));
 
+        // Create a new workout in the database
         const workout = new Workout({
           user: req.user._id,
-          name: `Custom ${timeFrame} ${fitnessGoal} Workout`,
-          exercises
+          name: workoutData.title || `Custom ${timeFrame} ${fitnessGoal} Workout`,
+          exercises,
+          difficulty: workoutData.difficulty,
+          estimatedCalories: workoutData.estimatedCalories,
+          restPeriods: workoutData.restPeriods,
+          notes: workoutData.notes,
+          progression: workoutData.progression
         });
 
         await workout.save();
@@ -238,21 +200,20 @@ DO NOT DEVIATE FROM THIS FORMAT. NO EXTRA TEXT. NO INTRODUCTION. NO CONCLUSION.`
           { new: true, upsert: true }
         );
 
-        // Return both the formatted response and the saved workout
-        res.json({
-          workoutPlan: responseContent,
+        // Return both the API response and the saved workout
+        return res.json({
+          workoutPlan: workoutData,
           savedWorkout: workout
         });
       } catch (error) {
-        console.error("Error formatting workout response:", error);
-        // If our formatting fails, just return the original response
+        console.error("Error parsing workout response:", error);
+        return res.status(500).json({
+          error: "Failed to process the workout data",
+          details: error.message
+        });
       }
-    }
-    
-    console.log("Final response prepared:", responseContent);
-    
-    // Only send response if it hasn't been sent already
-    if (!res.headersSent) {
+    } else {
+      // Return free-form question response
       return res.json({ answer: responseContent });
     }
   } catch (error) {
@@ -261,20 +222,16 @@ DO NOT DEVIATE FROM THIS FORMAT. NO EXTRA TEXT. NO INTRODUCTION. NO CONCLUSION.`
     // More specific error handling
     if (error.response) {
       console.error("OpenAI API response error:", error.response.data);
-      if (!res.headersSent) {
-        return res.status(500).json({
-          error: "OpenAI API error",
-          details: error.response.data
-        });
-      }
+      return res.status(500).json({
+        error: "OpenAI API error",
+        details: error.response.data
+      });
     } else {
       console.error("Error details:", error.message);
-      if (!res.headersSent) {
-        return res.status(500).json({
-          error: "Error fetching response from OpenAI",
-          message: error.message
-        });
-      }
+      return res.status(500).json({
+        error: "Error fetching response from OpenAI",
+        message: error.message
+      });
     }
   }
 };

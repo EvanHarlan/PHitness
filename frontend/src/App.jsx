@@ -13,6 +13,7 @@ import LoginPage from "./pages/LoginPage";
 import LoadingSpinner from "./components/LoadingSpinner";
 import { useUserStore } from './stores/useUserStore';
 import COLORS from './lib/constants';
+import WorkoutDetailsPage from './pages/WorkoutDetailsPage'
 
 // ProtectedRoute component definition
 const ProtectedRoute = ({ element }) => {
@@ -73,23 +74,23 @@ function App() {
       />
       <Navbar />
       <main>
-        <Routes>
-          {/* Home page is accessible to everyone */}
-          <Route path="/" element={<HomePage />} />
-          
-          {/* Protected routes - only accessible if logged in */}
-          <Route path="/profile" element={<ProtectedRoute element={<ProfilePage />} />} />
-          <Route path="/social" element={<ProtectedRoute element={<SocialPage />} />} />
-          <Route path="/nutrition" element={<ProtectedRoute element={<NutritionPage />} />} />
-          <Route path="/workout" element={<ProtectedRoute element={<WorkoutPage />} />} />
-          
-          {/* Auth routes - only accessible if NOT logged in */}
-          <Route path="/signup" element={user ? <Navigate to="/" /> : <SignUpPage />} />
-          <Route path="/login" element={user ? <Navigate to="/" /> : <LoginPage />} />
-          
-          {/* Catch-all route */}
-          <Route path="*" element={<Navigate to="/" />} />
-        </Routes>
+      <Routes>
+        {/* Home page is accessible to everyone */}
+        <Route path="/" element={<HomePage />} />
+        
+        {/* Protected routes - only accessible if logged in */}
+        <Route path="/profile" element={<ProtectedRoute element={<ProfilePage />} />} />
+        <Route path="/social" element={<ProtectedRoute element={<SocialPage />} />} />
+        <Route path="/nutrition" element={<ProtectedRoute element={<NutritionPage />} />} />
+        <Route path="/workout" element={<ProtectedRoute element={<WorkoutPage />} />} />
+        <Route path="/workouts/:id" element={<ProtectedRoute element={<WorkoutDetailsPage />} />} />        
+        {/* Auth routes - only accessible if NOT logged in */}
+        <Route path="/signup" element={user ? <Navigate to="/" /> : <SignUpPage />} />
+        <Route path="/login" element={user ? <Navigate to="/" /> : <LoginPage />} />
+        
+        {/* Catch-all route */}
+        <Route path="*" element={<Navigate to="/" />} />
+      </Routes>
       </main>
     </div>
   );
