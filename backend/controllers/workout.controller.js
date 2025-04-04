@@ -1,4 +1,6 @@
 import OpenAI from "openai";
+import Workout from "../models/workout.model.js";
+import Tracker from "../models/tracker.model.js";
 
 export default async (req, res) => {
   // Extract structured parameters from request body
@@ -212,6 +214,35 @@ DO NOT DEVIATE FROM THIS FORMAT. NO EXTRA TEXT. NO INTRODUCTION. NO CONCLUSION.`
         
         // Update the response with our properly formatted version
         responseContent = newResponse.trim();
+
+        // After getting the AI response, save the workout to MongoDB
+        const exercises = extractedExercises.map((name, index) => ({
+          name,
+          sets: parseInt(extractedSetsReps[index]?.split('x')[0] || '3'),
+          reps: parseInt(extractedSetsReps[index]?.split('x')[1] || '10'),
+          weight: 0 // Default weight, can be updated later
+        }));
+
+        const workout = new Workout({
+          user: req.user._id,
+          name: `Custom ${timeFrame} ${fitnessGoal} Workout`,
+          exercises
+        });
+
+        await workout.save();
+
+        // Update workout tracker
+        await Tracker.findOneAndUpdate(
+          { user: req.user._id, type: "workout" },
+          { $inc: { amount: 1 } },
+          { new: true, upsert: true }
+        );
+
+        // Return both the formatted response and the saved workout
+        res.json({
+          workoutPlan: responseContent,
+          savedWorkout: workout
+        });
       } catch (error) {
         console.error("Error formatting workout response:", error);
         // If our formatting fails, just return the original response
@@ -220,23 +251,30 @@ DO NOT DEVIATE FROM THIS FORMAT. NO EXTRA TEXT. NO INTRODUCTION. NO CONCLUSION.`
     
     console.log("Final response prepared:", responseContent);
     
-    return res.json({ answer: responseContent });
+    // Only send response if it hasn't been sent already
+    if (!res.headersSent) {
+      return res.json({ answer: responseContent });
+    }
   } catch (error) {
     console.error("OpenAI API error details:", error);
     
     // More specific error handling
     if (error.response) {
       console.error("OpenAI API response error:", error.response.data);
-      return res.status(500).json({
-        error: "OpenAI API error",
-        details: error.response.data
-      });
+      if (!res.headersSent) {
+        return res.status(500).json({
+          error: "OpenAI API error",
+          details: error.response.data
+        });
+      }
     } else {
       console.error("Error details:", error.message);
-      return res.status(500).json({
-        error: "Error fetching response from OpenAI",
-        message: error.message
-      });
+      if (!res.headersSent) {
+        return res.status(500).json({
+          error: "Error fetching response from OpenAI",
+          message: error.message
+        });
+      }
     }
   }
 };

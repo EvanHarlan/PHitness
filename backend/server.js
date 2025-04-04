@@ -21,7 +21,7 @@ const __dirname = path.resolve();
 
 // Configure middleware
 app.use(cors({
-    origin: process.env.NODE_ENV === "production" ? false : ['http://localhost:5173', 'http://localhost:3000'],
+  origin: process.env.NODE_ENV === "production" ? false : ['http://localhost:5173', 'http://localhost:3000', 'http://localhost:5174'],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
@@ -40,19 +40,11 @@ app.use((req, res, next) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/tracker", trackerRoutes);
 app.use("/api/friend", friendRoutes);
+app.use("/api/workouts", workoutRoutes);
 
 // Health & test routes
 app.get('/health', (req, res) => {
   res.status(200).send('OK');
-});
-
-// WORKOUT ROUTES
-app.use("/api/auth", authRoutes); 
-app.use("/api/workouts", workoutRoutes);
-
-app.get('/test', (req, res) => {
-  console.log('Test route hit');
-  res.json({ message: 'Backend is working!', timestamp: new Date().toISOString() });
 });
 
 // Question route for AI

@@ -9,6 +9,7 @@ const WorkoutPage = () => {
   const [workoutAmount, setWorkoutAmount] = useState(0);
   const [loading, setLoading] = useState(false);
   const [answer, setAnswer] = useState("");
+  const [savedWorkout, setSavedWorkout] = useState(null);
   
   // Form state for user parameters
   const [userParams, setUserParams] = useState({
@@ -57,51 +58,47 @@ const WorkoutPage = () => {
     }
 
     setLoading(true);
-    
+    const loadingToast = toast.loading("Generating your personalized workout plan...", {
+      style: { 
+        background: COLORS.DARK_GRAY, 
+        color: COLORS.WHITE,
+        border: `1px solid ${COLORS.MEDIUM_GRAY}`
+      }
+    });
+
     try {
-      const response = await axios.post('http://localhost:5000/question', { 
-        ...userParams
+      const response = await axios.post(
+        "http://localhost:5000/api/workouts/generate",
+        userParams,
+        { withCredentials: true }
+      );
+
+      setAnswer(response.data.workoutPlan);
+      setSavedWorkout(response.data.savedWorkout);
+      toast.dismiss(loadingToast);
+      
+      toast.success("Workout generated and saved successfully!", {
+        duration: 2000,
+        icon: '💪',
+        style: { 
+          background: COLORS.DARK_GRAY, 
+          color: COLORS.NEON_GREEN,
+          border: `1px solid ${COLORS.MEDIUM_GRAY}`
+        }
       });
       
-      setAnswer(response.data.answer);
-      
-      // Dismiss all toasts
-      toast.dismiss();
-      
-      // Show success toast
-      toast.success("Workout plan generated successfully!", {
+      setWorkoutAmount(prevWorkoutAmount => prevWorkoutAmount + 1);
+    } catch (error) {
+      toast.dismiss(loadingToast);
+      console.error(error);
+      toast.error("Failed to generate workout. Please try again later.", {
         duration: 3000,
         style: { 
           background: COLORS.DARK_GRAY, 
           color: COLORS.WHITE,
           border: `1px solid ${COLORS.MEDIUM_GRAY}`
-        },
-        iconTheme: {
-          primary: COLORS.NEON_GREEN,
-          secondary: COLORS.BLACK
         }
       });
-      
-      // Scroll to results
-      setTimeout(() => {
-        document.getElementById('workout-result')?.scrollIntoView({ behavior: 'smooth' });
-      }, 100);
-    } catch (error) {
-      console.error(error);
-      
-      // Dismiss all toasts
-      toast.dismiss();
-      
-      toast.error("Failed to generate workout plan. Please try again.", {
-        duration: 4000,
-        style: { 
-          background: COLORS.DARK_GRAY, 
-          color: COLORS.WHITE,
-          border: `1px solid ${COLORS.MEDIUM_GRAY}`
-        }
-      });
-      
-      setAnswer("An error has occurred. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -225,15 +222,26 @@ const WorkoutPage = () => {
           <div id="workout-result" className="mt-8 rounded-xl shadow-sm p-6 border" style={{ backgroundColor: COLORS.DARK_GRAY, borderColor: COLORS.MEDIUM_GRAY }}>
             <h2 className="text-xl font-semibold mb-4" style={{ color: COLORS.WHITE }}>Your Personalized Workout Plan</h2>
             
-            <div 
-              className="p-4 border rounded-lg whitespace-pre-line" 
-              style={{ 
-                borderColor: COLORS.MEDIUM_GRAY, 
-                backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                color: COLORS.WHITE 
-              }}
-              dangerouslySetInnerHTML={{ __html: answer }}
-            />
+            <div className="prose prose-invert max-w-none" dangerouslySetInnerHTML={{ __html: answer }} />
+
+            {savedWorkout && (
+              <div className="mt-6">
+                <h3 className="text-lg font-semibold mb-2" style={{ color: COLORS.WHITE }}>Saved Workout Details</h3>
+                <div className="space-y-2">
+                  <p style={{ color: COLORS.LIGHT_GRAY }}>Name: {savedWorkout.name}</p>
+                  <div>
+                    <p style={{ color: COLORS.LIGHT_GRAY }}>Exercises:</p>
+                    <ul className="list-disc pl-5">
+                      {savedWorkout.exercises.map((exercise, index) => (
+                        <li key={index} style={{ color: COLORS.LIGHT_GRAY }}>
+                          {exercise.name} - {exercise.sets} sets x {exercise.reps} reps
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>
