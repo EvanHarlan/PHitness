@@ -235,3 +235,37 @@ Provide this workout as structured JSON with exactly 5 exercises - NO HTML forma
     }
   }
 };
+
+export const toggleFavorite = async (req, res) => {
+  try {
+    const workoutId = req.params.id;
+    
+    // Find the workout and verify it belongs to the current user
+    const workout = await Workout.findOne({ 
+      _id: workoutId, 
+      user: req.user._id 
+    });
+    
+    if (!workout) {
+      return res.status(404).json({ message: "Workout not found" });
+    }
+    
+    // Toggle the favorite status
+    workout.favorite = !workout.favorite;
+    
+    // Save the updated workout
+    await workout.save();
+    
+    res.json({ 
+      success: true, 
+      favorite: workout.favorite,
+      message: workout.favorite ? "Workout added to favorites" : "Workout removed from favorites"
+    });
+  } catch (error) {
+    console.error("Error toggling favorite status:", error);
+    res.status(500).json({ 
+      success: false, 
+      message: "Failed to update favorite status" 
+    });
+  }
+};
