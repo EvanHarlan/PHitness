@@ -32,7 +32,7 @@ router.post('/signup', async (req, res) => {
     // Generate a JWT token
     const token = jwt.sign(
       { id: newUser._id, email: newUser.email },
-      process.env.JWT_SECRET,
+      process.env.ACCESS_TOKEN_SECRET,
       { expiresIn: '1h' }
     );
     
@@ -58,7 +58,7 @@ router.post('/login', async (req, res) => {
     }
 
     // Check if the password matches
-    const isMatch = await bcrypt.compare(password, user.password);  // Use bcrypt to compare hashed passwords
+    const isMatch = await user.matchPassword(password);
     if (!isMatch) {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
@@ -66,7 +66,7 @@ router.post('/login', async (req, res) => {
     // Generate a JWT token
     const token = jwt.sign(
       { id: user._id, email: user.email },
-      process.env.JWT_SECRET,
+      process.env.ACCESS_TOKEN_SECRET,
       { expiresIn: '7d' }
     );
     
@@ -95,7 +95,7 @@ export const protect = async (req, res, next) => {
       token = req.headers.authorization.split(' ')[1];
 
       // Verify token
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
 
       // Get user from the token (excluding password)
       req.user = await User.findById(decoded.id).select('-password');

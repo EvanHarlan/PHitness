@@ -1,99 +1,92 @@
-# PHitness
+# PHitness - AI-Powered Fitness and Nutrition App
 
-An AI-powered fitness web platform designed to help users create, track, and optimize their workouts and nutrition plans.
-
-## Environment Setup
-
-1. Copy `.env.example` to create your own `.env` file:
-```bash
-cp backend/.env.example backend/.env
-```
-
-2. Update the `.env` file with your actual values:
-- `PORT`: Server port (default: 5000)
-- `MONGODB_URI`: Your MongoDB connection string
-- `JWT_SECRET`: A secure random string for JWT encryption
-- `OPENAI_API_KEY`: Your OpenAI API key (Get one from https://platform.openai.com/api-keys)
-
-**IMPORTANT: Never commit your `.env` file or share your API keys publicly!**
-
-## Development Setup
-
-1. Install dependencies:
-```bash
-npm install
-cd frontend && npm install
-cd ../backend && npm install
-```
-
-2. Start the development servers:
-```bash
-# Start backend server
-cd backend && npm run dev
-
-# In a new terminal, start frontend
-cd frontend && npm run dev
-```
-
-## Initial Setup
-
-## Packages
-- **express**: Web framework for Node.js
-- **dotenv**: Loads environment variables from `.env` file
-- **mongoose**: MongoDB object modeling
-- **jsonwebtoken**: Create/sign/verify JWTs for authentication
-- **cookie-parser**: Parse cookies from HTTP request headers
-- **bcryptjs**: Password hashing and data encryption
-- **ioredis**: Redis client for caching frequent data (JWTs/cookies)
-- **nodemon**: Development server with hot-reloading
-- **lucide-react**: React icon package
+PHitness is a modern web application that combines fitness tracking with AI-powered meal planning to help users achieve their health and fitness goals.
 
 ## Project Structure
-```bash
-/root
-│
-├── backend/ # Node.js & Express backend
-│   ├── controllers/ # Request handling logic
-│   ├── models/ # Mongoose schemas & models
-│   ├── lib/ # Service connections (db.js, redis.js)
-│   ├── routes/ # API endpoint definitions
-│   ├── middleware/ # Custom middleware functions
-│   └── server.js # Backend entry point
-│
-├── frontend/ # React application
-│   ├── public/ # Static assets (images, fonts)
-│   └── src/
-│       ├── components/ # Reusable UI components
-│       ├── pages/ # Page-level components
-│       ├── services/ # API communication layer
-│       ├── App.js # Root React component
-│       ├── index.css # Global styles with Tailwind imports
-│       └── Main.js # ReactDOM render point
-│
-├── .env # Environment variables
-├── package.json # Project dependencies & scripts
-├── README.md # Project documentation
-└── vite.config.js # Vite configuration
+
+```
+PHitness/
+├── backend/              # Backend server code
+│   ├── models/          # Database models
+│   ├── routes/          # API routes
+│   ├── services/        # Business logic and services
+│   ├── lib/            # Utility functions and helpers
+│   └── server.js       # Main server file
+├── frontend/            # Frontend React application
+│   ├── public/         # Static files
+│   └── src/            # Source files
+│       ├── components/ # React components
+│       ├── context/    # React context providers
+│       ├── pages/      # Page components
+│       └── lib/        # Utility functions
+└── .env                # Environment variables
 ```
 
+## Features
 
-## Key File Descriptions
-**Backend**
-- `lib/db.js`: Handles MongoDB connection
-- `lib/redis.js`: Manages Redis client instance
-- `middleware/auth.js`: Authentication middleware
+- User authentication and authorization
+- AI-powered meal planning based on nutritional goals
+- Fitness tracking and progress monitoring
+- Modern, responsive UI with Tailwind CSS
 
-**Frontend**
-- `index.css`: Contains Tailwind CSS directives (`@tailwind base`, etc.)
-- `services/api.js`: Axios instance with base URL configuration
+## Setup Instructions
 
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/yourusername/PHitness.git
+   cd PHitness
+   ```
 
-## Application Color Palette
-- **Neon Green** → `#32CD32`
-- **Balanced Green** → `#4CAF50`
-- **Dark Gray** → `#1E1E1E`
-- **Black** → `#121212`
-- **Medium Gray** → `#2A2A2A`
-- **Light Gray** → `#B0B0B0`
-- **White** → `#F5F5F5`
+2. Install dependencies:
+   ```bash
+   # Install backend dependencies
+   cd backend
+   npm install
+
+   # Install frontend dependencies
+   cd ../frontend
+   npm install
+   ```
+
+3. Set up environment variables:
+   - Copy `.env.example` to `.env`
+   - Fill in your MongoDB URI, OpenAI API key, and other required variables
+
+4. Start the development servers:
+   ```bash
+   # Start backend server (from backend directory)
+   npm run dev
+
+   # Start frontend development server (from frontend directory)
+   npm run dev
+   ```
+
+## Environment Variables
+
+Required environment variables:
+- `MONGO_URI`: MongoDB connection string
+- `PORT`: Backend server port (default: 8080)
+- `ACCESS_TOKEN_SECRET`: JWT access token secret
+- `REFRESH_TOKEN_SECRET`: JWT refresh token secret
+- `OPENAI_API_KEY`: OpenAI API key for meal planning
+
+## API Documentation
+
+### Authentication Endpoints
+- POST `/api/auth/signup`: Create a new user account
+- POST `/api/auth/login`: Log in an existing user
+- GET `/api/auth/user`: Get current user information (protected)
+
+### Meal Planning Endpoints
+- POST `/api/meal-plans/generate`: Generate AI-powered meal suggestions
+
+## Contributing
+
+1. Create a new branch for your feature
+2. Make your changes
+3. Submit a pull request
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
 

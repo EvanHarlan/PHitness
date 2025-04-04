@@ -13,7 +13,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // Load environment variables from root .env file
-dotenv.config({ path: path.join(__dirname, '../.env') });
+dotenv.config();
 
 const app = express();
 
@@ -31,7 +31,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/workouts", workoutRoutes);
 app.use("/api/meal-plans", mealPlanRoutes);
 
-const PORT = process.env.PORT || 5000;
+const PORT = 8080; // Temporarily set to 8080 for local development
 
 // Connect to database and start server
 connectDB()
