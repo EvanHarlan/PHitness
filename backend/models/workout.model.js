@@ -15,7 +15,10 @@ const workoutSchema = new mongoose.Schema(
     exercises: {
       type: [
         {
-          name: { type: String, required: [true, "Exercise name is required"] },
+          name: { 
+            type: String, 
+            required: [true, "Exercise name is required"] 
+          },
           sets: {
             type: Number,
             required: [true, "Number of sets is required"],
@@ -31,10 +34,52 @@ const workoutSchema = new mongoose.Schema(
             default: 0,
             min: [0, "Weight must be at least 0"],
           },
+          description: {
+            type: String,
+            default: ""
+          },
+          targetMuscles: {
+            type: String,
+            default: ""
+          },
+          videoKeywords: {
+            type: String,
+            default: ""
+          }
         },
       ],
       default: [], // Ensures an empty array instead of undefined
     },
+    difficulty: {
+      type: String,
+      default: "3"
+    },
+    estimatedCalories: {
+      type: String,
+      default: ""
+    },
+    restPeriods: {
+      type: String,
+      default: "60-90 seconds between sets"
+    },
+    notes: {
+      type: String,
+      default: ""
+    },
+    progression: {
+      type: String,
+      default: ""
+    },
+    alternatives: {
+      beginner: {
+        type: String,
+        default: ""
+      },
+      advanced: {
+        type: String,
+        default: ""
+      }
+    }
   },
   { timestamps: true } // Automatically creates createdAt & updatedAt
 );
