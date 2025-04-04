@@ -1,17 +1,38 @@
 import express from "express";
+import { protectRoute } from "../middleware/auth.middleware.js";
+import workoutController from "../controllers/workout.controller.js";
 import Workout from "../models/workout.model.js";
 import asyncHandler from "express-async-handler"; // Handles async errors gracefully
 
 const router = express.Router();
 
-// GET all workouts (Sorted by newest first)
-router.get(
-  "/",
-  asyncHandler(async (req, res) => {
-    const workouts = await Workout.find().sort({ createdAt: -1 });
+// Generate a new workout
+router.post("/generate", protectRoute, workoutController);
+
+// GET all workouts for the current user
+router.get("/", protectRoute, async (req, res) => {
+  try {
+    const workouts = await Workout.find({ user: req.user._id }).sort({ createdAt: -1 });
     res.json(workouts);
-  })
-);
+  } catch (error) {
+    console.error("Error fetching workouts:", error);
+    res.status(500).json({ message: "Failed to fetch workouts" });
+  }
+});
+
+// GET a specific workout
+router.get("/:id", protectRoute, async (req, res) => {
+  try {
+    const workout = await Workout.findOne({ _id: req.params.id, user: req.user._id });
+    if (!workout) {
+      return res.status(404).json({ message: "Workout not found" });
+    }
+    res.json(workout);
+  } catch (error) {
+    console.error("Error fetching workout:", error);
+    res.status(500).json({ message: "Failed to fetch workout" });
+  }
+});
 
 // POST a new workout (With validation)
 router.post(
