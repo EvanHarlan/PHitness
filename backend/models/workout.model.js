@@ -12,12 +12,16 @@ const workoutSchema = new mongoose.Schema(
       required: [true, "Workout name is required"],
       trim: true,
     },
+    favorite: {
+      type: Boolean,
+      default: false,
+    },
     exercises: {
       type: [
         {
-          name: { 
-            type: String, 
-            required: [true, "Exercise name is required"] 
+          name: {
+            type: String,
+            required: [true, "Exercise name is required"]
           },
           sets: {
             type: Number,
@@ -48,7 +52,7 @@ const workoutSchema = new mongoose.Schema(
           }
         },
       ],
-      default: [], // Ensures an empty array instead of undefined
+      default: [],
     },
     difficulty: {
       type: String,
@@ -81,8 +85,9 @@ const workoutSchema = new mongoose.Schema(
       }
     }
   },
-  { timestamps: true } // Automatically creates createdAt & updatedAt
+  { timestamps: true }
 );
 
 const Workout = mongoose.model("Workout", workoutSchema);
+
 export default Workout;

@@ -2,37 +2,53 @@ import { useState } from 'react';
 import COLORS from '../lib/constants';
 import { useNavigate } from 'react-router-dom';
 
-// THIS COMPONENT IS USED TO DISPLAY THE CARD UNDER "SAVED WORKOUTS" WHERE USERS CAN THEN CLICK TO ACCESS THE WORKOUTDETAILSPAGE FOR MORE INFORMATION
-
-const SavedWorkoutCard = ({ workout, onDeleteWorkout }) => {
+const SavedWorkoutCard = ({ workout, onDeleteWorkout, onToggleFavorite }) => {
   const [expanded, setExpanded] = useState(false);
   const navigate = useNavigate();
 
   if (!workout) return null;
 
   return (
-    <div 
-      className="p-4 border rounded-lg cursor-pointer hover:opacity-90 transition"
-      style={{ borderColor: COLORS.MEDIUM_GRAY, backgroundColor: 'rgba(255,255,255,0.05)' }}
-      onClick={() => navigate(`/workouts/${workout._id}`)}
-    >
-      <div className="flex justify-between items-center">
-        <h3 className="text-lg font-semibold" style={{ color: COLORS.WHITE }}>
-          {workout.name}
-        </h3>
-        <div className="flex space-x-2">
+    <div className="p-4 rounded-lg" style={{ backgroundColor: COLORS.MEDIUM_GRAY }}>
+      <div className="flex items-center justify-between mb-2">
+        <div className="flex-1">
+          <h3 
+            className="text-lg font-medium cursor-pointer hover:underline" 
+            style={{ color: COLORS.WHITE }}
+            onClick={() => navigate(`/workouts/${workout._id}`)}
+          >
+            {workout.name}
+          </h3>
+        </div>
+        <div className="flex items-center space-x-2">
           <button
-            onClick={() => setExpanded(!expanded)}
-            className="px-3 py-1 rounded-lg text-sm transition"
-            style={{ backgroundColor: COLORS.MEDIUM_GRAY, color: COLORS.WHITE }}
+            onClick={() => onToggleFavorite(workout._id, workout.favorite)}
+            className="p-2 rounded-full transition hover:bg-opacity-80"
+            style={{ backgroundColor: COLORS.DARK_GRAY }}
+          >
+            <svg 
+              xmlns="http://www.w3.org/2000/svg" 
+              className="h-5 w-5" 
+              viewBox="0 0 20 20" 
+              fill={workout.favorite ? "#FFD700" : "none"}
+              stroke={workout.favorite ? "#FFD700" : COLORS.WHITE}
+              strokeWidth="1.5"
+            >
+              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118l-2.8-2.034c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+            </svg>
+          </button>
+          <button 
+            onClick={() => setExpanded(!expanded)} 
+            className="px-3 py-1 rounded-lg text-sm transition" 
+            style={{ backgroundColor: COLORS.DARK_GRAY, color: COLORS.WHITE }}
           >
             {expanded ? 'Hide' : 'View'}
           </button>
           {onDeleteWorkout && (
-            <button
-              onClick={() => onDeleteWorkout(workout._id)}
-              className="px-3 py-1 rounded-lg text-sm transition"
-              style={{ backgroundColor: COLORS.MEDIUM_GRAY, color: '#ff4d4d' }}
+            <button 
+              onClick={() => onDeleteWorkout(workout._id)} 
+              className="px-3 py-1 rounded-lg text-sm transition" 
+              style={{ backgroundColor: COLORS.DARK_GRAY, color: '#ff4d4d' }}
             >
               Delete
             </button>
@@ -41,37 +57,21 @@ const SavedWorkoutCard = ({ workout, onDeleteWorkout }) => {
       </div>
       
       {expanded && (
-        <div className="mt-4">
-          <p className="text-sm mb-2" style={{ color: COLORS.LIGHT_GRAY }}>
+        <div className="mt-3 p-3 rounded-lg" style={{ backgroundColor: COLORS.DARK_GRAY }}>
+          <div className="mb-2" style={{ color: COLORS.LIGHT_GRAY }}>
             Created: {new Date(workout.createdAt).toLocaleDateString()}
-          </p>
-          
-          <div className="mt-3">
-            <h4 className="font-medium mb-2" style={{ color: COLORS.NEON_GREEN }}>Exercises</h4>
-            <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
-              {workout.exercises.map((exercise, index) => (
-                <div 
-                  key={index} 
-                  className="p-3 rounded border"
-                  style={{ borderColor: COLORS.MEDIUM_GRAY, backgroundColor: 'rgba(255,255,255,0.05)' }}
-                >
-                  <p className="font-medium" style={{ color: COLORS.WHITE }}>{exercise.name}</p>
-                  <div className="flex space-x-4 mt-1">
-                    <span style={{ color: COLORS.LIGHT_GRAY }}>
-                      <span style={{ color: COLORS.NEON_GREEN }}>{exercise.sets}</span> sets
-                    </span>
-                    <span style={{ color: COLORS.LIGHT_GRAY }}>
-                      <span style={{ color: COLORS.NEON_GREEN }}>{exercise.reps}</span> reps
-                    </span>
-                    {exercise.weight > 0 && (
-                      <span style={{ color: COLORS.LIGHT_GRAY }}>
-                        <span style={{ color: COLORS.NEON_GREEN }}>{exercise.weight}</span> lbs
-                      </span>
-                    )}
-                  </div>
+          </div>
+          <h4 className="font-medium mb-2" style={{ color: COLORS.WHITE }}>Exercises</h4>
+          <div className="space-y-2">
+            {workout.exercises.map((exercise, index) => (
+              <div key={index} className="p-2 rounded" style={{ backgroundColor: COLORS.MEDIUM_GRAY }}>
+                <div className="font-medium" style={{ color: COLORS.WHITE }}>{exercise.name}</div>
+                <div style={{ color: COLORS.LIGHT_GRAY }}>
+                  {exercise.sets} sets × {exercise.reps} reps
+                  {exercise.weight > 0 && ` × ${exercise.weight} lbs`}
                 </div>
-              ))}
-            </div>
+              </div>
+            ))}
           </div>
         </div>
       )}

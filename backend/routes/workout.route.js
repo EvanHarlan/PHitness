@@ -1,6 +1,6 @@
 import express from "express";
 import { protectRoute } from "../middleware/auth.middleware.js";
-import workoutController from "../controllers/workout.controller.js";
+import workoutController, { toggleFavorite } from "../controllers/workout.controller.js";
 import Workout from "../models/workout.model.js";
 import asyncHandler from "express-async-handler"; // Handles async errors gracefully
 
@@ -79,5 +79,8 @@ router.delete(
     res.json({ message: "Workout deleted successfully" });
   })
 );
+
+// TOGGLE favorite status for a workout
+router.patch("/:id/favorite", protectRoute, toggleFavorite);
 
 export default router;
