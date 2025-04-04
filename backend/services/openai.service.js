@@ -14,6 +14,7 @@ const openai = new OpenAI();
 
 /**
  * Generate meal suggestions based on user preferences and goals
+<<<<<<< Updated upstream
  * @param {Object} params - Parameters for meal suggestion
  * @param {number} params.targetCalories - Daily calorie goal
  * @param {number} params.targetProtein - Daily protein goal in grams
@@ -22,6 +23,16 @@ const openai = new OpenAI();
  * @param {Array<string>} params.dietaryRestrictions - List of dietary restrictions
  * @param {Array<string>} params.preferences - Food preferences
  * @returns {Promise<Object>} Meal suggestions with nutritional information
+=======
+ * @param {Object} params - Parameters for meal generation
+ * @param {number} params.targetCalories - Target daily calories
+ * @param {number} params.targetProtein - Target daily protein in grams
+ * @param {number} params.targetCarbs - Target daily carbs in grams
+ * @param {number} params.targetFats - Target daily fats in grams
+ * @param {string[]} params.dietaryRestrictions - Array of dietary restrictions
+ * @param {string[]} params.preferences - Array of food preferences
+ * @returns {Promise<Object>} - Generated meal suggestions
+>>>>>>> Stashed changes
  */
 export const generateMealSuggestions = async ({
   targetCalories,
@@ -31,6 +42,7 @@ export const generateMealSuggestions = async ({
   dietaryRestrictions = [],
   preferences = []
 }) => {
+<<<<<<< Updated upstream
   try {
     const prompt = `As a nutrition expert, create a daily meal plan with the following requirements:
     
@@ -81,6 +93,53 @@ Format the response as a JSON object with this structure:
   }
 }`;
 
+=======
+  const prompt = `
+    Create a detailed 7-day meal plan that meets the following nutritional requirements:
+    - Daily Calories: ${targetCalories}
+    - Daily Protein: ${targetProtein}g
+    - Daily Carbs: ${targetCarbs}g
+    - Daily Fats: ${targetFats}g
+    
+    ${dietaryRestrictions.length > 0 ? `Dietary Restrictions: ${dietaryRestrictions.join(', ')}` : ''}
+    ${preferences.length > 0 ? `Food Preferences: ${preferences.join(', ')}` : ''}
+    
+    For each meal, include:
+    - Detailed ingredients with amounts
+    - Nutritional information (calories, protein, carbs, fat)
+    - Simple preparation instructions
+    
+    Format the response as a JSON object with this structure:
+    {
+      "meals": [
+        {
+          "day": "Monday",
+          "mealType": "Breakfast",
+          "name": "Meal Name",
+          "ingredients": [
+            {
+              "name": "Ingredient Name",
+              "amount": 1,
+              "unit": "cup"
+            }
+          ],
+          "calories": 500,
+          "protein": 30,
+          "carbs": 50,
+          "fat": 20
+        }
+      ],
+      "dailyTotals": {
+        "calories": 2000,
+        "protein": 150,
+        "carbs": 200,
+        "fat": 70
+      }
+    }
+  `;
+
+  try {
+>>>>>>> Stashed changes
     const completion = await openai.chat.completions.create({
       messages: [
         {
@@ -96,6 +155,7 @@ Format the response as a JSON object with this structure:
       temperature: 0.7,
     });
 
+<<<<<<< Updated upstream
     // Parse the response and validate it's in the correct format
     const mealPlan = JSON.parse(completion.choices[0].message.content);
     
@@ -108,5 +168,12 @@ Format the response as a JSON object with this structure:
   } catch (error) {
     console.error('Error generating meal suggestions:', error);
     throw error;
+=======
+    const response = completion.choices[0].message.content;
+    return JSON.parse(response);
+  } catch (error) {
+    console.error('Error generating meal suggestions:', error);
+    throw new Error('Failed to generate meal suggestions');
+>>>>>>> Stashed changes
   }
 }; 
