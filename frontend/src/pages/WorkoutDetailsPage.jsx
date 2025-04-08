@@ -227,7 +227,7 @@ const WorkoutDetailsPage = () => {
     <div className="p-6" style={{ backgroundColor: COLORS.DARK_GRAY, minHeight: '100vh' }}>
       <div className="mb-4 flex justify-between items-center">
         <button
-          onClick={() => navigate('/workouts')}
+          onClick={() => navigate('/workout')}
           className="px-3 py-1 rounded text-sm font-medium"
           style={{ backgroundColor: COLORS.MEDIUM_GRAY, color: COLORS.WHITE }}
         >
