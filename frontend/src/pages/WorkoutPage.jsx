@@ -1,11 +1,9 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom"; // Import useNavigate
 import WorkoutQuestionnaire from "../components/WorkoutQuestionnaire";
 import SavedWorkoutsList from "../components/SavedWorkoutsList";
-// import WorkoutDetail from "../components/WorkoutDetail"; // REMOVE THIS LINE
-import SavedWorkoutCard from "../components/SavedWorkoutCard";
 import COLORS from '../lib/constants';
 
 const WorkoutPage = () => {
@@ -41,8 +39,6 @@ const WorkoutPage = () => {
       } catch (error) {
         console.error("Error fetching workout count:", error);
         setFetchWorkoutCountError(error);
-        // Decide if you want to show a toast here every time the component mounts/updates
-        // toast.error("Couldn't load workout history. Please try again later.");
       }
     };
 
@@ -176,6 +172,15 @@ const WorkoutPage = () => {
 
   return (
     <div className="min-h-screen p-6" style={{ backgroundColor: COLORS.BLACK }}>
+      <header className="mb-10">
+        <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4 flex justify-center"
+        style={{ color: COLORS.NEON_GREEN }}>
+        Workout Generator
+        </h1>
+        <p className="text-lg md:text-xl text-[#B0B0B0] flex justify-center">
+        Get AI-powered custom workout plans. Please fill out the questionnaire below to get started.
+        </p>
+      </header>
       <div className="max-w-5xl mx-auto">
         <div className="grid gap-8 md:grid-cols-1 lg:grid-cols-2">
           {/* Workout Parameters Form */}
