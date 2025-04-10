@@ -47,7 +47,11 @@ const userSchema = new mongoose.Schema({
     type: String,
     enum: ['public', 'friends', 'private'],
     default: 'friends'
-  }
+    },
+  achievements: [{
+  title: { type: String, required: true },
+  dateUnlocked: { type: Date, default: Date.now }
+  }]
 }, {
   timestamps: true
 });

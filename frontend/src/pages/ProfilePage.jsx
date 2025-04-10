@@ -3,6 +3,7 @@ import { COLORS } from '../lib/constants';
 import axios from "axios";
 import { Dumbbell, Utensils, Trophy } from "lucide-react";
 import { useUserStore } from "../stores/useUserStore"; 
+import { useMemo } from "react";
 
 
 const ProfilePage = () =>
@@ -82,21 +83,70 @@ const ProfilePage = () =>
         }));
     };
 
-    const achievements = [
+    const achievements = useMemo(() => [
         { title: "Account Created", description: "Welcome to PHitness! Your journey begins here.", threshold: 0, count: 1 },
         { title: "Completed 1 Workout", description: "Your first workout completed!", threshold: 1, count: workoutAmount, iconType: "workout_bronze" },
-        { title: "Completed 5 Workouts", description: "You're getting into the routine!", threshold: 5, count: workoutAmount, iconType: "workout_silver"  },
-        { title: "Completed 10 Workouts", description: "A true fitness enthusiast!", threshold: 10, count: workoutAmount, iconType: "workout_gold"  },
-        { title: "Completed 25 Workouts", description: "Dominating this routine!", threshold: 25, count: workoutAmount, iconType: "workout_diam"  },
-        { title: "Completed 50 Workouts", description: "You should go pro!", threshold: 50, count: workoutAmount, iconType: "workout_ruby"  },
-        { title: "Completed 100 Workouts", description: "A PHitness workout!", threshold: 100, count: workoutAmount, iconType: "workout_phit"  },
+        { title: "Completed 5 Workouts", description: "You're getting into the routine!", threshold: 5, count: workoutAmount, iconType: "workout_silver" },
+        { title: "Completed 10 Workouts", description: "A true fitness enthusiast!", threshold: 10, count: workoutAmount, iconType: "workout_gold" },
+        { title: "Completed 25 Workouts", description: "Dominating this routine!", threshold: 25, count: workoutAmount, iconType: "workout_diam" },
+        { title: "Completed 50 Workouts", description: "You should go pro!", threshold: 50, count: workoutAmount, iconType: "workout_ruby" },
+        { title: "Completed 100 Workouts", description: "A PHitness workout!", threshold: 100, count: workoutAmount, iconType: "workout_phit" },
         { title: "Created 1 Meal", description: "Your first meal tracked!", threshold: 1, count: mealAmount, iconType: "meal_bronze" },
         { title: "Created 5 Meals", description: "You're building healthy habits!", threshold: 5, count: mealAmount, iconType: "meal_silver" },
         { title: "Created 10 Meals", description: "A dedicated meal planner!", threshold: 10, count: mealAmount, iconType: "meal_gold" },
-        { title: "Created 25 Meals", description: "A chef in the making!", threshold: 25, count: workoutAmount, iconType: "meal_diam"},
+        { title: "Created 25 Meals", description: "A chef in the making!", threshold: 25, count: workoutAmount, iconType: "meal_diam" },
         { title: "Created 50 Meals", description: "The meal prep king!", threshold: 50, count: workoutAmount, iconType: "meal_ruby" },
         { title: "Created 100 Meals", description: "A Phitness meal planer!", threshold: 100, count: workoutAmount, iconType: "meal_phit" },
-    ];
+    ], [workoutAmount, mealAmount]);
+
+    const { setUnlockedAchievement } = useUserStore();
+
+    useEffect(() =>
+    {
+        if (!user) return;
+
+        achievements.forEach(async (achievement) =>
+        {
+            const isAccountCreated = achievement.title === "Account Created";
+            const alreadyShownAccountCreated = localStorage.getItem("shownAccountCreated");
+
+            // If using backend tracking for other achievements:
+            const alreadyUnlocked = user.achievements?.some(
+                (a) => a.title === achievement.title
+            );
+
+            if (
+                achievement.count >= achievement.threshold &&
+                (
+                    isAccountCreated
+                        ? !alreadyShownAccountCreated
+                        : !alreadyUnlocked
+                )
+            )
+            {
+                if (isAccountCreated)
+                {
+                    localStorage.setItem("shownAccountCreated", "true");
+                } else
+                {
+                    try
+                    {
+                        await axios.post(
+                            "http://localhost:5000/api/auth/unlock-achievement",
+                            { title: achievement.title },
+                            { withCredentials: true }
+                        );
+                    } catch (error)
+                    {
+                        console.error("Failed to save achievement:", error);
+                    }
+                }
+
+                setUnlockedAchievement(achievement);
+            }
+        });
+    }, [user, achievements, setUnlockedAchievement]);
+
 
 
     const AchievementIcon = ({ type, filled }) => {
