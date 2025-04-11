@@ -8,7 +8,8 @@ import questionHandler from "./controllers/workout.controller.js";
 import authRoutes from "./routes/auth.route.js";
 import trackerRoutes from "./routes/tracker.route.js";
 import friendRoutes from './routes/friend.route.js';
-import workoutRoutes from "./routes/workout.route.js"; 
+import workoutRoutes from "./routes/workout.route.js";
+import mealPlanRoutes from "./routes/mealPlan.route.js";
 
 
 // Load environment variables
@@ -41,6 +42,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/tracker", trackerRoutes);
 app.use("/api/friend", friendRoutes);
 app.use("/api/workouts", workoutRoutes);
+app.use("/api/meal-plans", mealPlanRoutes);
 
 // Health & test routes
 app.get('/health', (req, res) => {

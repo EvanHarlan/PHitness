@@ -1,0 +1,22 @@
+### Login
+POST http://localhost:5000/api/auth/login
+Content-Type: application/json
+
+{
+    "email": "admin@gmail.com",
+    "password": "adminpassword"
+}
+
+### Generate Meal Plan
+POST http://localhost:5000/api/meal-plans/generate
+Content-Type: application/json
+
+{
+    "goal": "gain muscle",
+    "targetCalories": 2800,
+    "targetProtein": 180,
+    "targetCarbs": 300,
+    "targetFats": 90,
+    "preferences": ["chicken", "brown rice", "broccoli"],
+    "dietaryRestrictions": ["no dairy"]
+}
