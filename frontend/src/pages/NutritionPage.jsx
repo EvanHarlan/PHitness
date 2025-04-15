@@ -64,6 +64,14 @@ const NutritionPage = () => {
 
   const generateMealPlan = async () => {
     try {
+
+      const loadingToast = toast.loading("Generating Meal Plan...", {
+        style: {
+          background: COLORS.DARK_GRAY,
+          color: COLORS.WHITE,
+          border: `1px solid ${COLORS.MEDIUM_GRAY}`
+        }
+      }); 
       // Validate required fields
       if (!userParams.weight || !userParams.height || !userParams.age || !userParams.gender || !userParams.activityLevel || !userParams.nutritionGoal) {
         toast.error("Please fill in all required fields");
@@ -183,12 +191,15 @@ const NutritionPage = () => {
         setGeneratedPlan(planWithTotals);
         setError(null);
         toast.success("Meal plan generated successfully!");
+        toast.dismiss(loadingToast);
       } else {
         toast.error("Failed to generate meal plan");
+        toast.dismiss(loadingToast);
       }
     } catch (error) {
       console.error("Error generating meal plan:", error);
       toast.error(error.response?.data?.message || "Failed to generate meal plan");
+      toast.dismiss(loadingToast);
     }
   };
 
