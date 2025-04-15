@@ -22,11 +22,6 @@ const hashMealPlan = (mealPlan) => {
 // @access  Private
 export const generateMealPlan = asyncHandler(async (req, res) => {
   try {
-    // Log the full incoming payload
-    console.log("📦 Received meal plan request payload:", {
-      body: req.body,
-      user: req.user?._id || 'anonymous'
-    });
 
     // Validate required fields
     const requiredFields = [
@@ -51,7 +46,7 @@ export const generateMealPlan = asyncHandler(async (req, res) => {
         received: Object.keys(req.body),
         timestamp: new Date().toISOString()
       };
-      console.error("❌ Request rejected:", rejectionLog);
+      console.error("Request rejected:", rejectionLog);
       return res.status(400).json({ 
         message: `Missing required fields: ${missingFields.join(', ')}`,
         details: rejectionLog
@@ -87,7 +82,7 @@ export const generateMealPlan = asyncHandler(async (req, res) => {
         })),
         timestamp: new Date().toISOString()
       };
-      console.error("❌ Request rejected:", rejectionLog);
+      console.error("Request rejected:", rejectionLog);
       return res.status(400).json({
         message: "Invalid numeric values. All numeric fields must be positive numbers.",
         details: rejectionLog
@@ -104,12 +99,6 @@ export const generateMealPlan = asyncHandler(async (req, res) => {
     });
 
     const macroRatios = getMacroRatio(normalizedBody.goal);
-
-    // Log calculated limits and ratios
-    console.log("📊 Macro calculations:", {
-      limits: macroLimits,
-      ratios: macroRatios
-    });
 
     // Validate macro values against limits with 20% margin
     const macroMargin = 0.20; // 20% margin
@@ -137,10 +126,6 @@ export const generateMealPlan = asyncHandler(async (req, res) => {
         timestamp: new Date().toISOString()
       };
       console.error("❌ Request rejected:", rejectionLog);
-      return res.status(400).json({
-        message: `Calories must be between ${minCalories} and ${maxCalories}`,
-        details: rejectionLog
-      });
     }
 
     // Check if protein exceeds max
@@ -248,13 +233,11 @@ export const generateMealPlan = asyncHandler(async (req, res) => {
 // @desc    Save a generated meal plan
 export const saveMealPlan = asyncHandler(async (req, res) => {
   try {
-    console.log("📝 Starting save meal plan process...");
-    console.log("🧑‍💻 Authenticated user:", req.user);
-    console.log("🧾 Full request body:", JSON.stringify(req.body, null, 2));
+    console.log("Starting save meal plan process...");
 
     // Validate required fields
     if (!req.body.meals || !Array.isArray(req.body.meals)) {
-      console.log("❌ Missing or invalid meals array:", {
+      console.log("Missing or invalid meals array:", {
         hasMeals: !!req.body.meals,
         isArray: Array.isArray(req.body.meals),
         meals: req.body.meals
@@ -263,12 +246,12 @@ export const saveMealPlan = asyncHandler(async (req, res) => {
     }
 
     if (req.body.meals.length === 0) {
-      console.log("❌ Empty meals array");
+      console.log("Empty meals array");
       return res.status(400).json({ message: "Meals array cannot be empty" });
     }
 
     if (!req.body.totalNutrition || typeof req.body.totalNutrition !== 'object') {
-      console.log("❌ Missing or invalid totalNutrition object:", {
+      console.log("Missing or invalid totalNutrition object:", {
         hasTotalNutrition: !!req.body.totalNutrition,
         type: typeof req.body.totalNutrition,
         totalNutrition: req.body.totalNutrition
@@ -294,7 +277,7 @@ export const saveMealPlan = asyncHandler(async (req, res) => {
     });
 
     if (invalidMeals.length > 0) {
-      console.log("❌ Invalid meal structure:", {
+      console.log("Invalid meal structure:", {
         invalidMeals,
         details: invalidMeals.map(meal => ({
           name: meal.name,
@@ -340,7 +323,7 @@ export const saveMealPlan = asyncHandler(async (req, res) => {
     );
 
     if (missingNutritionFields.length > 0 || invalidNutritionTypes.length > 0) {
-      console.log("❌ Invalid totalNutrition structure:", {
+      console.log("Invalid totalNutrition structure:", {
         missingFields: missingNutritionFields,
         invalidTypes: invalidNutritionTypes,
         totalNutrition: req.body.totalNutrition
@@ -355,7 +338,7 @@ export const saveMealPlan = asyncHandler(async (req, res) => {
     }
 
     // Log the data we're about to save
-    console.log("💾 Attempting to save meal plan with data:", {
+    console.log("Attempting to save meal plan with data:", {
       user: req.user._id,
       mealsCount: req.body.meals.length,
       totalNutrition: req.body.totalNutrition
@@ -381,8 +364,8 @@ export const saveMealPlan = asyncHandler(async (req, res) => {
       savedPlan: newPlan 
     });
   } catch (error) {
-    console.error("❌ Failed to save meal plan:", error);
-    console.error("❌ Error details:", {
+    console.error("Failed to save meal plan:", error);
+    console.error("Error details:", {
       message: error.message,
       stack: error.stack,
       validationErrors: error.errors
