@@ -21,6 +21,7 @@
     "ioredis": "^5.5.0",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.12.1",
+    "node-fetch": "^3.3.2",
     "openai": "^4.87.4",
     "phitness": "file:"
   },
