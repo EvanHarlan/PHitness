@@ -11,6 +11,7 @@ const SignUpPage = () => {
     email: "",
     password: "",
     confirmPassword: "",
+    termsAccepted: false
   });
 
     const [errors, setErrors] = useState({});
@@ -33,12 +34,14 @@ const SignUpPage = () => {
       if (formData.password !== formData.confirmPassword) {
           newErrors.confirmPassword = "Passwords do not match";
       }
-
+      if (!formData.termsAccepted) {
+        newErrors.termsAccepted = "You must agree to the Terms and Conditions.";
+      }
       if (Object.keys(newErrors).length > 0) {
           setErrors(newErrors);
           return;
       }
-
+    
       setErrors({});
       const success = await signup(formData);
 
@@ -196,6 +199,33 @@ const SignUpPage = () => {
                                   {errors.confirmPassword && <p className="text-red-500 text-sm mt-1">{errors.confirmPassword}</p>}
                 </div>
 
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-gray-300">
+                    Terms & Conditions
+                  </label>
+                  <div className="bg-[#0a0a0a]/70 text-gray-300 text-sm border border-gray-600 rounded-xl p-4 max-h-40 overflow-y-auto">
+                    <p>
+                      Welcome! Please read these terms and conditions before signing up. By checking the box below, you agree to abide by our rules, data privacy policy, and community guidelines. Violations may result in account suspension or termination.
+                    </p>
+                    <p className="mt-2">
+                      Your data is encrypted and secured. We do not sell your information to third parties. For any questions, please contact support.
+                    </p>
+                  </div>
+
+                  <div className="flex items-start mt-3">
+                    <input
+                      id="termsAccepted"
+                      type="checkbox"
+                      checked={formData.termsAccepted || false}
+                      onChange={(e) => setFormData({ ...formData, termsAccepted: e.target.checked })}
+                      className="mt-1 h-4 w-4 text-green-500 bg-gray-700 border-gray-600 rounded focus:ring-green-500"
+                    />
+                    <label htmlFor="termsAccepted" className="ml-2 text-sm text-gray-300">
+                      I agree to the Terms and Conditions
+                    </label>
+                  </div>
+                  {errors.termsAccepted && <p className="text-red-500 text-sm mt-1">{errors.termsAccepted}</p>}
+                </div>
                 <button
                   type="submit"
                   disabled={loading}

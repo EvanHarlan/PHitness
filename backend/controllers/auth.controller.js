@@ -140,13 +140,37 @@ export const refreshToken = async (req, res) => {
 	}
 };
 
-export const getProfile = async (req, res) => {
-	try {
-		res.json(req.user);
-	} catch (error) {
+export const getProfile = async (req, res) =>
+{
+	try
+	{
+		const user = await User.findById(req.user._id);
+
+		if (!user)
+		{
+			return res.status(404).json({ message: "User not found" });
+		}
+
+		res.status(200).json({
+			_id: user._id,
+			name: user.name,
+			email: user.email,
+			username: user.username,
+			age: user.age,
+			bio: user.bio,
+			achievements: user.achievements || [],
+			friends: user.friends || [],
+			friendRequests: user.friendRequests || [],
+			sentRequests: user.sentRequests || [],
+			profileVisibility: user.profileVisibility,
+		});
+	} catch (error)
+	{
 		res.status(500).json({ message: "Server error", error: error.message });
 	}
 };
+
+
 
 export const updateProfile = async (req, res) => {
 	try {
@@ -169,7 +193,38 @@ export const updateProfile = async (req, res) => {
 	}
   };
 
-// In auth.controller.js
+export const unlockAchievement = async (req, res) =>
+{
+	try
+	{
+		const { title } = req.body;
+		const user = await User.findById(req.user._id);
+
+		if (!user)
+		{
+			return res.status(404).json({ message: "User not found" });
+		}
+
+		const alreadyUnlocked = user.achievements?.some(
+			(a) => a.title === title
+		);
+
+		if (alreadyUnlocked)
+		{
+			return res.status(200).json({ message: "Already unlocked" });
+		}
+
+		user.achievements.push({ title, dateUnlocked: new Date() });
+		await user.save();
+
+		res.status(200).json({ message: "Achievement unlocked" });
+	} catch (error)
+	{
+		console.error("Unlock achievement error:", error);
+		res.status(500).json({ message: "Server error" });
+	}
+};
+
 
 export const searchUsers = async (req, res) => {
 	try {

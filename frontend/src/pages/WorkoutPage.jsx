@@ -261,13 +261,6 @@ const WorkoutPage = () => {
             <div className="rounded-xl shadow-sm p-6 border" style={{ backgroundColor: COLORS.DARK_GRAY, borderColor: COLORS.MEDIUM_GRAY }}>
               <h2 className="text-xl font-semibold mb-4" style={{ color: COLORS.WHITE }}>
                 Workout Tracker
-                <span
-                  className="ml-2 px-2 py-1 text-sm rounded-full"
-                  style={{ backgroundColor: COLORS.MEDIUM_GRAY, color: COLORS.NEON_GREEN }}
-                >
-                  {workoutAmount !== null ? workoutAmount : 'N/A'}
-                </span>
-                <InfoTooltip title="This tracker shows your total completed workouts to help monitor your progress over time" />
               </h2>
 
               <p className="mb-4" style={{ color: COLORS.LIGHT_GRAY }}>

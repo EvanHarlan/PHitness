@@ -18,6 +18,11 @@ const userSchema = new mongoose.Schema({
     required: [true, "Password is required"],
     minLength: [6, "Password must be at least 6 characters long"]
   },
+  termsAccepted: {
+    type: Boolean,
+    required: [true, "You must accept the terms and conditions"],
+    default: true
+  },
   username: {
     type: String,
     unique: true, // Ensures the username is unique
@@ -47,7 +52,11 @@ const userSchema = new mongoose.Schema({
     type: String,
     enum: ['public', 'friends', 'private'],
     default: 'friends'
-  }
+    },
+  achievements: [{
+  title: { type: String, required: true },
+  dateUnlocked: { type: Date, default: Date.now }
+  }]
 }, {
   timestamps: true
 });

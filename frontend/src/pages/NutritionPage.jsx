@@ -5,6 +5,9 @@ import NutritionQuestionnaire from "../components/NutritionQuestionnaire";
 import COLORS from '../lib/constants';
 import { calculateMacros } from '../lib/macroCalculator';
 import { useUserStore } from '../stores/useUserStore';
+import Tooltip from '@mui/material/Tooltip';
+import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
+import { ThemeProvider, createTheme } from '@mui/material/styles';
 
 const NutritionPage = () => {
   const { user } = useUserStore();
@@ -36,6 +39,46 @@ const NutritionPage = () => {
   useEffect(() => {
     console.log("🧍 User from store:", user);
   }, [user]);
+
+    // Custom theme for tooltips to match the website (This is for the description)
+    const tooltipTheme = createTheme({
+      components: {
+        MuiTooltip: {
+          styleOverrides: {
+            tooltip: {
+              backgroundColor: COLORS.DARK_GRAY,
+              color: COLORS.WHITE,
+              border: `1px solid ${COLORS.MEDIUM_GRAY}`,
+              fontSize: '0.875rem',
+              padding: '8px 12px',
+              maxWidth: '300px',
+              zIndex: 9999,
+            },
+            arrow: {
+              color: COLORS.DARK_GRAY,
+            }
+          }
+        }
+      }
+    });
+  
+    // Info tooltip component to match the website (This is for the icon)
+    const InfoTooltip = ({ title }) => (
+      <Tooltip title={title} arrow placement="top">
+        <HelpOutlineIcon 
+          sx={{ 
+            color: COLORS.NEON_GREEN, 
+            fontSize: '18px', 
+            marginLeft: '5px',
+            verticalAlign: 'middle',
+            cursor: 'pointer',
+            '&:hover': {
+              color: COLORS.LIGHT_GRAY, // Slightly lighter on hover for feedback
+            }
+          }} 
+        />
+      </Tooltip>
+    );
 
   useEffect(() => {
     const fetchMealCount = async () => {
@@ -332,82 +375,78 @@ const NutritionPage = () => {
   }
 
   return (
-    <div className="min-h-screen p-6" style={{ backgroundColor: COLORS.BLACK }}>
-      <header className="mb-10">
-        <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4 flex justify-center"
-        style={{ color: COLORS.NEON_GREEN }}>
-        Meal Plan Generator
-        </h1>
-        <p className="text-lg md:text-xl text-[#B0B0B0] flex justify-center">
-        Get AI-powered custom meal plans. please fill out the questionnaire below to get started.
-        </p>
-      </header>
-      <div className="max-w-5xl mx-auto">
-        <div className="grid gap-8 md:grid-cols-1 lg:grid-cols-2">
-          {/* Nutrition Parameters Form */}
-          <div className="rounded-xl shadow-sm p-6 border" style={{ backgroundColor: COLORS.DARK_GRAY, borderColor: COLORS.MEDIUM_GRAY }}>
-            <h2 className="text-xl font-semibold mb-4" style={{ color: COLORS.WHITE }}>Your Nutrition Parameters</h2>
-            <NutritionQuestionnaire
-              userParams={userParams}
-              setUserParams={setUserParams}
-              onSubmit={generateMealPlan}
-              loading={loading}
-            />
-          </div>
+    <ThemeProvider theme={tooltipTheme}>
+      <div className="min-h-screen p-6" style={{ backgroundColor: COLORS.BLACK }}>
+        <header className="mb-10">
+          <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4 flex justify-center"
+          style={{ color: COLORS.NEON_GREEN }}>
+          Meal Plan Generator
+          </h1>
+          <p className="text-lg md:text-xl text-[#B0B0B0] flex justify-center">
+          Get AI-powered custom meal plans. please fill out the questionnaire below to get started.
+          </p>
+        </header>
+        <div className="max-w-5xl mx-auto">
+          <div className="grid gap-8 md:grid-cols-1 lg:grid-cols-2">
+            {/* Nutrition Parameters Form */}
+            <div className="rounded-xl shadow-sm p-6 border" style={{ backgroundColor: COLORS.DARK_GRAY, borderColor: COLORS.MEDIUM_GRAY }}>
+              <h2 className="text-xl font-semibold mb-4" style={{ color: COLORS.WHITE }}>Your Nutrition Parameters
+              <InfoTooltip title="Fill out the questions to get a personalized meal plan based on your specific goals and information." />
+              </h2>
+              <NutritionQuestionnaire
+                userParams={userParams}
+                setUserParams={setUserParams}
+                onSubmit={generateMealPlan}
+                loading={loading}
+              />
+            </div>
 
-          {/* Meal Tracker */}
-          <div className="rounded-xl shadow-sm p-6 border" style={{ backgroundColor: COLORS.DARK_GRAY, borderColor: COLORS.MEDIUM_GRAY }}>
-            <h2 className="text-xl font-semibold mb-4" style={{ color: COLORS.WHITE }}>
-              Meal Tracker
-              {mealAmount !== null && (
-                <span
-                  className="ml-2 px-2 py-1 text-sm rounded-full"
-                  style={{ backgroundColor: COLORS.MEDIUM_GRAY, color: COLORS.NEON_GREEN }}
+            {/* Meal Tracker */}
+            <div className="rounded-xl shadow-sm p-6 border" style={{ backgroundColor: COLORS.DARK_GRAY, borderColor: COLORS.MEDIUM_GRAY }}>
+              <h2 className="text-xl font-semibold mb-4" style={{ color: COLORS.WHITE }}>
+                Meal Tracker
+              </h2>
+
+              <p className="mb-4" style={{ color: COLORS.LIGHT_GRAY }}>
+                Track your meals to monitor your progress
+              </p>
+
+              <div className="p-4 border rounded-lg mb-4" style={{ borderColor: COLORS.MEDIUM_GRAY, backgroundColor: COLORS.DARK_GRAY }}>
+                <h3 className="font-medium" style={{ color: COLORS.WHITE }}>Meals Logged
+                <InfoTooltip title="This shows the total number of meals you've logged as completed" />
+                </h3>
+                <p className="text-2xl font-bold mb-3" style={{ color: COLORS.NEON_GREEN }}>{mealAmount !== null ? mealAmount : 'N/A'}</p>
+              </div>
+
+              <div className="flex flex-col space-y-3">
+                <button
+                  className="px-4 py-2 rounded-lg transition font-medium flex items-center hover:opacity-90"
+                  style={{ backgroundColor: COLORS.NEON_GREEN, color: COLORS.BLACK }}
+                  onClick={addMeal}
                 >
-                  {mealAmount}
-                </span>
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clipRule="evenodd" />
+                  </svg>
+                  Log Meal
+                </button>
+
+                {/* Future feature: View saved meal plans */}
+                {/* <button
+                  className="px-4 py-2 rounded-lg transition font-medium flex items-center"
+                  style={{ backgroundColor: COLORS.MEDIUM_GRAY, color: COLORS.WHITE }}
+                  // onClick={() => setShowSavedMeals(!showSavedMeals)}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M7 3a1 1 0 000 2h6a1 1 0 100-2H7zM4 7a1 1 0 011-1h10a1 1 0 011 2H5a1 1 0 01-1-1zM2 11a2 2 0 012-2h12a2 2 0 012 2v4a2 2 0 01-2 2H4a2 2 0 01-2-2v-4z" />
+                  </svg>
+                  View Saved Meal Plans (Coming Soon)
+                </button> */}
+              </div>
+              {fetchMealCountError && (
+                <p className="mt-2 text-sm text-red-500">Failed to load meal count.</p>
               )}
-            </h2>
-
-            <p className="mb-4" style={{ color: COLORS.LIGHT_GRAY }}>
-              Track your meals to monitor your progress
-            </p>
-
-            <div className="p-4 border rounded-lg mb-4" style={{ borderColor: COLORS.MEDIUM_GRAY, backgroundColor: COLORS.DARK_GRAY }}>
-              <h3 className="font-medium" style={{ color: COLORS.WHITE }}>Meals Logged</h3>
-              <p className="text-2xl font-bold mb-3" style={{ color: COLORS.NEON_GREEN }}>{mealAmount !== null ? mealAmount : 'N/A'}</p>
             </div>
-
-            <div className="flex flex-col space-y-3">
-              <button
-                className="px-4 py-2 rounded-lg transition font-medium flex items-center hover:opacity-90"
-                style={{ backgroundColor: COLORS.NEON_GREEN, color: COLORS.BLACK }}
-                onClick={addMeal}
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clipRule="evenodd" />
-                </svg>
-                Log Meal
-              </button>
-
-              {/* Future feature: View saved meal plans */}
-              {/* <button
-                className="px-4 py-2 rounded-lg transition font-medium flex items-center"
-                style={{ backgroundColor: COLORS.MEDIUM_GRAY, color: COLORS.WHITE }}
-                // onClick={() => setShowSavedMeals(!showSavedMeals)}
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-                  <path d="M7 3a1 1 0 000 2h6a1 1 0 100-2H7zM4 7a1 1 0 011-1h10a1 1 0 011 2H5a1 1 0 01-1-1zM2 11a2 2 0 012-2h12a2 2 0 012 2v4a2 2 0 01-2 2H4a2 2 0 01-2-2v-4z" />
-                </svg>
-                View Saved Meal Plans (Coming Soon)
-              </button> */}
-            </div>
-            {fetchMealCountError && (
-              <p className="mt-2 text-sm text-red-500">Failed to load meal count.</p>
-            )}
           </div>
-        </div>
-
         {/* Meal Plan Results */}
         {generatedPlan && (
           <div className="mt-8 rounded-xl shadow-sm p-6 border" style={{ backgroundColor: COLORS.DARK_GRAY, borderColor: COLORS.MEDIUM_GRAY }}>
@@ -510,8 +549,20 @@ const NutritionPage = () => {
             </div>
           </div>
         )}
+          {/* Meal Plan Results */}
+          {mealPlanData && (
+            <div className="mt-8 rounded-xl shadow-sm p-6 border" style={{ backgroundColor: COLORS.DARK_GRAY, borderColor: COLORS.MEDIUM_GRAY }}>
+              <h2 className="text-xl font-semibold mb-4" style={{ color: COLORS.WHITE }}>Your Generated Meal Plan</h2>
+              {typeof mealPlanData === 'object' && mealPlanData !== null ? (
+                <pre style={{ color: COLORS.LIGHT_GRAY }}>{JSON.stringify(mealPlanData, null, 2)}</pre>
+              ) : (
+                <p style={{ color: COLORS.LIGHT_GRAY }}>{mealPlanData}</p>
+              )}
+            </div>
+          )}
+        </div>
       </div>
-    </div>
+    </ThemeProvider>
   );
 };
 

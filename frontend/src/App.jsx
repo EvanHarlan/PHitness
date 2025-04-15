@@ -14,6 +14,7 @@ import LoadingSpinner from "./components/LoadingSpinner";
 import { useUserStore } from './stores/useUserStore';
 import COLORS from './lib/constants';
 import WorkoutDetailsPage from './pages/WorkoutDetailsPage'
+import AchievementNotifier from './components/AchievementNotifier';
 
 // ProtectedRoute component definition
 const ProtectedRoute = ({ element }) => {
@@ -34,7 +35,8 @@ ProtectedRoute.propTypes = {
 };
 
 function App() {
-  const { user, checkAuth, checkingAuth } = useUserStore();
+    const { user, checkAuth, checkingAuth } = useUserStore();
+    const unlockedAchievement = useUserStore(state => state.unlockedAchievement);
   
   useEffect(() => {
     checkAuth();
@@ -72,6 +74,8 @@ function App() {
           },
         }}
       />
+      <AchievementNotifier unlockedAchievement={unlockedAchievement} />
+
       <Navbar />
       <main>
       <Routes>
