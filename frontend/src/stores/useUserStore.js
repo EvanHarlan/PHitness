@@ -94,6 +94,8 @@ export const useUserStore = create((set, get) => ({
       return false;
     }
   },
+  unlockedAchievement: null,
+  setUnlockedAchievement: (achievement) => set({ unlockedAchievement: achievement }),
 }));
 
 // Axios interceptor for token refresh
