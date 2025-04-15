@@ -18,7 +18,7 @@ const NutritionPage = () => {
     height: "",
     weight: "",
     age: "",
-    gender: "", // Ensure initial state matches the new options
+    gender: "",
     nutritionGoal: "",
     activityLevel: "",
     dietaryRestrictions: "none",
@@ -29,51 +29,52 @@ const NutritionPage = () => {
     timePerMeal: "",
     budget: "",
     healthConditions: "none",
-    preferences: [], // Add this field
+    preferences: [],
   });
   const [fetchMealCountError, setFetchMealCountError] = useState(null);
   const [error, setError] = useState(null);
 
-    // Custom theme for tooltips to match the website (This is for the description)
-    const tooltipTheme = createTheme({
-      components: {
-        MuiTooltip: {
-          styleOverrides: {
-            tooltip: {
-              backgroundColor: COLORS.DARK_GRAY,
-              color: COLORS.WHITE,
-              border: `1px solid ${COLORS.MEDIUM_GRAY}`,
-              fontSize: '0.875rem',
-              padding: '8px 12px',
-              maxWidth: '300px',
-              zIndex: 9999,
-            },
-            arrow: {
-              color: COLORS.DARK_GRAY,
-            }
+  // Custom theme for tooltips to match the website
+  const tooltipTheme = createTheme({
+    components: {
+      MuiTooltip: {
+        styleOverrides: {
+          tooltip: {
+            backgroundColor: COLORS.DARK_GRAY,
+            color: COLORS.WHITE,
+            border: `1px solid ${COLORS.MEDIUM_GRAY}`,
+            fontSize: '0.875rem',
+            padding: '8px 12px',
+            maxWidth: '300px',
+            zIndex: 9999,
+          },
+          arrow: {
+            color: COLORS.DARK_GRAY,
           }
         }
       }
-    });
-  
-    // Info tooltip component to match the website (This is for the icon)
-    const InfoTooltip = ({ title }) => (
-      <Tooltip title={title} arrow placement="top">
-        <HelpOutlineIcon 
-          sx={{ 
-            color: COLORS.NEON_GREEN, 
-            fontSize: '18px', 
-            marginLeft: '5px',
-            verticalAlign: 'middle',
-            cursor: 'pointer',
-            '&:hover': {
-              color: COLORS.LIGHT_GRAY, // Slightly lighter on hover for feedback
-            }
-          }} 
-        />
-      </Tooltip>
-    );
+    }
+  });
 
+  // Info tooltip component 
+  const InfoTooltip = ({ title }) => (
+    <Tooltip title={title} arrow placement="top">
+      <HelpOutlineIcon 
+        sx={{ 
+          color: COLORS.NEON_GREEN, 
+          fontSize: '18px', 
+          marginLeft: '5px',
+          verticalAlign: 'middle',
+          cursor: 'pointer',
+          '&:hover': {
+            color: COLORS.LIGHT_GRAY,
+          }
+        }} 
+      />
+    </Tooltip>
+  );
+
+  // Fetch meal count on component mount
   useEffect(() => {
     console.log("🧍 User from store:", user);
   }, [user]);
@@ -85,7 +86,6 @@ const NutritionPage = () => {
         setMealAmount(response.data.mealCount || 0);
         setFetchMealCountError(null);
       } catch (error) {
-        console.error("Error fetching meal count:", error);
         setFetchMealCountError(error);
       }
     };
@@ -93,7 +93,7 @@ const NutritionPage = () => {
     fetchMealCount();
   }, []);
 
-  // Add calculateTotalNutrition function
+  // Calculate total nutrition from meals
   const calculateTotalNutrition = (meals) => {
     return meals.reduce((totals, meal) => ({
       calories: totals.calories + Number(meal.calories || 0),
@@ -103,19 +103,23 @@ const NutritionPage = () => {
     }), { calories: 0, protein: 0, carbs: 0, fats: 0 });
   };
 
+  // Generate meal plan based on user params
   const generateMealPlan = async () => {
+    setLoading(true);
     try {
-
       const loadingToast = toast.loading("Generating Meal Plan...", {
         style: {
           background: COLORS.DARK_GRAY,
           color: COLORS.WHITE,
           border: `1px solid ${COLORS.MEDIUM_GRAY}`
         }
-      }); 
+      });
+
       // Validate required fields
       if (!userParams.weight || !userParams.height || !userParams.age || !userParams.gender || !userParams.activityLevel || !userParams.nutritionGoal) {
         toast.error("Please fill in all required fields");
+        toast.dismiss(loadingToast);
+        setLoading(false);
         return;
       }
 
@@ -139,26 +143,23 @@ const NutritionPage = () => {
       // Validate numeric values
       if (!Number.isFinite(numericParams.weight) || numericParams.weight <= 0) {
         toast.error("Please enter a valid weight");
+        toast.dismiss(loadingToast);
+        setLoading(false);
         return;
       }
 
       if (!Number.isFinite(numericParams.age) || numericParams.age <= 0) {
         toast.error("Please enter a valid age");
+        toast.dismiss(loadingToast);
+        setLoading(false);
         return;
       }
 
       // Destructure parameters for macro calculation
-      const {
-        height,
-        weight,
-        age,
-        gender,
-        activityLevel,
-        nutritionGoal
-      } = numericParams;
+      const { height, weight, age, gender, activityLevel, nutritionGoal } = numericParams;
 
       // Calculate target macros with destructured parameters
-      const targetMacros = calculateMacros(
+      const macros = calculateMacros(
         height,
         weight,
         age,
@@ -166,14 +167,17 @@ const NutritionPage = () => {
         activityLevel,
         nutritionGoal
       );
+      
+      setTargetMacros(macros);
 
       // Validate macro calculations
-      if (targetMacros.targetCalories === 0 || 
-          targetMacros.targetProtein === 0 || 
-          targetMacros.targetCarbs === 0 || 
-          targetMacros.targetFats === 0) {
-        console.error("❌ Invalid macro calculations:", targetMacros);
+      if (macros.targetCalories === 0 || 
+          macros.targetProtein === 0 || 
+          macros.targetCarbs === 0 || 
+          macros.targetFats === 0) {
         toast.error("Invalid macro values. Please review your input.");
+        toast.dismiss(loadingToast);
+        setLoading(false);
         return;
       }
 
@@ -194,10 +198,10 @@ const NutritionPage = () => {
         age: Number(age),
         gender: String(gender),
         activityLevel: String(activityLevel),
-        targetCalories: Number(targetMacros.targetCalories),
-        targetProtein: Number(targetMacros.targetProtein),
-        targetCarbs: Number(targetMacros.targetCarbs),
-        targetFats: Number(targetMacros.targetFats),
+        targetCalories: Number(macros.targetCalories),
+        targetProtein: Number(macros.targetProtein),
+        targetCarbs: Number(macros.targetCarbs),
+        targetFats: Number(macros.targetFats),
         dietaryRestrictions: dietaryRestrictions,
         preferences: userParams.preferences.map(p => String(p).trim()),
         mealFrequency: userParams.mealFrequency ? String(userParams.mealFrequency).trim() : undefined,
@@ -209,15 +213,9 @@ const NutritionPage = () => {
         healthConditions: healthConditions
       };
 
-      // Log payload before sending
-      console.log("✅ Final payload sent to backend:", JSON.stringify(payload, null, 2));
-
-      // Hardcoded base URL for now
-      const BASE_URL = "http://localhost:5000";
-
       // Make API call
       const response = await axios.post(
-        `${BASE_URL}/api/meal-plans/generate`,
+        "http://localhost:5000/api/meal-plans/generate",
         payload,
         { withCredentials: true }
       );
@@ -232,27 +230,27 @@ const NutritionPage = () => {
         setGeneratedPlan(planWithTotals);
         setError(null);
         toast.success("Meal plan generated successfully!");
-        toast.dismiss(loadingToast);
       } else {
         toast.error("Failed to generate meal plan");
-        toast.dismiss(loadingToast);
       }
-    } catch (error) {
-      console.error("Error generating meal plan:", error);
-      toast.error(error.response?.data?.message || "Failed to generate meal plan");
+      
       toast.dismiss(loadingToast);
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to generate meal plan");
+    } finally {
+      setLoading(false);
     }
   };
 
-  // meal tracker
+  // Log a meal
   const addMeal = async () => {
     try {
-      const response = await axios.post("http://localhost:5000/api/tracker",
+      const response = await axios.post(
+        "http://localhost:5000/api/tracker",
         { type: "meal" },
         { withCredentials: true }
       );
 
-      console.log("API Response:", response.data);
       setMealAmount(prevMealAmount => prevMealAmount + 1);
       toast.success("Meal logged!", {
         duration: 1500,
@@ -263,24 +261,15 @@ const NutritionPage = () => {
         }
       });
     } catch (error) {
-      console.error("Error logging meal:", error);
       toast.error("Failed to log meal.");
     }
   };
 
+  // Save the generated meal plan
   const handleSaveMealPlan = async () => {
     try {
-      console.log("📝 Starting meal plan save process...");
-      console.log("📦 Raw generated plan:", generatedPlan);
-      console.log("👤 User parameters:", userParams);
-
       // Validate the meal plan data
       if (!generatedPlan || !generatedPlan.meals || !generatedPlan.totalNutrition) {
-        console.error("❌ Invalid meal plan data:", {
-          hasPlan: !!generatedPlan,
-          hasMeals: !!generatedPlan?.meals,
-          hasTotalNutrition: !!generatedPlan?.totalNutrition
-        });
         toast.error("Invalid meal plan data");
         return;
       }
@@ -324,15 +313,12 @@ const NutritionPage = () => {
         }
       };
 
-      console.log("📤 Formatted meal plan payload:", JSON.stringify(formattedPlan, null, 2));
-
       const res = await axios.post(
         "http://localhost:5000/api/meal-plans/save",
         formattedPlan,
         { withCredentials: true }
       );
 
-      console.log("✅ Successfully saved meal plan:", res.data);
       toast.success("Meal plan saved!", {
         duration: 2000,
         style: {
@@ -342,11 +328,6 @@ const NutritionPage = () => {
         }
       });
     } catch (err) {
-      console.error("❌ Failed to save meal plan:", {
-        error: err,
-        response: err.response?.data,
-        status: err.response?.status
-      });
       toast.error(err.response?.data?.message || "Failed to save meal plan", {
         duration: 2000,
         style: {
@@ -358,6 +339,7 @@ const NutritionPage = () => {
     }
   };
 
+  // Loading state UI
   if (loading) {
     return (
       <div className="flex items-center justify-center h-screen" style={{ backgroundColor: COLORS.BLACK }}>
@@ -377,19 +359,20 @@ const NutritionPage = () => {
       <div className="min-h-screen p-6" style={{ backgroundColor: COLORS.BLACK }}>
         <header className="mb-10">
           <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4 flex justify-center"
-          style={{ color: COLORS.NEON_GREEN }}>
-          Meal Plan Generator
+            style={{ color: COLORS.NEON_GREEN }}>
+            Meal Plan Generator
           </h1>
           <p className="text-lg md:text-xl text-[#B0B0B0] flex justify-center">
-          Get AI-powered custom meal plans. please fill out the questionnaire below to get started.
+            Get AI-powered custom meal plans. please fill out the questionnaire below to get started.
           </p>
         </header>
         <div className="max-w-5xl mx-auto">
           <div className="grid gap-8 md:grid-cols-1 lg:grid-cols-2">
             {/* Nutrition Parameters Form */}
             <div className="rounded-xl shadow-sm p-6 border" style={{ backgroundColor: COLORS.DARK_GRAY, borderColor: COLORS.MEDIUM_GRAY }}>
-              <h2 className="text-xl font-semibold mb-4" style={{ color: COLORS.WHITE }}>Your Nutrition Parameters
-              <InfoTooltip title="Fill out the questions to get a personalized meal plan based on your specific goals and information." />
+              <h2 className="text-xl font-semibold mb-4" style={{ color: COLORS.WHITE }}>
+                Your Nutrition Parameters
+                <InfoTooltip title="Fill out the questions to get a personalized meal plan based on your specific goals and information." />
               </h2>
               <NutritionQuestionnaire
                 userParams={userParams}
@@ -410,10 +393,13 @@ const NutritionPage = () => {
               </p>
 
               <div className="p-4 border rounded-lg mb-4" style={{ borderColor: COLORS.MEDIUM_GRAY, backgroundColor: COLORS.DARK_GRAY }}>
-                <h3 className="font-medium" style={{ color: COLORS.WHITE }}>Meals Logged
-                <InfoTooltip title="This shows the total number of meals you've logged as completed" />
+                <h3 className="font-medium" style={{ color: COLORS.WHITE }}>
+                  Meals Logged
+                  <InfoTooltip title="This shows the total number of meals you've logged as completed" />
                 </h3>
-                <p className="text-2xl font-bold mb-3" style={{ color: COLORS.NEON_GREEN }}>{mealAmount !== null ? mealAmount : 'N/A'}</p>
+                <p className="text-2xl font-bold mb-3" style={{ color: COLORS.NEON_GREEN }}>
+                  {mealAmount !== null ? mealAmount : 'N/A'}
+                </p>
               </div>
 
               <div className="flex flex-col space-y-3">
@@ -427,19 +413,8 @@ const NutritionPage = () => {
                   </svg>
                   Log Meal
                 </button>
-
-                {/* Future feature: View saved meal plans */}
-                {/* <button
-                  className="px-4 py-2 rounded-lg transition font-medium flex items-center"
-                  style={{ backgroundColor: COLORS.MEDIUM_GRAY, color: COLORS.WHITE }}
-                  // onClick={() => setShowSavedMeals(!showSavedMeals)}
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-                    <path d="M7 3a1 1 0 000 2h6a1 1 0 100-2H7zM4 7a1 1 0 011-1h10a1 1 0 011 2H5a1 1 0 01-1-1zM2 11a2 2 0 012-2h12a2 2 0 012 2v4a2 2 0 01-2 2H4a2 2 0 01-2-2v-4z" />
-                  </svg>
-                  View Saved Meal Plans (Coming Soon)
-                </button> */}
               </div>
+              
               {fetchMealCountError && (
                 <p className="mt-2 text-sm text-red-500">Failed to load meal count.</p>
               )}
@@ -447,14 +422,105 @@ const NutritionPage = () => {
           </div>
 
           {/* Meal Plan Results */}
-          {mealPlanData && (
+          {generatedPlan && (
             <div className="mt-8 rounded-xl shadow-sm p-6 border" style={{ backgroundColor: COLORS.DARK_GRAY, borderColor: COLORS.MEDIUM_GRAY }}>
               <h2 className="text-xl font-semibold mb-4" style={{ color: COLORS.WHITE }}>Your Generated Meal Plan</h2>
-              {typeof mealPlanData === 'object' && mealPlanData !== null ? (
-                <pre style={{ color: COLORS.LIGHT_GRAY }}>{JSON.stringify(mealPlanData, null, 2)}</pre>
-              ) : (
-                <p style={{ color: COLORS.LIGHT_GRAY }}>{mealPlanData}</p>
+              
+              {/* Total Nutrition Summary */}
+              {generatedPlan.totalNutrition && (
+                <div className="mb-8 p-4 rounded-lg border" style={{ borderColor: COLORS.MEDIUM_GRAY }}>
+                  <h3 className="text-lg font-medium mb-3" style={{ color: COLORS.NEON_GREEN }}>Daily Nutrition Summary</h3>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div className="p-3 rounded-lg" style={{ backgroundColor: COLORS.MEDIUM_GRAY }}>
+                      <p className="text-sm" style={{ color: COLORS.LIGHT_GRAY }}>Calories</p>
+                      <p className="text-xl font-bold" style={{ color: COLORS.WHITE }}>{generatedPlan.totalNutrition.calories}</p>
+                    </div>
+                    <div className="p-3 rounded-lg" style={{ backgroundColor: COLORS.MEDIUM_GRAY }}>
+                      <p className="text-sm" style={{ color: COLORS.LIGHT_GRAY }}>Protein</p>
+                      <p className="text-xl font-bold" style={{ color: COLORS.WHITE }}>{generatedPlan.totalNutrition.protein}g</p>
+                    </div>
+                    <div className="p-3 rounded-lg" style={{ backgroundColor: COLORS.MEDIUM_GRAY }}>
+                      <p className="text-sm" style={{ color: COLORS.LIGHT_GRAY }}>Carbs</p>
+                      <p className="text-xl font-bold" style={{ color: COLORS.WHITE }}>{generatedPlan.totalNutrition.carbs}g</p>
+                    </div>
+                    <div className="p-3 rounded-lg" style={{ backgroundColor: COLORS.MEDIUM_GRAY }}>
+                      <p className="text-sm" style={{ color: COLORS.LIGHT_GRAY }}>Fats</p>
+                      <p className="text-xl font-bold" style={{ color: COLORS.WHITE }}>{generatedPlan.totalNutrition.fats}g</p>
+                    </div>
+                  </div>
+                </div>
               )}
+
+              {/* Meals List */}
+              <div className="space-y-6">
+                {generatedPlan.meals.map((meal, index) => (
+                  <div key={index} className="p-4 rounded-lg border" style={{ borderColor: COLORS.MEDIUM_GRAY }}>
+                    <div className="flex justify-between items-start mb-4">
+                      <div>
+                        <h3 className="text-lg font-medium" style={{ color: COLORS.WHITE }}>{meal.name}</h3>
+                        <p className="text-sm" style={{ color: COLORS.LIGHT_GRAY }}>{meal.time}</p>
+                      </div>
+                      <div className="grid grid-cols-4 gap-2">
+                        <div className="text-center">
+                          <p className="text-sm" style={{ color: COLORS.LIGHT_GRAY }}>Calories</p>
+                          <p className="font-bold" style={{ color: COLORS.WHITE }}>{meal.calories}</p>
+                        </div>
+                        <div className="text-center">
+                          <p className="text-sm" style={{ color: COLORS.LIGHT_GRAY }}>Protein</p>
+                          <p className="font-bold" style={{ color: COLORS.WHITE }}>{meal.protein}g</p>
+                        </div>
+                        <div className="text-center">
+                          <p className="text-sm" style={{ color: COLORS.LIGHT_GRAY }}>Carbs</p>
+                          <p className="font-bold" style={{ color: COLORS.WHITE }}>{meal.carbs}g</p>
+                        </div>
+                        <div className="text-center">
+                          <p className="text-sm" style={{ color: COLORS.LIGHT_GRAY }}>Fats</p>
+                          <p className="font-bold" style={{ color: COLORS.WHITE }}>{meal.fats}g</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <div>
+                        <h4 className="text-sm font-medium mb-2" style={{ color: COLORS.NEON_GREEN }}>Ingredients</h4>
+                        <ul className="list-disc list-inside" style={{ color: COLORS.LIGHT_GRAY }}>
+                          {meal.ingredients.map((ingredient, i) => (
+                            <li key={i}>{ingredient}</li>
+                          ))}
+                        </ul>
+                      </div>
+                      <div>
+                        <h4 className="text-sm font-medium mb-2" style={{ color: COLORS.NEON_GREEN }}>Instructions</h4>
+                        <p className="whitespace-pre-line" style={{ color: COLORS.LIGHT_GRAY }}>{meal.instructions}</p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex flex-col sm:flex-row gap-4 mt-6">
+                <button
+                  onClick={handleSaveMealPlan}
+                  className="flex-1 px-4 py-2 rounded-lg transition font-medium flex items-center justify-center hover:opacity-90"
+                  style={{ backgroundColor: COLORS.NEON_GREEN, color: COLORS.BLACK }}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M7.707 10.293a1 1 0 10-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 11.586V6h5a2 2 0 012 2v7a2 2 0 01-2 2H4a2 2 0 01-2-2V8a2 2 0 012-2h5v5.586l-1.293-1.293zM9 4a1 1 0 012 0v2H9V4z" />
+                  </svg>
+                  Save Meal Plan
+                </button>
+                <button
+                  onClick={generateMealPlan}
+                  className="flex-1 px-4 py-2 rounded-lg transition font-medium flex items-center justify-center hover:opacity-90"
+                  style={{ backgroundColor: COLORS.MEDIUM_GRAY, color: COLORS.WHITE }}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clipRule="evenodd" />
+                  </svg>
+                  Generate Another Plan
+                </button>
+              </div>
             </div>
           )}
         </div>
