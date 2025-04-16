@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import toast from 'react-hot-toast';
-import COLORS from '../lib/constants';
+import { COLORS } from '../lib/constants';
 
 const WorkoutDetailsPage = () => {
   const { id: workoutId } = useParams();
@@ -14,6 +14,19 @@ const WorkoutDetailsPage = () => {
   const [exerciseEdits, setExerciseEdits] = useState([]);
   const [activeTab, setActiveTab] = useState('exercises');
   const [showDescription, setShowDescription] = useState({});
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Detect mobile devices
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    handleResize(); // Check on initial load
+    window.addEventListener('resize', handleResize);
+    
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => {
     if (workoutId) {
@@ -146,12 +159,13 @@ const WorkoutDetailsPage = () => {
     const difficultyNum = parseInt(difficulty);
     const dots = [];
     const color = getDifficultyColor(difficulty);
+    const dotSize = isMobile ? 'w-2 h-2' : 'w-3 h-3';
 
     for (let i = 1; i <= 5; i++) {
       dots.push(
         <div
           key={i}
-          className="w-3 h-3 rounded-full mx-0.5"
+          className={`${dotSize} rounded-full mx-0.5`}
           style={{
             backgroundColor: i <= difficultyNum ? color : COLORS.MEDIUM_GRAY,
             opacity: i <= difficultyNum ? 1 : 0.3,
@@ -163,7 +177,7 @@ const WorkoutDetailsPage = () => {
     return (
       <div className="flex items-center">
         {dots}
-        <span className="ml-2 text-sm" style={{ color: COLORS.LIGHT_GRAY }}>
+        <span className="ml-2 text-xs sm:text-sm" style={{ color: COLORS.LIGHT_GRAY }}>
           {difficultyNum <= 2 ? 'Beginner' :
             difficultyNum <= 3 ? 'Intermediate' :
               difficultyNum <= 4 ? 'Advanced' : 'Expert'}
@@ -174,9 +188,9 @@ const WorkoutDetailsPage = () => {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center p-8">
+      <div className="flex justify-center items-center p-4 sm:p-8">
         <svg
-          className="animate-spin h-6 w-6 mr-3"
+          className="animate-spin h-5 w-5 sm:h-6 sm:w-6 mr-2 sm:mr-3"
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
           viewBox="0 0 24 24"
@@ -188,17 +202,17 @@ const WorkoutDetailsPage = () => {
             d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
           ></path>
         </svg>
-        <span style={{ color: COLORS.WHITE }}>Loading workout details...</span>
+        <span className="text-sm sm:text-base" style={{ color: COLORS.WHITE }}>Loading workout details...</span>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="text-center py-8" style={{ color: COLORS.LIGHT_GRAY }}>
+      <div className="text-center py-4 sm:py-8 text-sm sm:text-base" style={{ color: COLORS.LIGHT_GRAY }}>
         <p>{error}</p>
         <button
-          className="mt-4 px-4 py-2 rounded"
+          className="mt-4 px-3 sm:px-4 py-2 rounded text-xs sm:text-sm"
           style={{ backgroundColor: COLORS.MEDIUM_GRAY, color: COLORS.WHITE }}
           onClick={() => navigate('/workouts')}
         >
@@ -210,10 +224,10 @@ const WorkoutDetailsPage = () => {
 
   if (!workout) {
     return (
-      <div className="text-center py-8" style={{ color: COLORS.LIGHT_GRAY }}>
+      <div className="text-center py-4 sm:py-8 text-sm sm:text-base" style={{ color: COLORS.LIGHT_GRAY }}>
         <p>Workout not found</p>
         <button
-          className="mt-4 px-4 py-2 rounded"
+          className="mt-4 px-3 sm:px-4 py-2 rounded text-xs sm:text-sm"
           style={{ backgroundColor: COLORS.MEDIUM_GRAY, color: COLORS.WHITE }}
           onClick={() => navigate('/workouts')}
         >
@@ -224,20 +238,20 @@ const WorkoutDetailsPage = () => {
   }
 
   return (
-    <div className="p-6" style={{ backgroundColor: COLORS.DARK_GRAY, minHeight: '100vh' }}>
-      <div className="mb-4 flex justify-between items-center">
+    <div className="p-3 sm:p-4 md:p-6" style={{ backgroundColor: COLORS.DARK_GRAY, minHeight: '100vh' }}>
+      <div className="mb-4 flex flex-col sm:flex-row gap-2 sm:gap-0 sm:justify-between sm:items-center">
         <button
           onClick={() => navigate('/workout')}
-          className="px-3 py-1 rounded text-sm font-medium"
+          className="px-3 py-1 rounded text-xs sm:text-sm font-medium"
           style={{ backgroundColor: COLORS.MEDIUM_GRAY, color: COLORS.WHITE }}
         >
           Back to Workouts
         </button>
-        <div className="flex space-x-2">
+        <div className="flex gap-2">
           {!editMode && (
             <button
               onClick={() => deleteWorkout()}
-              className="px-3 py-1 rounded text-sm font-medium"
+              className="px-3 py-1 rounded text-xs sm:text-sm font-medium"
               style={{ backgroundColor: '#e74c3c', color: COLORS.WHITE }}
             >
               Delete Workout
@@ -246,14 +260,14 @@ const WorkoutDetailsPage = () => {
           {editMode ? (
             <>
               <button
-                className="px-3 py-1 rounded text-sm font-medium"
+                className="px-3 py-1 rounded text-xs sm:text-sm font-medium"
                 style={{ backgroundColor: COLORS.MEDIUM_GRAY, color: COLORS.WHITE }}
                 onClick={() => setEditMode(false)}
               >
                 Cancel
               </button>
               <button
-                className="px-3 py-1 rounded text-sm font-medium"
+                className="px-3 py-1 rounded text-xs sm:text-sm font-medium"
                 style={{ backgroundColor: COLORS.NEON_GREEN, color: COLORS.BLACK }}
                 onClick={saveWorkoutChanges}
               >
@@ -262,13 +276,13 @@ const WorkoutDetailsPage = () => {
             </>
           ) : (
             <button
-              className="px-3 py-1 rounded text-sm font-medium flex items-center"
+              className="px-3 py-1 rounded text-xs sm:text-sm font-medium flex items-center"
               style={{ backgroundColor: COLORS.MEDIUM_GRAY, color: COLORS.WHITE }}
               onClick={() => setEditMode(true)}
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                className="h-4 w-4 mr-1"
+                className="h-3 w-3 sm:h-4 sm:w-4 mr-1"
                 viewBox="0 0 20 20"
                 fill="currentColor"
               >
@@ -280,33 +294,33 @@ const WorkoutDetailsPage = () => {
         </div>
       </div>
 
-      <div className="border rounded-lg p-6" style={{ borderColor: COLORS.MEDIUM_GRAY, backgroundColor: COLORS.DARK_GRAY }}>
+      <div className="border rounded-lg p-3 sm:p-4 md:p-6" style={{ borderColor: COLORS.MEDIUM_GRAY, backgroundColor: COLORS.DARK_GRAY }}>
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-semibold" style={{ color: COLORS.WHITE }}>{workout.name}</h2>
+          <h2 className="text-lg sm:text-xl font-semibold" style={{ color: COLORS.WHITE }}>{workout.name}</h2>
         </div>
 
         {/* Workout Summary */}
-        <div className="mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="rounded-lg p-4" style={{ backgroundColor: COLORS.BLACK }}>
+        <div className="mb-4 sm:mb-6 grid grid-cols-1 gap-2 sm:gap-4 md:grid-cols-3">
+          <div className="rounded-lg p-3 sm:p-4" style={{ backgroundColor: COLORS.BLACK }}>
             <div className="flex justify-between">
-              <h3 className="text-sm uppercase font-medium" style={{ color: COLORS.LIGHT_GRAY }}>Difficulty</h3>
+              <h3 className="text-xs sm:text-sm uppercase font-medium" style={{ color: COLORS.LIGHT_GRAY }}>Difficulty</h3>
               {renderDifficultyIndicator(workout.difficulty)}
             </div>
           </div>
-          <div className="rounded-lg p-4" style={{ backgroundColor: COLORS.BLACK }}>
-            <h3 className="text-sm uppercase font-medium" style={{ color: COLORS.LIGHT_GRAY }}>Est. Calories</h3>
-            <p className="text-lg font-medium" style={{ color: COLORS.WHITE }}>{workout.estimatedCalories || 'Not specified'}</p>
+          <div className="rounded-lg p-3 sm:p-4" style={{ backgroundColor: COLORS.BLACK }}>
+            <h3 className="text-xs sm:text-sm uppercase font-medium" style={{ color: COLORS.LIGHT_GRAY }}>Est. Calories</h3>
+            <p className="text-base sm:text-lg font-medium" style={{ color: COLORS.WHITE }}>{workout.estimatedCalories || 'Not specified'}</p>
           </div>
-          <div className="rounded-lg p-4" style={{ backgroundColor: COLORS.BLACK }}>
-            <h3 className="text-sm uppercase font-medium" style={{ color: COLORS.LIGHT_GRAY }}>Rest Period</h3>
-            <p className="text-lg font-medium" style={{ color: COLORS.WHITE }}>{workout.restPeriods || '60-90 seconds'}</p>
+          <div className="rounded-lg p-3 sm:p-4" style={{ backgroundColor: COLORS.BLACK }}>
+            <h3 className="text-xs sm:text-sm uppercase font-medium" style={{ color: COLORS.LIGHT_GRAY }}>Rest Period</h3>
+            <p className="text-base sm:text-lg font-medium" style={{ color: COLORS.WHITE }}>{workout.restPeriods || '60-90 seconds'}</p>
           </div>
         </div>
 
-        {/* Tab navigation */}
-        <div className="flex border-b mb-6" style={{ borderColor: COLORS.MEDIUM_GRAY }}>
+        {/* Tab navigation - scrollable on mobile */}
+        <div className="flex overflow-x-auto border-b mb-4 sm:mb-6" style={{ borderColor: COLORS.MEDIUM_GRAY }}>
           <button
-            className={`px-4 py-2 font-medium ${activeTab === 'exercises' ? 'border-b-2' : ''}`}
+            className={`px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium whitespace-nowrap ${activeTab === 'exercises' ? 'border-b-2' : ''}`}
             style={{
               color: activeTab === 'exercises' ? COLORS.NEON_GREEN : COLORS.LIGHT_GRAY,
               borderColor: COLORS.NEON_GREEN,
@@ -316,7 +330,7 @@ const WorkoutDetailsPage = () => {
             Exercises
           </button>
           <button
-            className={`px-4 py-2 font-medium ${activeTab === 'details' ? 'border-b-2' : ''}`}
+            className={`px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium whitespace-nowrap ${activeTab === 'details' ? 'border-b-2' : ''}`}
             style={{
               color: activeTab === 'details' ? COLORS.NEON_GREEN : COLORS.LIGHT_GRAY,
               borderColor: COLORS.NEON_GREEN,
@@ -326,7 +340,7 @@ const WorkoutDetailsPage = () => {
             Workout Details
           </button>
           <button
-            className={`px-4 py-2 font-medium ${activeTab === 'alternatives' ? 'border-b-2' : ''}`}
+            className={`px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium whitespace-nowrap ${activeTab === 'alternatives' ? 'border-b-2' : ''}`}
             style={{
               color: activeTab === 'alternatives' ? COLORS.NEON_GREEN : COLORS.LIGHT_GRAY,
               borderColor: COLORS.NEON_GREEN,
@@ -339,30 +353,30 @@ const WorkoutDetailsPage = () => {
 
         {/* Tab content */}
         {activeTab === 'exercises' && (
-          <div className="space-y-6">
+          <div className="space-y-4 sm:space-y-6">
             {workout.exercises.map((exercise, index) => (
               <div
                 key={index}
-                className="border rounded-lg p-4"
+                className="border rounded-lg p-3 sm:p-4"
                 style={{ borderColor: COLORS.MEDIUM_GRAY, backgroundColor: COLORS.BLACK }}
               >
                 {editMode ? (
-                  <div className="grid gap-3">
+                  <div className="grid gap-2 sm:gap-3">
                     <div>
-                      <label className="block mb-1 text-sm" style={{ color: COLORS.LIGHT_GRAY }}>
+                      <label className="block mb-1 text-xs sm:text-sm" style={{ color: COLORS.LIGHT_GRAY }}>
                         Exercise Name
                       </label>
                       <input
                         type="text"
                         value={exerciseEdits[index].name}
                         onChange={(e) => handleExerciseChange(index, 'name', e.target.value)}
-                        className="w-full p-2 rounded border"
+                        className="w-full p-2 rounded border text-xs sm:text-sm"
                         style={{ backgroundColor: COLORS.DARK_GRAY, borderColor: COLORS.MEDIUM_GRAY, color: COLORS.WHITE }}
                       />
                     </div>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <div className="grid grid-cols-3 gap-2 sm:gap-3">
                       <div>
-                        <label className="block mb-1 text-sm" style={{ color: COLORS.LIGHT_GRAY }}>
+                        <label className="block mb-1 text-xs sm:text-sm" style={{ color: COLORS.LIGHT_GRAY }}>
                           Sets
                         </label>
                         <input
@@ -370,12 +384,12 @@ const WorkoutDetailsPage = () => {
                           min="1"
                           value={exerciseEdits[index].sets}
                           onChange={(e) => handleExerciseChange(index, 'sets', e.target.value)}
-                          className="w-full p-2 rounded border"
+                          className="w-full p-2 rounded border text-xs sm:text-sm"
                           style={{ backgroundColor: COLORS.DARK_GRAY, borderColor: COLORS.MEDIUM_GRAY, color: COLORS.WHITE }}
                         />
                       </div>
                       <div>
-                        <label className="block mb-1 text-sm" style={{ color: COLORS.LIGHT_GRAY }}>
+                        <label className="block mb-1 text-xs sm:text-sm" style={{ color: COLORS.LIGHT_GRAY }}>
                           Reps
                         </label>
                         <input
@@ -383,12 +397,12 @@ const WorkoutDetailsPage = () => {
                           min="1"
                           value={exerciseEdits[index].reps}
                           onChange={(e) => handleExerciseChange(index, 'reps', e.target.value)}
-                          className="w-full p-2 rounded border"
+                          className="w-full p-2 rounded border text-xs sm:text-sm"
                           style={{ backgroundColor: COLORS.DARK_GRAY, borderColor: COLORS.MEDIUM_GRAY, color: COLORS.WHITE }}
                         />
                       </div>
                       <div>
-                        <label className="block mb-1 text-sm" style={{ color: COLORS.LIGHT_GRAY }}>
+                        <label className="block mb-1 text-xs sm:text-sm" style={{ color: COLORS.LIGHT_GRAY }}>
                           Weight (lbs)
                         </label>
                         <input
@@ -396,72 +410,72 @@ const WorkoutDetailsPage = () => {
                           min="0"
                           value={exerciseEdits[index].weight}
                           onChange={(e) => handleExerciseChange(index, 'weight', e.target.value)}
-                          className="w-full p-2 rounded border"
+                          className="w-full p-2 rounded border text-xs sm:text-sm"
                           style={{ backgroundColor: COLORS.DARK_GRAY, borderColor: COLORS.MEDIUM_GRAY, color: COLORS.WHITE }}
                         />
                       </div>
                     </div>
                     <div>
-                      <label className="block mb-1 text-sm" style={{ color: COLORS.LIGHT_GRAY }}>
+                      <label className="block mb-1 text-xs sm:text-sm" style={{ color: COLORS.LIGHT_GRAY }}>
                         Target Muscles
                       </label>
                       <input
                         type="text"
                         value={exerciseEdits[index].targetMuscles}
                         onChange={(e) => handleExerciseChange(index, 'targetMuscles', e.target.value)}
-                        className="w-full p-2 rounded border"
+                        className="w-full p-2 rounded border text-xs sm:text-sm"
                         style={{ backgroundColor: COLORS.DARK_GRAY, borderColor: COLORS.MEDIUM_GRAY, color: COLORS.WHITE }}
                       />
                     </div>
                     <div>
-                      <label className="block mb-1 text-sm" style={{ color: COLORS.LIGHT_GRAY }}>
+                      <label className="block mb-1 text-xs sm:text-sm" style={{ color: COLORS.LIGHT_GRAY }}>
                         Description
                       </label>
                       <textarea
                         rows="3"
                         value={exerciseEdits[index].description}
                         onChange={(e) => handleExerciseChange(index, 'description', e.target.value)}
-                        className="w-full p-2 rounded border"
+                        className="w-full p-2 rounded border text-xs sm:text-sm"
                         style={{ backgroundColor: COLORS.DARK_GRAY, borderColor: COLORS.MEDIUM_GRAY, color: COLORS.WHITE }}
                       />
                     </div>
                   </div>
                 ) : (
                   <>
-                    <div className="flex justify-between items-start">
-                      <h3 className="text-lg font-medium" style={{ color: COLORS.NEON_GREEN }}>
+                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2 sm:gap-0">
+                      <h3 className="text-base sm:text-lg font-medium" style={{ color: COLORS.NEON_GREEN }}>
                         {exercise.name}
                       </h3>
                       <span
-                        className="px-2 py-1 text-xs rounded"
+                        className="px-2 py-1 text-xs rounded self-start"
                         style={{ backgroundColor: COLORS.MEDIUM_GRAY, color: COLORS.WHITE }}
                       >
                         {exercise.targetMuscles}
                       </span>
                     </div>
 
-                    <div className="mt-3 flex flex-wrap gap-3">
-                      <div className="px-3 py-2 rounded" style={{ backgroundColor: COLORS.MEDIUM_GRAY }}>
-                        <span className="text-sm" style={{ color: COLORS.LIGHT_GRAY }}>
+                    <div className="mt-3 flex flex-wrap gap-2 sm:gap-3">
+                      <div className="px-2 sm:px-3 py-1 sm:py-2 rounded" style={{ backgroundColor: COLORS.MEDIUM_GRAY }}>
+                        <span className="text-xs sm:text-sm" style={{ color: COLORS.LIGHT_GRAY }}>
                           Sets
                         </span>
-                        <p className="text-xl font-semibold" style={{ color: COLORS.WHITE }}>
+                        <p className="text-lg sm:text-xl font-semibold" style={{ color: COLORS.WHITE }}>
                           {exercise.sets}
                         </p>
                       </div>
-                      <div className="px-3 py-2 rounded" style={{ backgroundColor: COLORS.MEDIUM_GRAY }}>
-                        <span className="text-sm" style={{ color: COLORS.LIGHT_GRAY }}>
+                      <div className="px-2 sm:px-3 py-1 sm:py-2 rounded" style={{ backgroundColor: COLORS.MEDIUM_GRAY }}>
+                        <span className="text-xs sm:text-sm" style={{ color: COLORS.LIGHT_GRAY }}>
                           Reps
                         </span>
-                        <p className="text-xl font-semibold" style={{ color: COLORS.WHITE }}>
+                        <p className="text-lg sm:text-xl font-semibold" style={{ color: COLORS.WHITE }}>
                           {exercise.reps}
                         </p>
                       </div>
-                      <div className="px-3 py-2 rounded" style={{ backgroundColor: COLORS.MEDIUM_GRAY }}>
-                        <span className="text-sm" style={{ color: COLORS.LIGHT_GRAY }}>
+                      <div className="px-2 sm:px-3 py-1 sm:py-2 rounded" style={{ backgroundColor: COLORS.MEDIUM_GRAY }}>
+                        <span className="text-xs sm:text-sm" style={{ color: COLORS.LIGHT_GRAY }}>
                           Weight
                         </span>
-                        <p className="text-xl font-semibold" style={{ color: COLORS.WHITE }}>
+                        <p className="text-lg sm:text-xl font-semibold" style={{ color: COLORS.WHITE }}>
                           {exercise.weight || 0} lbs
                         </p>
                       </div>
@@ -470,13 +484,13 @@ const WorkoutDetailsPage = () => {
                     {exercise.description && (
                       <div className="mt-3">
                         <button
-                          className="flex items-center text-sm font-medium"
+                          className="flex items-center text-xs sm:text-sm font-medium"
                           style={{ color: COLORS.LIGHT_GRAY }}
                           onClick={() => toggleDescription(index)}
                         >
                           <svg
                             xmlns="http://www.w3.org/2000/svg"
-                            className={`h-4 w-4 mr-1 transition-transform ${showDescription[index] ? 'rotate-90' : ''}`}
+                            className={`h-3 w-3 sm:h-4 sm:w-4 mr-1 transition-transform ${showDescription[index] ? 'rotate-90' : ''}`}
                             fill="none"
                             viewBox="0 0 24 24"
                             stroke="currentColor"
@@ -492,16 +506,16 @@ const WorkoutDetailsPage = () => {
                         </button>
 
                         {showDescription[index] && (
-                          <div className="mt-2 p-3 rounded" style={{ backgroundColor: 'rgba(255,255,255,0.05)' }}>
-                            <p style={{ color: COLORS.WHITE }}>{exercise.description}</p>
+                          <div className="mt-2 p-2 sm:p-3 rounded" style={{ backgroundColor: 'rgba(255,255,255,0.05)' }}>
+                            <p className="text-xs sm:text-sm" style={{ color: COLORS.WHITE }}>{exercise.description}</p>
                           </div>
                         )}
                       </div>
                     )}
 
-                    <div className="mt-4 flex flex-wrap gap-2">
+                    <div className="mt-3 sm:mt-4 flex flex-wrap gap-2">
                       <button
-                        className="px-3 py-1 rounded text-sm font-medium flex items-center"
+                        className="px-2 sm:px-3 py-1 rounded text-xs sm:text-sm font-medium flex items-center"
                         style={{ backgroundColor: COLORS.NEON_GREEN, color: COLORS.BLACK }}
                         onClick={() =>
                           window.open(
@@ -514,7 +528,7 @@ const WorkoutDetailsPage = () => {
                       >
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
-                          className="h-4 w-4 mr-1"
+                          className="h-3 w-3 sm:h-4 sm:w-4 mr-1"
                           fill="none"
                           viewBox="0 0 24 24"
                           stroke="currentColor"
@@ -529,7 +543,7 @@ const WorkoutDetailsPage = () => {
                         Watch Tutorial
                       </button>
                       <button
-                        className="px-3 py-1 rounded text-sm font-medium flex items-center"
+                        className="px-2 sm:px-3 py-1 rounded text-xs sm:text-sm font-medium flex items-center"
                         style={{ backgroundColor: COLORS.MEDIUM_GRAY, color: COLORS.WHITE }}
                         onClick={() =>
                           window.open(
@@ -540,7 +554,7 @@ const WorkoutDetailsPage = () => {
                       >
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
-                          className="h-4 w-4 mr-1"
+                          className="h-3 w-3 sm:h-4 sm:w-4 mr-1"
                           fill="none"
                           viewBox="0 0 24 24"
                           stroke="currentColor"
@@ -563,33 +577,33 @@ const WorkoutDetailsPage = () => {
         )}
 
         {activeTab === 'details' && (
-          <div className="space-y-6">
+          <div className="space-y-4 sm:space-y-6">
             {/* Notes Section */}
-            <div className="border rounded-lg p-4" style={{ borderColor: COLORS.MEDIUM_GRAY, backgroundColor: COLORS.BLACK }}>
-              <h3 className="text-lg font-medium mb-3" style={{ color: COLORS.NEON_GREEN }}>
+            <div className="border rounded-lg p-3 sm:p-4" style={{ borderColor: COLORS.MEDIUM_GRAY, backgroundColor: COLORS.BLACK }}>
+              <h3 className="text-base sm:text-lg font-medium mb-2 sm:mb-3" style={{ color: COLORS.NEON_GREEN }}>
                 Workout Notes
               </h3>
-              <p style={{ color: COLORS.WHITE }}>{workout.notes || 'No specific notes for this workout.'}</p>
+              <p className="text-xs sm:text-sm" style={{ color: COLORS.WHITE }}>{workout.notes || 'No specific notes for this workout.'}</p>
             </div>
 
             {/* Progression Section */}
-            <div className="border rounded-lg p-4" style={{ borderColor: COLORS.MEDIUM_GRAY, backgroundColor: COLORS.BLACK }}>
-              <h3 className="text-lg font-medium mb-3" style={{ color: COLORS.NEON_GREEN }}>
+            <div className="border rounded-lg p-3 sm:p-4" style={{ borderColor: COLORS.MEDIUM_GRAY, backgroundColor: COLORS.BLACK }}>
+              <h3 className="text-base sm:text-lg font-medium mb-2 sm:mb-3" style={{ color: COLORS.NEON_GREEN }}>
                 Progression Plan
               </h3>
-              <p style={{ color: COLORS.WHITE }}>{workout.progression || 'No progression plan specified for this workout.'}</p>
+              <p className="text-xs sm:text-sm" style={{ color: COLORS.WHITE }}>{workout.progression || 'No progression plan specified for this workout.'}</p>
             </div>
 
             {/* Calendar Planning */}
-            <div className="border rounded-lg p-4" style={{ borderColor: COLORS.MEDIUM_GRAY, backgroundColor: COLORS.BLACK }}>
-              <h3 className="text-lg font-medium mb-3" style={{ color: COLORS.NEON_GREEN }}>
+            <div className="border rounded-lg p-3 sm:p-4" style={{ borderColor: COLORS.MEDIUM_GRAY, backgroundColor: COLORS.BLACK }}>
+              <h3 className="text-base sm:text-lg font-medium mb-2 sm:mb-3" style={{ color: COLORS.NEON_GREEN }}>
                 Workout Schedule
               </h3>
-              <div className="p-3 rounded" style={{ backgroundColor: 'rgba(255,255,255,0.05)' }}>
+              <div className="p-2 sm:p-3 rounded" style={{ backgroundColor: 'rgba(255,255,255,0.05)' }}>
                 <div className="flex items-center mb-2">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
-                    className="h-5 w-5 mr-2"
+                    className="h-4 w-4 sm:h-5 sm:w-5 mr-2"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -602,10 +616,10 @@ const WorkoutDetailsPage = () => {
                       d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
                     />
                   </svg>
-                  <span style={{ color: COLORS.WHITE }}>Schedule this workout in your weekly plan</span>
+                  <span className="text-xs sm:text-sm" style={{ color: COLORS.WHITE }}>Schedule this workout in your weekly plan</span>
                 </div>
                 <button
-                  className="w-full px-3 py-2 rounded text-sm font-medium mt-2"
+                  className="w-full px-3 py-2 rounded text-xs sm:text-sm font-medium mt-2"
                   style={{ backgroundColor: COLORS.MEDIUM_GRAY, color: COLORS.WHITE }}
                 >
                   Add to Calendar (Coming Soon)
@@ -616,38 +630,38 @@ const WorkoutDetailsPage = () => {
         )}
 
         {activeTab === 'alternatives' && (
-          <div className="space-y-6">
+          <div className="space-y-4 sm:space-y-6">
             {/* Beginner Alternatives */}
-            <div className="border rounded-lg p-4" style={{ borderColor: COLORS.MEDIUM_GRAY, backgroundColor: COLORS.BLACK }}>
-              <h3 className="text-lg font-medium mb-2" style={{ color: COLORS.NEON_GREEN }}>
+            <div className="border rounded-lg p-3 sm:p-4" style={{ borderColor: COLORS.MEDIUM_GRAY, backgroundColor: COLORS.BLACK }}>
+              <h3 className="text-base sm:text-lg font-medium mb-2" style={{ color: COLORS.NEON_GREEN }}>
                 Beginner Modifications
               </h3>
-              <div className="p-3 rounded" style={{ backgroundColor: 'rgba(255,255,255,0.05)' }}>
-                <p style={{ color: COLORS.WHITE }}>
+              <div className="p-2 sm:p-3 rounded" style={{ backgroundColor: 'rgba(255,255,255,0.05)' }}>
+                <p className="text-xs sm:text-sm" style={{ color: COLORS.WHITE }}>
                   {workout.alternatives?.beginner || 'No specific beginner modifications provided for this workout.'}
                 </p>
               </div>
             </div>
 
             {/* Advanced Alternatives */}
-            <div className="border rounded-lg p-4" style={{ borderColor: COLORS.MEDIUM_GRAY, backgroundColor: COLORS.BLACK }}>
-              <h3 className="text-lg font-medium mb-2" style={{ color: COLORS.NEON_GREEN }}>
+            <div className="border rounded-lg p-3 sm:p-4" style={{ borderColor: COLORS.MEDIUM_GRAY, backgroundColor: COLORS.BLACK }}>
+              <h3 className="text-base sm:text-lg font-medium mb-2" style={{ color: COLORS.NEON_GREEN }}>
                 Advanced Challenges
               </h3>
-              <div className="p-3 rounded" style={{ backgroundColor: 'rgba(255,255,255,0.05)' }}>
-                <p style={{ color: COLORS.WHITE }}>
+              <div className="p-2 sm:p-3 rounded" style={{ backgroundColor: 'rgba(255,255,255,0.05)' }}>
+                <p className="text-xs sm:text-sm" style={{ color: COLORS.WHITE }}>
                   {workout.alternatives?.advanced || 'No specific advanced modifications provided for this workout.'}
                 </p>
               </div>
             </div>
 
             {/* Equipment Alternatives */}
-            <div className="border rounded-lg p-4" style={{ borderColor: COLORS.MEDIUM_GRAY, backgroundColor: COLORS.BLACK }}>
-              <h3 className="text-lg font-medium mb-2" style={{ color: COLORS.NEON_GREEN }}>
+            <div className="border rounded-lg p-3 sm:p-4" style={{ borderColor: COLORS.MEDIUM_GRAY, backgroundColor: COLORS.BLACK }}>
+              <h3 className="text-base sm:text-lg font-medium mb-2" style={{ color: COLORS.NEON_GREEN }}>
                 Equipment Alternatives
               </h3>
-              <div className="p-3 rounded" style={{ backgroundColor: 'rgba(255,255,255,0.05)' }}>
-                <p style={{ color: COLORS.WHITE }}>
+              <div className="p-2 sm:p-3 rounded" style={{ backgroundColor: 'rgba(255,255,255,0.05)' }}>
+                <p className="text-xs sm:text-sm" style={{ color: COLORS.WHITE }}>
                   If you don't have access to all equipment needed for this workout, search for alternatives by clicking
                   on the exercise tutorials.
                 </p>
@@ -658,9 +672,9 @@ const WorkoutDetailsPage = () => {
 
         {/* Start Workout Button - Keep this here */}
         {!editMode && (
-          <div className="mt-8 p-4 rounded-lg flex items-center justify-center" style={{ backgroundColor: 'rgba(255,255,255,0.05)' }}>
+          <div className="mt-4 sm:mt-6 md:mt-8 p-3 sm:p-4 rounded-lg flex items-center justify-center" style={{ backgroundColor: 'rgba(255,255,255,0.05)' }}>
             <button
-              className="px-6 py-3 rounded text-lg font-medium"
+              className="px-4 sm:px-6 py-2 sm:py-3 rounded text-sm sm:text-lg font-medium"
               style={{ backgroundColor: COLORS.NEON_GREEN, color: COLORS.BLACK }}
             >
               Start Workout
