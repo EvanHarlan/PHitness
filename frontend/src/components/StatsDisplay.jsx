@@ -255,6 +255,5 @@ const StatsDisplay = ({
 };
 
 export default StatsDisplay;
-
 // Export chart types for easier reference
 export { CHART_TYPES, PLACEHOLDER_DATA };
