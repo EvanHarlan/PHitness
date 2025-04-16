@@ -1,11 +1,9 @@
-// SocialPage.jsx
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import COLORS from '../lib/constants'
+import { COLORS } from '../lib/constants';
 import Tooltip from '@mui/material/Tooltip';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
-
 
 axios.defaults.withCredentials = true;
 
@@ -16,46 +14,59 @@ const SocialPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isMobile, setIsMobile] = useState(false);
 
-      // Custom theme for tooltips to match the website (This is for the description)
-      const tooltipTheme = createTheme({
-        components: {
-          MuiTooltip: {
-            styleOverrides: {
-              tooltip: {
-                backgroundColor: COLORS.DARK_GRAY,
-                color: COLORS.WHITE,
-                border: `1px solid ${COLORS.MEDIUM_GRAY}`,
-                fontSize: '0.875rem',
-                padding: '8px 12px',
-                maxWidth: '300px',
-                zIndex: 9999,
-              },
-              arrow: {
-                color: COLORS.DARK_GRAY,
-              }
-            }
+  // Detect mobile devices
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    handleResize(); // Check on initial load
+    window.addEventListener('resize', handleResize);
+    
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // Custom theme for tooltips to match the website
+  const tooltipTheme = createTheme({
+    components: {
+      MuiTooltip: {
+        styleOverrides: {
+          tooltip: {
+            backgroundColor: COLORS.DARK_GRAY,
+            color: COLORS.WHITE,
+            border: `1px solid ${COLORS.MEDIUM_GRAY}`,
+            fontSize: isMobile ? '0.75rem' : '0.875rem',
+            padding: isMobile ? '6px 10px' : '8px 12px',
+            maxWidth: isMobile ? '250px' : '300px',
+            zIndex: 9999,
+          },
+          arrow: {
+            color: COLORS.DARK_GRAY,
           }
         }
-      });
-    
-      // Info tooltip component to match the website (This is for the icon)
-      const InfoTooltip = ({ title }) => (
-        <Tooltip title={title} arrow placement="top">
-          <HelpOutlineIcon 
-            sx={{ 
-              color: COLORS.NEON_GREEN, 
-              fontSize: '18px', 
-              marginLeft: '5px',
-              verticalAlign: 'middle',
-              cursor: 'pointer',
-              '&:hover': {
-                color: COLORS.LIGHT_GRAY, // Slightly lighter on hover for feedback
-              }
-            }} 
-          />
-        </Tooltip>
-      );
+      }
+    }
+  });
+
+  // Info tooltip component to match the website
+  const InfoTooltip = ({ title }) => (
+    <Tooltip title={title} arrow placement="top">
+      <HelpOutlineIcon 
+        sx={{ 
+          color: COLORS.NEON_GREEN, 
+          fontSize: isMobile ? '16px' : '18px', 
+          marginLeft: '5px',
+          verticalAlign: 'middle',
+          cursor: 'pointer',
+          '&:hover': {
+            color: COLORS.LIGHT_GRAY,
+          }
+        }} 
+      />
+    </Tooltip>
+  );
 
   // Fetch friends and friend requests on component mount
   useEffect(() => {
@@ -113,6 +124,7 @@ const SocialPage = () => {
       setLoading(false);
     }
   };
+
   const sendFriendRequest = async (userId) => {
     try {
       await axios.post('/api/friend/send-request', { friendId: userId });
@@ -162,7 +174,13 @@ const SocialPage = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-screen" style={{ backgroundColor: COLORS.BLACK }}>
-        <div className="p-8 text-lg font-medium" style={{ color: COLORS.WHITE }}>Loading...</div>
+        <div className="p-4 sm:p-8 text-base sm:text-lg font-medium" style={{ color: COLORS.WHITE }}>
+          <svg className="animate-spin h-5 w-5 sm:h-6 sm:w-6 mr-2 sm:mr-3 inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          Loading social data...
+        </div>
       </div>
     );
   }
@@ -170,29 +188,30 @@ const SocialPage = () => {
   if (error) {
     return (
       <div className="flex items-center justify-center h-screen" style={{ backgroundColor: COLORS.BLACK }}>
-        <div className="p-6 rounded-lg shadow-sm" style={{ backgroundColor: COLORS.MEDIUM_GRAY, color: COLORS.LIGHT_GRAY }}>{error}</div>
+        <div className="p-4 sm:p-6 rounded-lg shadow-sm text-sm sm:text-base" style={{ backgroundColor: COLORS.MEDIUM_GRAY, color: COLORS.LIGHT_GRAY }}>{error}</div>
       </div>
     );
   }
 
   return (
     <ThemeProvider theme={tooltipTheme}>
-      <div className="min-h-screen p-6" style={{ backgroundColor: COLORS.BLACK }}>
+      <div className="min-h-screen p-3 sm:p-4 md:p-6" style={{ backgroundColor: COLORS.BLACK }}>
         <div className="max-w-5xl mx-auto">        
-          <div className="grid gap-8 md:grid-cols-1 lg:grid-cols-2">
+          <div className="grid gap-4 sm:gap-6 md:gap-8 grid-cols-1 lg:grid-cols-2">
             {/* Friend Search */}
-            <div className="rounded-xl shadow-sm p-6 border" style={{ backgroundColor: COLORS.DARK_GRAY, borderColor: COLORS.MEDIUM_GRAY }}>
-              <h2 className="text-xl font-semibold mb-4" style={{ color: COLORS.WHITE }}>Find Friends
-              <InfoTooltip title="Find and add friends by searching for thier name or email." />
+            <div className="rounded-lg sm:rounded-xl shadow-sm p-4 sm:p-6 border" style={{ backgroundColor: COLORS.DARK_GRAY, borderColor: COLORS.MEDIUM_GRAY }}>
+              <h2 className="text-lg sm:text-xl font-semibold mb-2 sm:mb-4 flex items-center" style={{ color: COLORS.WHITE }}>
+                <span>Find Friends</span>
+                <InfoTooltip title="Find and add friends by searching for their name or email." />
               </h2>
               
-              <div className="flex gap-2 mb-6">
+              <div className="flex gap-2 mb-4 sm:mb-6">
                 <input
                   type="text"
                   placeholder="Search users..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="flex-1 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 transition"
+                  className="flex-1 px-3 sm:px-4 py-2 text-sm sm:text-base rounded-lg focus:outline-none focus:ring-2 transition"
                   style={{ 
                     backgroundColor: COLORS.MEDIUM_GRAY,
                     color: COLORS.WHITE,
@@ -202,30 +221,30 @@ const SocialPage = () => {
                 />
                 <button 
                   onClick={searchUsers}
-                  className="px-4 py-2 rounded-lg transition font-medium"
+                  className="px-3 sm:px-4 py-2 rounded-lg transition font-medium text-xs sm:text-sm whitespace-nowrap"
                   style={{ backgroundColor: COLORS.NEON_GREEN, color: COLORS.BLACK }}
                 >
                   Search
                 </button>
               </div>
               
-              <div className="space-y-4 max-h-96 overflow-y-auto">
+              <div className="space-y-3 sm:space-y-4 max-h-64 sm:max-h-96 overflow-y-auto">
                 {searchResults && searchResults.length > 0 ? (
                   searchResults.map(user => (
                     <div 
                       key={user._id} 
-                      className="p-4 border rounded-lg transition"
+                      className="p-3 sm:p-4 border rounded-lg transition"
                       style={{ 
                         borderColor: COLORS.MEDIUM_GRAY,
                         backgroundColor: COLORS.DARK_GRAY
                       }}
                     >
-                      <h3 className="font-medium" style={{ color: COLORS.WHITE }}>{user.name}</h3>
-                      <p className="text-sm mb-3" style={{ color: COLORS.LIGHT_GRAY }}>{user.email}</p>
+                      <h3 className="text-sm sm:text-base font-medium" style={{ color: COLORS.WHITE }}>{user.name}</h3>
+                      <p className="text-xs sm:text-sm mb-2 sm:mb-3" style={{ color: COLORS.LIGHT_GRAY }}>{user.email}</p>
                       {!user.requestSent && !user.isFriend && (
                         <button 
                           onClick={() => sendFriendRequest(user._id)}
-                          className="px-3 py-1 rounded-md text-sm transition font-medium"
+                          className="px-2 sm:px-3 py-1 rounded-md text-xs sm:text-sm transition font-medium"
                           style={{ backgroundColor: COLORS.MEDIUM_GRAY, color: COLORS.NEON_GREEN }}
                         >
                           Add Friend
@@ -233,7 +252,7 @@ const SocialPage = () => {
                       )}
                       {user.requestSent && (
                         <span 
-                          className="px-3 py-1 rounded-md text-sm"
+                          className="px-2 sm:px-3 py-1 rounded-md text-xs sm:text-sm"
                           style={{ backgroundColor: COLORS.MEDIUM_GRAY, color: COLORS.LIGHT_GRAY }}
                         >
                           Request Sent
@@ -241,7 +260,7 @@ const SocialPage = () => {
                       )}
                       {user.isFriend && (
                         <span 
-                          className="px-3 py-1 rounded-md text-sm"
+                          className="px-2 sm:px-3 py-1 rounded-md text-xs sm:text-sm"
                           style={{ backgroundColor: COLORS.MEDIUM_GRAY, color: COLORS.BALANCED_GREEN }}
                         >
                           Already Friends
@@ -250,7 +269,7 @@ const SocialPage = () => {
                     </div>
                   ))
                 ) : (
-                  <div className="text-center py-8" style={{ color: COLORS.LIGHT_GRAY }}>
+                  <div className="text-center py-6 sm:py-8 text-sm sm:text-base" style={{ color: COLORS.LIGHT_GRAY }}>
                     {searchTerm ? 'No users found' : 'Search for users to add as friends'}
                   </div>
                 )}
@@ -258,45 +277,45 @@ const SocialPage = () => {
             </div>
             
             {/* Friend Requests */}
-            <div className="rounded-xl shadow-sm p-6 border" style={{ backgroundColor: COLORS.DARK_GRAY, borderColor: COLORS.MEDIUM_GRAY }}>
-              <h2 className="text-xl font-semibold mb-4" style={{ color: COLORS.WHITE }}>
-                Friend Requests
+            <div className="rounded-lg sm:rounded-xl shadow-sm p-4 sm:p-6 border" style={{ backgroundColor: COLORS.DARK_GRAY, borderColor: COLORS.MEDIUM_GRAY }}>
+              <h2 className="text-lg sm:text-xl font-semibold mb-2 sm:mb-4 flex items-center" style={{ color: COLORS.WHITE }}>
+                <span>Friend Requests</span>
                 {friendRequests.length > 0 && (
                   <span 
-                    className="ml-2 px-2 py-1 text-sm rounded-full"
+                    className="ml-2 px-2 py-1 text-xs sm:text-sm rounded-full"
                     style={{ backgroundColor: COLORS.MEDIUM_GRAY, color: COLORS.NEON_GREEN }}
                   >
                     {friendRequests.length}
                   </span>
                 )}
-              <InfoTooltip title="Pending friend requests will appear here." />
+                <InfoTooltip title="Pending friend requests will appear here." />
               </h2>
               
-              <div className="space-y-4 max-h-96 overflow-y-auto">
+              <div className="space-y-3 sm:space-y-4 max-h-64 sm:max-h-96 overflow-y-auto">
                 {!friendRequests || friendRequests.length === 0 ? (
-                  <div className="text-center py-8" style={{ color: COLORS.LIGHT_GRAY }}>No pending friend requests</div>
+                  <div className="text-center py-6 sm:py-8 text-sm sm:text-base" style={{ color: COLORS.LIGHT_GRAY }}>No pending friend requests</div>
                 ) : (
                   friendRequests.map(request => (
                     <div 
                       key={request._id} 
-                      className="p-4 border rounded-lg transition"
+                      className="p-3 sm:p-4 border rounded-lg transition"
                       style={{ 
                         borderColor: COLORS.MEDIUM_GRAY,
                         backgroundColor: COLORS.DARK_GRAY
                       }}
                     >
-                      <h3 className="font-medium" style={{ color: COLORS.WHITE }}>{request.name}</h3>
-                      <p className="text-sm mb-3" style={{ color: COLORS.LIGHT_GRAY }}>{request.email}</p>
+                      <h3 className="text-sm sm:text-base font-medium" style={{ color: COLORS.WHITE }}>{request.name}</h3>
+                      <p className="text-xs sm:text-sm mb-2 sm:mb-3" style={{ color: COLORS.LIGHT_GRAY }}>{request.email}</p>
                       <div className="flex gap-2">
                         <button 
-                          className="px-3 py-1 rounded-md text-sm transition font-medium"
+                          className="px-2 sm:px-3 py-1 rounded-md text-xs sm:text-sm transition font-medium"
                           style={{ backgroundColor: COLORS.MEDIUM_GRAY, color: COLORS.BALANCED_GREEN }}
                           onClick={() => acceptFriendRequest(request._id)}
                         >
                           Accept
                         </button>
                         <button 
-                          className="px-3 py-1 rounded-md text-sm transition"
+                          className="px-2 sm:px-3 py-1 rounded-md text-xs sm:text-sm transition"
                           style={{ backgroundColor: COLORS.MEDIUM_GRAY, color: COLORS.LIGHT_GRAY }}
                           onClick={() => rejectFriendRequest(request._id)}
                         >
@@ -311,37 +330,37 @@ const SocialPage = () => {
           </div>
           
           {/* Friends List */}
-          <div className="mt-8 rounded-xl shadow-sm p-6 border" style={{ backgroundColor: COLORS.DARK_GRAY, borderColor: COLORS.MEDIUM_GRAY }}>
-            <h2 className="text-xl font-semibold mb-4" style={{ color: COLORS.WHITE }}>
-              My Friends
+          <div className="mt-4 sm:mt-6 md:mt-8 rounded-lg sm:rounded-xl shadow-sm p-4 sm:p-6 border" style={{ backgroundColor: COLORS.DARK_GRAY, borderColor: COLORS.MEDIUM_GRAY }}>
+            <h2 className="text-lg sm:text-xl font-semibold mb-2 sm:mb-4 flex items-center" style={{ color: COLORS.WHITE }}>
+              <span>My Friends</span>
               {friends.length > 0 && (
                 <span 
-                  className="ml-2 px-2 py-1 text-sm rounded-full"
+                  className="ml-2 px-2 py-1 text-xs sm:text-sm rounded-full"
                   style={{ backgroundColor: COLORS.MEDIUM_GRAY, color: COLORS.NEON_GREEN }}
                 >
                   {friends.length}
                 </span>
               )}
-            <InfoTooltip title="Your mutual friends will appear here. Click on their profile to view it." />
+              <InfoTooltip title="Your mutual friends will appear here. Click on their profile to view it." />
             </h2>
             
             {!friends || friends.length === 0 ? (
-              <div className="text-center py-8" style={{ color: COLORS.LIGHT_GRAY }}>You don't have any friends yet</div>
+              <div className="text-center py-6 sm:py-8 text-sm sm:text-base" style={{ color: COLORS.LIGHT_GRAY }}>You don't have any friends yet</div>
             ) : (
-              <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+              <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
                 {friends.map(friend => (
                   <div 
                     key={friend._id} 
-                    className="p-4 border rounded-lg transition"
+                    className="p-3 sm:p-4 border rounded-lg transition"
                     style={{ 
                       borderColor: COLORS.MEDIUM_GRAY,
                       backgroundColor: COLORS.DARK_GRAY
                     }}
                   >
-                    <h3 className="font-medium" style={{ color: COLORS.WHITE }}>{friend.name}</h3>
-                    <p className="text-sm mb-3" style={{ color: COLORS.LIGHT_GRAY }}>{friend.email}</p>
+                    <h3 className="text-sm sm:text-base font-medium" style={{ color: COLORS.WHITE }}>{friend.name}</h3>
+                    <p className="text-xs sm:text-sm mb-2 sm:mb-3" style={{ color: COLORS.LIGHT_GRAY }}>{friend.email}</p>
                     <button 
-                      className="px-3 py-1 rounded-md text-sm transition"
+                      className="px-2 sm:px-3 py-1 rounded-md text-xs sm:text-sm transition"
                       style={{ backgroundColor: COLORS.MEDIUM_GRAY, color: '#ff6b6b' }}
                       onClick={() => removeFriend(friend._id)}
                     >
