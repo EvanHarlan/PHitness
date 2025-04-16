@@ -11,7 +11,7 @@ const SignUpPage = () => {
     email: "",
     password: "",
     confirmPassword: "",
-    termsAccepted: false
+    termsAccepted: false,
   });
 
     const [errors, setErrors] = useState({});
@@ -34,14 +34,16 @@ const SignUpPage = () => {
       if (formData.password !== formData.confirmPassword) {
           newErrors.confirmPassword = "Passwords do not match";
       }
+
       if (!formData.termsAccepted) {
-        newErrors.termsAccepted = "You must agree to the Terms and Conditions.";
+          newErrors.termsAccepted = "You must accept the terms and conditions";
       }
+
       if (Object.keys(newErrors).length > 0) {
           setErrors(newErrors);
           return;
       }
-    
+
       setErrors({});
       const success = await signup(formData);
 
@@ -226,6 +228,7 @@ const SignUpPage = () => {
                   </div>
                   {errors.termsAccepted && <p className="text-red-500 text-sm mt-1">{errors.termsAccepted}</p>}
                 </div>
+
                 <button
                   type="submit"
                   disabled={loading}

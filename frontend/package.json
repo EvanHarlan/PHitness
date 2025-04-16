@@ -19,10 +19,12 @@
     "frontend": "file:",
     "lucide-react": "^0.477.0",
     "react": "^18.2.0",
+    "react-confetti": "^6.4.0",
     "react-dom": "^18.2.0",
     "react-hot-toast": "^2.5.2",
     "react-icons": "^5.5.0",
     "react-router-dom": "^7.2.0",
+    "recharts": "^2.15.2",
     "zustand": "^5.0.3"
   },
   "devDependencies": {
