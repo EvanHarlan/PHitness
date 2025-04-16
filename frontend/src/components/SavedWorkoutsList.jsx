@@ -4,6 +4,9 @@ import toast from 'react-hot-toast';
 import SavedWorkoutCard from './SavedWorkoutCard';
 import COLORS from '../lib/constants';
 
+// THIS IS THE WORKOUT LIBRARY. THIS USES THE WORKOUT CARD COMPONENT TO SHOW THE SAVED WORKOUTS. 
+// THIS COMPONENT ALLOWS FOR FAVORITING AND DELETING WORKOUTS FROM THE LIST.
+
 const SavedWorkoutsList = () => {
   const [workouts, setWorkouts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -158,16 +161,16 @@ const SavedWorkoutsList = () => {
           Favorites
         </button>
       </div>
-      <div className="grid gap-3">
-        {filteredWorkouts.map(workout => (
-          <SavedWorkoutCard 
-            key={workout._id} 
-            workout={workout} 
-            onDeleteWorkout={handleDeleteWorkout}
-            onToggleFavorite={handleToggleFavorite}
-          />
-        ))}
-      </div>
+        <div className="grid gap-3">
+          {filteredWorkouts.map(workout => (
+            <SavedWorkoutCard 
+              key={workout._id} 
+              workout={workout} 
+              onDeleteWorkout={handleDeleteWorkout}
+              onToggleFavorite={handleToggleFavorite}
+            />
+          ))}
+        </div>
     </div>
   );
 };
