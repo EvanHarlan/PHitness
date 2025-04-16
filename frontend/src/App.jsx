@@ -15,6 +15,7 @@ import { useUserStore } from './stores/useUserStore';
 import COLORS from './lib/constants';
 import WorkoutDetailsPage from './pages/WorkoutDetailsPage'
 import AchievementNotifier from './components/AchievementNotifier';
+import MealDetailsPage from './pages/MealsDetailsPage';
 
 // ProtectedRoute component definition
 const ProtectedRoute = ({ element }) => {
@@ -87,7 +88,8 @@ function App() {
         <Route path="/social" element={<ProtectedRoute element={<SocialPage />} />} />
         <Route path="/nutrition" element={<ProtectedRoute element={<NutritionPage />} />} />
         <Route path="/workout" element={<ProtectedRoute element={<WorkoutPage />} />} />
-        <Route path="/workouts/:id" element={<ProtectedRoute element={<WorkoutDetailsPage />} />} />        
+        <Route path="/workouts/:id" element={<ProtectedRoute element={<WorkoutDetailsPage />} />} />
+        <Route path="/meals/:id" element={<ProtectedRoute element={<MealDetailsPage />} />} />        
         {/* Auth routes - only accessible if NOT logged in */}
         <Route path="/signup" element={user ? <Navigate to="/" /> : <SignUpPage />} />
         <Route path="/login" element={user ? <Navigate to="/" /> : <LoginPage />} />

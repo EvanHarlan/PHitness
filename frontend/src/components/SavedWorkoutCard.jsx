@@ -2,6 +2,8 @@ import { useState } from 'react';
 import COLORS from '../lib/constants';
 import { useNavigate } from 'react-router-dom';
 
+// THIS RENDERS OUT EACH INDIVIDUAL WORKOUT WITHIN THE LIBRARY. THIS COMPONENT IS USED INSIDE THE WORKOUT LIST COMPONENT TO DISPLAY EACH WORKOUT IN THE LIBRARY.
+
 const SavedWorkoutCard = ({ workout, onDeleteWorkout, onToggleFavorite }) => {
   const [expanded, setExpanded] = useState(false);
   const navigate = useNavigate();
