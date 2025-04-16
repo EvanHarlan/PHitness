@@ -196,7 +196,7 @@ const NutritionQuestionnaire = ({ userParams, setUserParams, onSubmit, loading }
           {getFormField("Weight", "weight", "select", weightOptions, true)}
           {getFormField("Age", "age", "select", ageOptions)}
           {getFormField("Gender", "gender", "select", genderOptions)}
-          {getFormField("Primary Goal", "nutritionGoal", "select", goalOptions, true)}
+          {getFormField("Primary Goal", "goal", "select", goalOptions, true)}
           {getFormField("Typical Activity Level", "activityLevel", "select", activityLevelOptions)}
         </div>
 
