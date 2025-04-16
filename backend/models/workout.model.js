@@ -83,6 +83,10 @@ const workoutSchema = new mongoose.Schema(
         type: String,
         default: ""
       }
+    },
+    totalTimeSpent: {
+      type: Number,
+      default: 0
     }
   },
   { timestamps: true }
