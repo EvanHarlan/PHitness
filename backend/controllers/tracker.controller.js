@@ -1,4 +1,5 @@
 import Tracker from "../models/tracker.model.js";
+import User from "../models/user.model.js";
 
 export const addTrackerEntry = async (req, res) =>
 {
@@ -72,4 +73,34 @@ export const getTrackerCounts = async (req, res) =>
         console.error("Error counting tracker entries:", error);
         res.status(500).json({ message: "Server error" });
     }
+};
+
+export const updateWorkoutStreak = async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id);
+
+    const today = new Date();
+    const last = user.dailyStreak?.lastLogged ? new Date(user.dailyStreak.lastLogged) : null;
+
+    const isSameDay = last && last.toDateString() === today.toDateString();
+    const isYesterday = last && new Date(today.setDate(today.getDate() - 1)).toDateString() === last.toDateString();
+
+    if (isSameDay) {
+      return res.status(200).json({ streak: user.dailyStreak.current, message: "Already logged today" });
+    }
+
+    if (isYesterday) {
+      user.dailyStreak.current += 1;
+    } else {
+      user.dailyStreak.current = 1;
+    }
+
+    user.dailyStreak.lastLogged = new Date();
+    await user.save();
+
+    return res.status(200).json({ streak: user.dailyStreak.current });
+  } catch (err) {
+    console.error("Error updating workout streak:", err);
+    res.status(500).json({ error: "Failed to update streak" });
+  }
 };

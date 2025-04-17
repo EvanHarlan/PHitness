@@ -1,5 +1,5 @@
 import express from "express";
-import { login, logout, signup, refreshToken, getProfile, updateProfile, searchUsers, unlockAchievement } from "../controllers/auth.controller.js";
+import { login, logout, signup, refreshToken, getProfile, updateProfile, searchUsers, unlockAchievement, updateMaxLift } from "../controllers/auth.controller.js";
 import { protectRoute } from "../middleware/auth.middleware.js";
 
 const router = express.Router();
@@ -12,5 +12,7 @@ router.get("/profile", protectRoute, getProfile);
 router.put("/profile", protectRoute, updateProfile);
 router.get('/search', protectRoute, searchUsers);
 router.post('/unlock-achievement', protectRoute, unlockAchievement);
+router.post("/max-lift", protectRoute, updateMaxLift);
+
 
 export default router;
