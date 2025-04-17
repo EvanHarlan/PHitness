@@ -167,8 +167,12 @@ const WorkoutPage = () => {
     };
 
 
-    const newStreak = updateWorkoutStreak();
-    setStreak(newStreak);
+    useEffect(() =>
+    {
+        const streak = updateWorkoutStreak();
+        setStreak(streak);
+    }, []);
+ 
 
 
   const generateWorkoutPlan = async () => {
