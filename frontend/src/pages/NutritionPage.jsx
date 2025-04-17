@@ -8,6 +8,7 @@ import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import NutritionQuestionnaire from "../components/NutritionQuestionnaire";
 import SavedMealsList from "../components/SavedMealList";
 import COLORS from '../lib/constants';
+import { useUserStore } from "../stores/useUserStore";
 
 const NutritionPage = () => {
   // State variables
@@ -18,6 +19,8 @@ const NutritionPage = () => {
   const [showSavedMeals, setShowSavedMeals] = useState(false);
   const navigate = useNavigate();
   const [fetchMealCountError, setFetchMealCountError] = useState(null);
+  const { user } = useUserStore();
+
 
   // Form state for user parameters
   const [userParams, setUserParams] = useState({

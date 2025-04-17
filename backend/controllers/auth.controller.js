@@ -163,6 +163,7 @@ export const getProfile = async (req, res) =>
 			friendRequests: user.friendRequests || [],
 			sentRequests: user.sentRequests || [],
 			profileVisibility: user.profileVisibility,
+			maxLift: user.maxLift,
 		});
 	} catch (error)
 	{
@@ -224,6 +225,39 @@ export const unlockAchievement = async (req, res) =>
 		res.status(500).json({ message: "Server error" });
 	}
 };
+
+export const updateMaxLift = async (req, res) => {
+  try {
+	  const { maxLift } = req.body;
+
+	  console.log("Incoming maxLift value:", maxLift);
+	  console.log("Type of maxLift:", typeof maxLift);
+
+    if (typeof maxLift !== 'number' || isNaN(maxLift)) {
+      return res.status(400).json({ message: "Invalid lift value" });
+    }
+
+    // Ensure the user document has a maxLift field (initialize to 0 if undefined)
+    const user = await User.findById(req.user._id);
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Only update if the new lift is greater
+    if (typeof user.maxLift !== 'number' || maxLift > user.maxLift) {
+      user.maxLift = maxLift;
+      await user.save();
+    }
+
+    res.status(200).json(user);
+  } catch (error) {
+    console.error("Error updating max lift:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+
 
 
 export const searchUsers = async (req, res) => {

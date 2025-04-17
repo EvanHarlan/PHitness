@@ -10,6 +10,7 @@ const ProfilePage = () =>
 {
     const [workoutAmount, setWorkoutAmount] = useState(0);
     const [mealAmount, setMealAmount] = useState(0);
+    const [maxLift, setMaxLift] = useState(0);
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
     const [isEditing, setIsEditing] = useState(false); // State to toggle the edit form
@@ -19,6 +20,8 @@ const ProfilePage = () =>
         bio: "",
         age: ""
     });
+    const profileEdited = localStorage.getItem("profileEdited") === "true";
+    const [streak, setStreak] = useState(0);
 
     useEffect(() =>
     {
@@ -44,6 +47,8 @@ const ProfilePage = () =>
 
                 setWorkoutAmount(countsResponse.data.workoutCount || 0);
                 setMealAmount(countsResponse.data.mealCount || 0);
+                setMaxLift(profileResponse.data.maxLift || 0);
+
             }
             catch (error)
             {
@@ -65,7 +70,8 @@ const ProfilePage = () =>
         if (success) {
           // Get the updated user from the store
           setUser(useUserStore.getState().user);
-          setIsEditing(false);
+            setIsEditing(false);
+            localStorage.setItem("profileEdited", "true");
         } else {
           alert("Failed to save profile. Please try again.");
         }
@@ -83,8 +89,17 @@ const ProfilePage = () =>
         }));
     };
 
+    useEffect(() =>
+    {
+        const storedStreak = parseInt(localStorage.getItem("workoutStreak") || "0", 10);
+        setStreak(storedStreak);
+    }, []);
+
+
     const achievements = useMemo(() => [
         { title: "Account Created", description: "Welcome to PHitness! Your journey begins here.", threshold: 0, count: 1 },
+        { title: "Profile Updated", description: "You've customed your profile. Make it yours!", threshold: 1, count: profileEdited ? 1 : 0, iconType: "milestone_bronze" },
+        { title: `Max Lift: ${maxLift} lbs`, description: `Your highest recorded lift is ${maxLift} lbs.`, threshold: maxLift, count: maxLift, iconType: "workout_gold" },
         { title: "Completed 1 Workout", description: "Your first workout completed!", threshold: 1, count: workoutAmount, iconType: "workout_bronze" },
         { title: "Completed 5 Workouts", description: "You're getting into the routine!", threshold: 5, count: workoutAmount, iconType: "workout_silver" },
         { title: "Completed 10 Workouts", description: "A true fitness enthusiast!", threshold: 10, count: workoutAmount, iconType: "workout_gold" },
@@ -97,7 +112,14 @@ const ProfilePage = () =>
         { title: "Created 25 Meals", description: "A chef in the making!", threshold: 25, count: workoutAmount, iconType: "meal_diam" },
         { title: "Created 50 Meals", description: "The meal prep king!", threshold: 50, count: workoutAmount, iconType: "meal_ruby" },
         { title: "Created 100 Meals", description: "A Phitness meal planer!", threshold: 100, count: workoutAmount, iconType: "meal_phit" },
-    ], [workoutAmount, mealAmount]);
+        { title: "3-Day Workout Streak!", description: "You're building the habit! Keep it going!", threshold: 3, count: streak, iconType: "milestone_bronze" },
+        { title: "7-Day Workout Streak!", description: "A full week of grind!", threshold: 7, count: streak, iconType: "milestone_silver" },
+        { title: "14-Day Workout Streak!", description: "You're unstoppable!", threshold: 14, count: streak, iconType: "milestone_gold" },
+        { title: "30-Day Workout Streak!", description: "A month of dedication! You're a beast!", threshold: 30, count: streak, iconType: "milestone_diam" },
+        { title: "Weekend Warrior", description: "You worked out on the weekend. That’s dedication!", threshold: 1, count: workoutAmount, iconType: "milestone_bronze" },
+        { title: "Early Bird", description: "Logged a workout before 6AM. Rise and grind!", threshold: 1, count: workoutAmount, iconType: "milestone_silver" },
+        { title: "Late Owl", description: "Logged a workout after 10PM. Burning the midnight oil!", threshold: 1, count: workoutAmount, iconType: "milestone_gold" }
+    ], [workoutAmount, mealAmount, maxLift, streak]);
 
     const { setUnlockedAchievement } = useUserStore();
 
@@ -114,7 +136,6 @@ const ProfilePage = () =>
             const alreadyUnlocked = user.achievements?.some(
                 (a) => a.title === achievement.title
             );
-
             if (
                 achievement.count >= achievement.threshold &&
                 (
@@ -141,7 +162,6 @@ const ProfilePage = () =>
                         console.error("Failed to save achievement:", error);
                     }
                 }
-
                 setUnlockedAchievement(achievement);
             }
         });
