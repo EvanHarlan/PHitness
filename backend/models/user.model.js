@@ -33,6 +33,10 @@ const userSchema = new mongoose.Schema({
     min: [13, "Age must be at least 18"],
     max: [100, "Age cannot be more than 100"]
   },
+  avatar: {
+    type: String,
+    default: "default"
+  },
   bio:{
     type: String,
   },

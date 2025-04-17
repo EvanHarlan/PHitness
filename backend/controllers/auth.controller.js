@@ -158,6 +158,7 @@ export const getProfile = async (req, res) =>
 			username: user.username,
 			age: user.age,
 			bio: user.bio,
+			avatar: user.avatar,
 			achievements: user.achievements || [],
 			friends: user.friends || [],
 			friendRequests: user.friendRequests || [],
@@ -184,6 +185,7 @@ export const updateProfile = async (req, res) => {
 	  user.username = req.body.username || user.username;
 	  user.age = req.body.age || user.age;
 	  user.bio = req.body.bio || user.bio;
+	  user.avatar = req.body.avatar || user.avatar;
   
 	  await user.save(); // Save the updated user data
   
