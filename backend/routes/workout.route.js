@@ -20,6 +20,36 @@ router.get("/", protectRoute, async (req, res) => {
   }
 });
 
+// GET workouts by date range
+router.get("/by-date", protectRoute, async (req, res) => {
+  try {
+    const { startDate, endDate } = req.query;
+    
+    if (!startDate || !endDate) {
+      return res.status(400).json({ message: "Start date and end date are required" });
+    }
+
+    const workouts = await Workout.find({
+      user: req.user._id,
+      createdAt: {
+        $gte: new Date(startDate),
+        $lte: new Date(endDate)
+      }
+    }).sort({ createdAt: 1 });
+
+    console.log('Found workouts:', workouts.map(w => ({
+      createdAt: w.createdAt,
+      totalTimeSpent: w.totalTimeSpent,
+      estimatedCalories: w.estimatedCalories
+    })));
+
+    res.json(workouts);
+  } catch (error) {
+    console.error("Error fetching workouts by date:", error);
+    res.status(500).json({ message: "Failed to fetch workouts by date" });
+  }
+});
+
 // GET a specific workout
 router.get("/:id", protectRoute, async (req, res) => {
   try {

@@ -20,15 +20,7 @@ import { COLORS } from '../lib/constants';
 
 // Sample data for charts - replace with actual data from MongoDB later
 const PLACEHOLDER_DATA = {
-  workout: [
-    { day: 'Mon', minutes: 45, calories: 320 },
-    { day: 'Tue', minutes: 30, calories: 250 },
-    { day: 'Wed', minutes: 60, calories: 450 },
-    { day: 'Thu', minutes: 0, calories: 0 },
-    { day: 'Fri', minutes: 45, calories: 350 },
-    { day: 'Sat', minutes: 90, calories: 600 },
-    { day: 'Sun', minutes: 20, calories: 180 },
-  ],
+  
   nutrition: [
     { day: 'Mon', calories: 2100, protein: 120, carbs: 240, fat: 70 },
     { day: 'Tue', calories: 1950, protein: 130, carbs: 200, fat: 65 },
@@ -39,9 +31,7 @@ const PLACEHOLDER_DATA = {
     { day: 'Sun', calories: 1900, protein: 115, carbs: 210, fat: 63 },
   ],
   macros: [
-    { name: 'Protein', value: 120 },
-    { name: 'Carbs', value: 220 },
-    { name: 'Fat', value: 65 },
+    
   ],
   progress: [
     { month: 'Jan', weight: 185 },
@@ -62,7 +52,7 @@ const CustomTooltip = ({ active, payload, label }) => {
         <p className="font-medium mb-1">{label}</p>
         {payload.map((entry, index) => (
           <p key={index} style={{ color: entry.color }} className="text-sm">
-            {entry.name}: {entry.value} {entry.unit || ''}
+            {entry.dataKey === 'minutes' ? 'Total Time Spent' : 'Calories Burned'}: {entry.value} {entry.dataKey === 'minutes' ? 'min' : 'cal'}
           </p>
         ))}
       </div>
@@ -170,30 +160,50 @@ const StatsDisplay = ({
         );
         
       case CHART_TYPES.LINE:
-      default:
         return (
           <ResponsiveContainer width="100%" height={height}>
             <LineChart data={chartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke={COLORS.MEDIUM_GRAY} />
-              <XAxis dataKey={xAxisKey} stroke={COLORS.WHITE} />
-              <YAxis stroke={COLORS.WHITE} />
+              <XAxis 
+                dataKey={xAxisKey} 
+                stroke={COLORS.WHITE}
+                tick={{ fill: COLORS.WHITE }}
+              />
+              <YAxis 
+                yAxisId="left"
+                stroke={COLORS.WHITE}
+                tick={{ fill: COLORS.WHITE }}
+                label={{ value: 'Minutes', angle: -90, position: 'insideLeft', fill: COLORS.WHITE }}
+              />
+              <YAxis 
+                yAxisId="right"
+                orientation="right"
+                stroke={COLORS.WHITE}
+                tick={{ fill: COLORS.WHITE }}
+                label={{ value: 'Calories', angle: 90, position: 'insideRight', fill: COLORS.WHITE }}
+              />
               <Tooltip content={<CustomTooltip />} />
+              <Legend />
               <Line 
+                yAxisId="left"
                 type="monotone" 
                 dataKey={yAxisKey} 
                 stroke={COLORS.NEON_GREEN} 
                 strokeWidth={2}
                 dot={{ r: 4, fill: COLORS.NEON_GREEN }}
                 activeDot={{ r: 6, fill: COLORS.NEON_GREEN }}
+                name="Time Spent"
               />
               {secondaryKey && (
                 <Line 
+                  yAxisId="right"
                   type="monotone" 
                   dataKey={secondaryKey} 
                   stroke="#36A2EB" 
                   strokeWidth={2}
                   dot={{ r: 4, fill: "#36A2EB" }}
                   activeDot={{ r: 6, fill: "#36A2EB" }}
+                  name="Calories Burned"
                 />
               )}
             </LineChart>
