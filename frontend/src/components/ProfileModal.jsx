@@ -4,7 +4,7 @@ import COLORS from '../lib/constants'; // Adjust path if needed
 // --- Define the avatar mapping ---
 // (Moved from SocialPage.jsx as it's specific to profile display)
 const avatarImages = {
-  defualt: "../../public/profileIcon.png",
+  default: "../../public/profileIcon.png",
   avatar1: "../../public/avatar1.png",
   avatar2: "../../public/avatar2.png",
   avatar3: "../../public/avatar3.png",
