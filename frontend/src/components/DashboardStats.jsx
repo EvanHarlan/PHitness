@@ -120,15 +120,6 @@ const DashboardStats = ({ user }) => {
         yAxisKey="calories"
       />
       
-      {/* Macronutrient Distribution */}
-      <StatsDisplay 
-        title="Macronutrient Breakdown" 
-        description="Your average macronutrient distribution"
-        chartType={CHART_TYPES.PIE}
-        dataKey="macros"
-        pieColors={[COLORS.NEON_GREEN, '#36A2EB', '#FF6384']}
-      />
-      
       {/* Add more charts as needed */}
     </div>
   );

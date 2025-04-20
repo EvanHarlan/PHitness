@@ -4,6 +4,8 @@ import { COLORS } from '../lib/constants';
 import DashboardStats from '../components/DashboardStats';
 import { RadarChart, PolarGrid, PolarAngleAxis, Radar, ResponsiveContainer } from 'recharts';
 import { motion } from 'framer-motion';
+import MacronutrientPieChart from '../components/MacronutrientPieChart';
+
 
 
 const HomePage = () => {
@@ -20,23 +22,12 @@ const HomePage = () => {
     { group: 'Core', value: user?.stats?.muscleGroups?.core || 55 },
   ];
 
-  // Mock nutrition data
-  const nutritionData = [
-    { day: 'Mon', calories: 2100, protein: 120, target: 2200 },
-    { day: 'Tue', calories: 2300, protein: 135, target: 2200 },
-    { day: 'Wed', calories: 1950, protein: 115, target: 2200 },
-    { day: 'Thu', calories: 2250, protein: 130, target: 2200 },
-    { day: 'Fri', calories: 2050, protein: 125, target: 2200 },
-    { day: 'Sat', calories: 2400, protein: 140, target: 2200 },
-    { day: 'Sun', calories: 1850, protein: 110, target: 2200 },
-  ];
-
   // Content for authenticated users (dashboard)
   const renderDashboard = () => {
     const quickActions = [
-      { title: 'Start Workout', description: 'Begin your daily exercise routine', path: '/workout', icon: '💪' },
-      { title: 'Nutrition Plan', description: 'View and manage your meal plan', path: '/nutrition', icon: '🥗' },
-      { title: 'Social Connect', description: 'Connect with fitness friends', path: '/social', icon: '👥' }
+      { title: 'Start Workout', description: 'Begin your daily exercise routine', path: '/workout'},
+      { title: 'Nutrition Plan', description: 'View and manage your meal plan', path: '/nutrition'},
+      { title: 'Social Connect', description: 'Connect with fitness friends', path: '/social'}
     ];
 
     return (
@@ -131,69 +122,64 @@ const HomePage = () => {
           </div>
         </section>
 
-        {/* New: Nutrition Insights */}
+        {/* Replaced: Using MacronutrientPieChart Component */}
         <section className="mb-16">
           <h2 className="text-2xl font-semibold mb-8 flex items-center">
             <span className="inline-block w-1 h-6 mr-3 rounded" style={{ backgroundColor: COLORS.NEON_GREEN }}></span>
             Nutrition Insights
           </h2>
-          <div 
-            className="p-6 rounded-xl"
-            style={{ 
-              backgroundImage: `linear-gradient(180deg, rgba(30, 30, 30, 0.8), rgba(20, 20, 20, 0.9))`,
-              boxShadow: `0 4px 20px rgba(0, 0, 0, 0.2), inset 0 0 0 1px rgba(255, 255, 255, 0.05)`
-            }}
-          >
-            <div className="grid grid-cols-1 lg:grid-cols-7 gap-3">
-              {nutritionData.map((day, index) => {
-                const percentOfTarget = (day.calories / day.target) * 100;
-                const barHeight = Math.min(Math.max(percentOfTarget, 30), 120); // Min 30%, max 120%
-                const isOverTarget = percentOfTarget > 100;
-                
-                return (
-                  <div key={index} className="flex flex-col items-center">
-                    <p className="text-xs mb-1 opacity-70">{day.day}</p>
-                    <div className="relative w-full h-32 flex flex-col-reverse">
-                      <div 
-                        className="w-full rounded-t-sm transition-all duration-500"
-                        style={{ 
-                          height: `${barHeight}%`,
-                          backgroundColor: isOverTarget ? 'rgba(255, 99, 71, 0.7)' : COLORS.NEON_GREEN,
-                          opacity: day.day === 'Wed' ? 1 : 0.7
-                        }}
-                      ></div>
-                      {day.day === 'Wed' && (
-                        <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 whitespace-nowrap">
-                          <span className="text-xs py-1 px-2 rounded" style={{ backgroundColor: 'rgba(0, 0, 0, 0.7)' }}>
-                            {day.calories} cal
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                    <div className="mt-2 text-center">
-                      <span className="text-xs font-medium" style={{ color: isOverTarget ? 'rgba(255, 99, 71, 0.9)' : 'rgba(255, 255, 255, 0.9)' }}>
-                        {Math.round(percentOfTarget)}%
-                      </span>
-                    </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <MacronutrientPieChart />
+            <div 
+              className="p-6 rounded-xl bg-gradient-to-br"
+              style={{ 
+                backgroundImage: `linear-gradient(135deg, rgba(30, 30, 30, 0.9), rgba(20, 20, 20, 0.8))`, 
+                boxShadow: `0 4px 20px rgba(0, 0, 0, 0.2), inset 0 0 0 1px rgba(255, 255, 255, 0.05)`
+              }}
+            >
+              <h3 className="text-lg font-medium mb-4">Nutrition Tips</h3>
+              <ul className="space-y-4">
+                <li className="flex items-start p-3 rounded-lg" style={{ backgroundColor: 'rgba(0, 0, 0, 0.2)' }}>
+                  <div className="rounded-full p-2 mr-4" style={{ backgroundColor: COLORS.NEON_GREEN }}>
+                    <span className="text-black font-bold text-xs">1</span>
                   </div>
-                );
-              })}
-            </div>
-            <div className="flex justify-between items-center mt-8 pt-4 border-t border-gray-700">
-              <div>
-                <p className="text-sm opacity-70">Weekly Average</p>
-                <p className="text-xl font-medium">{Math.round(nutritionData.reduce((sum, day) => sum + day.calories, 0) / 7)} calories</p>
-              </div>
-              <Link 
-                to="/nutrition"
-                className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300"
-                style={{
-                  backgroundColor: COLORS.NEON_GREEN,
-                  color: COLORS.BLACK
-                }}
-              >
-                View Nutrition Details
-              </Link>
+                  <div>
+                    <p className="font-medium">Protein Intake</p>
+                    <p className="text-sm opacity-70">Consider increasing your daily protein to support muscle recovery.</p>
+                  </div>
+                </li>
+                <li className="flex items-start p-3 rounded-lg" style={{ backgroundColor: 'rgba(0, 0, 0, 0.2)' }}>
+                  <div className="rounded-full p-2 mr-4" style={{ backgroundColor: COLORS.NEON_GREEN }}>
+                    <span className="text-black font-bold text-xs">2</span>
+                  </div>
+                  <div>
+                    <p className="font-medium">Meal Timing</p>
+                    <p className="text-sm opacity-70">Try spacing your meals 3-4 hours apart for optimal energy.</p>
+                  </div>
+                </li>
+                <li className="flex items-start p-3 rounded-lg" style={{ backgroundColor: 'rgba(0, 0, 0, 0.2)' }}>
+                  <div className="rounded-full p-2 mr-4" style={{ backgroundColor: COLORS.NEON_GREEN }}>
+                    <span className="text-black font-bold text-xs">3</span>
+                  </div>
+                  <div>
+                    <p className="font-medium">Hydration</p>
+                    <p className="text-sm opacity-70">Remember to drink plenty of water throughout the day.</p>
+                  </div>
+                </li>
+                <li className="mt-6">
+                  <Link 
+                    to="/nutrition/plan"
+                    className="inline-block w-full py-3 text-center rounded-lg text-sm font-medium transition-all duration-300"
+                    style={{
+                      backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                      color: COLORS.WHITE,
+                      border: `1px solid rgba(255, 255, 255, 0.2)`,
+                    }}
+                  >
+                    View Full Nutrition Plan
+                  </Link>
+                </li>
+              </ul>
             </div>
           </div>
         </section>
