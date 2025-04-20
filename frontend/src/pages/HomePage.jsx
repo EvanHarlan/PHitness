@@ -168,7 +168,7 @@ const HomePage = () => {
                 </li>
                 <li className="mt-6">
                   <Link 
-                    to="/nutrition/plan"
+                    to="/nutrition"
                     className="inline-block w-full py-3 text-center rounded-lg text-sm font-medium transition-all duration-300"
                     style={{
                       backgroundColor: 'rgba(255, 255, 255, 0.1)',
