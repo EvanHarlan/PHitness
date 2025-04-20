@@ -269,7 +269,7 @@ const HomePage = () => {
     };
   
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen">
+      <div className="flex flex-col items-center justify-center min-h-screen">  
         {/* Hero Section */}
         <motion.header 
           className="max-w-4xl mx-auto mb-16 text-center pt-12"
@@ -320,6 +320,7 @@ const HomePage = () => {
             </motion.div>
           </motion.div>
         </motion.header>
+        
   
         {/* Features Section */}
         <motion.section 
