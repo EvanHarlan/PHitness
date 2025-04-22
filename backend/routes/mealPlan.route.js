@@ -33,8 +33,8 @@ router.get('/', protectRoute, getUserMealPlans);
 router.get('/:id', protectRoute, getMealPlanById);
 
 // Toggle the favorite status of a specific meal plan
-// PUT /api/meal-plans/:id/favorite
-router.put('/:id/favorite', protectRoute, toggleFavoriteMealPlan);
+// PATCH /api/meal-plans/:id/favorite
+router.patch('/:id/favorite', protectRoute, toggleFavoriteMealPlan);
 
 // Delete a specific meal plan
 // DELETE /api/meal-plans/:id

@@ -62,19 +62,21 @@ const SavedMealsList = () => {
 
   const handleToggleFavorite = async (mealId) => {
     try {
-      const response = await axios.put(`/api/meal-plans/${mealId}/favorite`, {}, { withCredentials: true }); // Corrected endpoint and method
+      const response = await axios.patch(
+        `http://localhost:5000/api/meal-plans/${mealId}/favorite`,
+        {},
+        { withCredentials: true }
+      );
 
       // Update the meal in state after successful toggle
-      if (response.data.success) {
-        setMeals(meals.map(meal =>
-          meal._id === mealId
-            ? { ...meal, favorite: response.data.favorite }
-            : meal
-        ));
-      }
+      setMeals(meals.map(meal =>
+        meal._id === mealId
+          ? { ...meal, isFavorite: response.data.isFavorite }
+          : meal
+      ));
     } catch (error) {
       console.error("Error updating favorite status:", error);
-      toast.error("Failed to update favorite status. Please try again.", { // Added error toast
+      toast.error("Failed to update favorite status. Please try again.", {
         style: {
           background: COLORS.DARK_GRAY,
           color: COLORS.WHITE,
@@ -94,7 +96,7 @@ const SavedMealsList = () => {
 
   // Filter meals based on current view mode
   const filteredMeals = viewMode === 'favorites'
-    ? meals.filter(meal => meal.favorite)
+    ? meals.filter(meal => meal.isFavorite)
     : meals;
 
   if (!meals.length) {
