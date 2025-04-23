@@ -1,6 +1,6 @@
 // friend.controller.js
 import User from '../models/user.model.js';
-
+import Nudge from '../models/nudge.model.js';
 // Send friend request
 export const sendFriendRequest = async (req, res) => {
   try {
@@ -213,5 +213,82 @@ export const getFriendProfile = async (req, res) => {
   } catch (error) {
       console.error("Error fetching friend profile:", error);
       res.status(500).json({ message: 'Server error fetching profile' });
+  }
+};
+const activeConnections = {};
+ 
+ export const listenForNudges = (req, res) => {
+   const userId = req.user._id;
+   res.setHeader('Content-Type', 'text/event-stream');
+   res.setHeader('Cache-Control', 'no-cache');
+   res.setHeader('Connection', 'keep-alive');
+ 
+   activeConnections[userId] = res;
+ 
+   req.on('close', () => {
+     delete activeConnections[userId];
+   });
+ };
+ 
+ export const nudgeFriend = async (req, res) => {
+   try {
+     const { friendId } = req.body;
+     const userId = req.user._id;
+ 
+     const friend = await User.findById(friendId);
+     if (!friend) return res.status(404).json({ message: 'User not found' });
+ 
+     const sender = await User.findById(userId);
+     if (!sender) return res.status(404).json({ message: 'Sender not found' });
+
+     const newNudge = await Nudge.create({
+      to: friendId,
+      from: userId,
+      fromName: sender.name
+    });
+ 
+     if (activeConnections[friendId]) {
+       activeConnections[friendId].write(
+         `data: ${JSON.stringify({ from: userId, fromName: sender.name, message: 'nudged you!' })}\n\n`
+       );
+     }
+ 
+     res.status(200).json({ message: 'Nudge sent successfully' });
+   } catch (error) {
+     res.status(500).json({ message: error.message });
+   }
+ };
+
+ export const getNudges = async (req, res) => {
+  try {
+    const userId = req.user._id;
+
+    const nudges = await Nudge.find({ to: userId }).sort({ createdAt: -1 }); 
+    if (!nudges.length) {
+      return res.status(404).json({ message: 'No nudges found' });
+    }
+
+    res.status(200).json({ nudges });
+  } catch (error) {
+    console.error('Error fetching nudges:', error);
+    res.status(500).json({ message: 'Error fetching nudges' });
+  }
+};
+
+export const deleteNudge = async (req, res) => {
+  try {
+    const { nudgeId } = req.body;
+
+    // Find and delete the nudge
+    const nudge = await Nudge.findByIdAndDelete(nudgeId);
+
+    if (!nudge) {
+      return res.status(404).json({ message: 'Nudge not found' });
+    }
+
+    res.status(200).json({ message: 'Nudge deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting nudge:', error);
+    res.status(500).json({ message: 'Error deleting nudge' });
   }
 };

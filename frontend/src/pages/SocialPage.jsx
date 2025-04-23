@@ -6,6 +6,7 @@ import Tooltip from '@mui/material/Tooltip';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import ProfileModal from '../components/ProfileModal'; // <-- IMPORT the new component (adjust path)
+import NudgeListener from '../components/NudgeListener';
 
 axios.defaults.withCredentials = true;
 
@@ -16,6 +17,9 @@ const SocialPage = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [friendSearchTerm, setFriendSearchTerm] = useState('');
+    const [hasSearched, setHasSearched] = useState(false);
+    const [friendsOpen, setFriendsOpen] = useState(false);
 
     // State for Profile Modal (remains here to control the modal)
     const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
@@ -111,8 +115,10 @@ const SocialPage = () => {
      const searchUsers = async () => {
         if (!searchTerm.trim()) {
              setSearchResults([]);
+             setHasSearched(false);
              return;
         };
+        setHasSearched(true);
         console.log(`Searching for users matching: "${searchTerm}"`);
         try {
             const response = await axios.get(`/api/auth/search?q=${searchTerm}`);
@@ -197,6 +203,15 @@ const SocialPage = () => {
              setProfileError(null);
         }, 300) // Match animation duration if any
     };
+    const sendNudge = async (friendId) => {
+        try {
+          const response = await axios.post('http://localhost:5000/api/friend/nudge', { friendId },{ withCredentials: true } );
+          alert(response.data.message || 'Nudge sent!');
+        } catch (error) {
+          console.error('Error sending nudge:', error);
+          setError("Failed to send nudge. Please try again.");
+        }
+      };
 
 
     // --- Render Logic ---
@@ -226,12 +241,22 @@ const SocialPage = () => {
             </div>
         );
     }
-
+    const filteredFriends = friends.filter(friend =>
+        friend.name.toLowerCase().includes(friendSearchTerm.toLowerCase()) ||
+        friend.email.toLowerCase().includes(friendSearchTerm.toLowerCase())
+      );
 
     return (
         <ThemeProvider theme={tooltipTheme}>
+             
             <div className="min-h-screen p-6" style={{ backgroundColor: COLORS.BLACK }}>
                 <div className="max-w-5xl mx-auto">
+                <div className="mt-8 rounded-xl shadow-sm p-6 border mb-4" style={{ backgroundColor: COLORS.DARK_GRAY, borderColor: COLORS.MEDIUM_GRAY }}>
+                 <h2 className="text-xl font-semibold mb-4" style={{ color: COLORS.WHITE }}>Notifcations</h2>
+                 <NudgeListener/> 
+                <div className="flex gap-2 mb-6">
+                </div>
+                </div>
                     {/* Search and Requests Sections */}
                     <div className="grid gap-8 md:grid-cols-1 lg:grid-cols-2 mb-8">
                        {/* ... (Friend Search JSX remains the same) ... */}
@@ -245,7 +270,13 @@ const SocialPage = () => {
                                     type="text"
                                     placeholder="Search by name or email..."
                                     value={searchTerm}
-                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                    onChange={(e) => {
+                                        const value = e.target.value;
+                                        setSearchTerm(value);
+                                        if (value.trim() === "") {
+                                          setSearchResults([]);
+                                          setHasSearched(false);  
+                                        }}}
                                     className="flex-1 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 transition"
                                     style={{ backgroundColor: COLORS.MEDIUM_GRAY, color: COLORS.WHITE, borderColor: COLORS.LIGHT_GRAY, ringColor: COLORS.NEON_GREEN }}
                                     onKeyDown={(e) => e.key === 'Enter' && searchUsers()}
@@ -255,19 +286,31 @@ const SocialPage = () => {
                                 </button>
                             </div>
                              <div className="space-y-3 max-h-60 overflow-y-auto pr-2">
-                                {searchResults.length === 0 && searchTerm && (
+                                {hasSearched && searchResults.length === 0 && searchTerm && (
                                     <p className="text-center py-4" style={{ color: COLORS.LIGHT_GRAY }}>No users found matching "{searchTerm}".</p>
                                 )}
                                 {searchResults.length === 0 && !searchTerm && (
                                      <p className="text-center py-4" style={{ color: COLORS.LIGHT_GRAY }}>Enter a name or email to find users.</p>
                                 )}
-                                {searchResults.map(user => (
+                                {searchResults.map(user => {
+                                    const isAlreadyFriend = friends.some(friend => friend._id === user._id);
+
+                                     return (
                                     <div key={user._id} className="p-3 border rounded-lg flex justify-between items-center" style={{ borderColor: COLORS.MEDIUM_GRAY, backgroundColor: COLORS.DARK_GRAY }}>
                                         <div>
                                             <h3 className="font-medium" style={{ color: COLORS.WHITE }}>{user.name}</h3>
                                             <p className="text-sm" style={{ color: COLORS.LIGHT_GRAY }}>{user.email}</p>
                                         </div>
-                                        {user.requestSent ? (
+
+                                        {isAlreadyFriend ? (
+                                            <span 
+                                            className="px-3 py-1 rounded-md text-sm cursor-default" 
+                                            style={{ backgroundColor: COLORS.MEDIUM_GRAY, color: COLORS.LIGHT_GRAY }}
+                                            >
+                                        Already Added
+                                            </span>
+                                        ):
+                                            user.requestSent ? (
                                              <span className="px-3 py-1 rounded-md text-sm cursor-default" style={{ backgroundColor: COLORS.MEDIUM_GRAY, color: COLORS.LIGHT_GRAY }}>
                                                 Request Sent
                                              </span>
@@ -281,7 +324,8 @@ const SocialPage = () => {
                                             </button>
                                         )}
                                     </div>
-                                ))}
+                                     );
+                                })}
                             </div>
                         </div>
                        {/* ... (Friend Requests JSX remains the same) ... */}
@@ -319,7 +363,28 @@ const SocialPage = () => {
                             </div>
                         </div>
                     </div>
-
+                    <div className="mb-4 flex gap-2">
+                        <input
+                        type="text"
+                        placeholder="Search your friends..."
+                        value={friendSearchTerm}
+                        onChange={(e) => setFriendSearchTerm(e.target.value)}
+                        className="flex-1 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 transition"
+                            style={{
+                            backgroundColor: COLORS.MEDIUM_GRAY,
+                            color: COLORS.WHITE,
+                            borderColor: COLORS.LIGHT_GRAY,
+                            ringColor: COLORS.NEON_GREEN
+                            }}
+                             />
+                        <button
+                         onClick={() => setFriendSearchTerm('')}
+                         className="px-4 py-2 rounded-lg transition font-medium hover:opacity-80"
+                        style={{ backgroundColor: COLORS.NEON_GREEN, color: COLORS.BLACK }}
+                        >
+                        Clear
+                        </button>
+                </div>
                     {/* Friends List */}
                     <div className="mt-8 rounded-xl shadow-sm p-6 border" style={{ backgroundColor: COLORS.DARK_GRAY, borderColor: COLORS.MEDIUM_GRAY }}>
                       {/* ... (Friends List Header remains the same) ... */}
@@ -331,14 +396,22 @@ const SocialPage = () => {
                                 </span>
                             )}
                             <InfoTooltip title="Your current friends. Click 'View Profile' for details or 'Remove' to unfriend." />
+                            <button 
+                             onClick={() => setFriendsOpen(!friendsOpen)} 
+                             style={{ marginLeft: 'auto', background: 'transparent', border: 'none', color: COLORS.NEON_GREEN }}
+                            className="flex items-center"
+                            >
+                             {friendsOpen ? "Hide Friends" : "Show Friends"} 
+                        </button>
                         </h2>
                       {/* ... (Friends List Content remains the same, including the handleViewProfile onClick) ... */}
-                      {friends.length === 0 ? (
+                      {friendsOpen && (
+                      friends.length === 0 ? (
                             <p className="text-center py-8" style={{ color: COLORS.LIGHT_GRAY }}>You haven't added any friends yet. Use the search above!</p>
                         ) : (
-                            <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-                                {friends.map(friend => (
-                                    <div key={friend._id} className="p-4 border rounded-lg flex flex-col justify-between transition hover:shadow-lg" style={{ borderColor: COLORS.MEDIUM_GRAY, backgroundColor: COLORS.DARK_GRAY, boxShadow: `0 0 5px ${COLORS.MEDIUM_GRAY}` }}>
+                            <div className="grid gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+                                {filteredFriends.map(friend => (
+                                    <div key={friend._id} className="p-4 border rounded-lg flex flex-col justify-between transition hover:shadow-lg" style={{ borderColor: COLORS.MEDIUM_GRAY, backgroundColor: COLORS.DARK_GRAY, boxShadow: `0 0 5px ${COLORS.MEDIUM_GRAY}` , width: '250px',}}>
                                         <div>
                                             <h3 className="font-medium truncate" style={{ color: COLORS.WHITE }}>{friend.name}</h3>
                                             <p className="text-sm mb-3 truncate" style={{ color: COLORS.LIGHT_GRAY }}>{friend.email}</p>
@@ -358,10 +431,18 @@ const SocialPage = () => {
                                             >
                                                 Remove
                                             </button>
+                                            <button
+                                                 className="px-3 py-1 rounded-md text-sm transition font-medium"
+                                                style={{ backgroundColor: COLORS.MEDIUM_GRAY, color: COLORS.NEON_GREEN }}
+                                                onClick={() => sendNudge(friend._id)}
+                                            >
+                                                Nudge
+                                            </button>
                                         </div>
                                     </div>
                                 ))}
                             </div>
+                        )
                         )}
                     </div>
                 </div>
