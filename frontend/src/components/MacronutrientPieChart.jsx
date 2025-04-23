@@ -52,68 +52,93 @@ const renderLegend = (props) => {
 };
 
 const MacronutrientPieChart = () => {
-  const [macroData, setMacroData] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [macronutrientData, setMacronutrientData] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const { user } = useUserStore();
 
   useEffect(() => {
-    const fetchMealData = async () => {
+    const fetchMacronutrientData = async () => {
       if (!user) {
-        setIsLoading(false);
+        setLoading(false);
         return;
       }
 
       try {
-        setIsLoading(true);
-        // Get all the user's meal plans from the API
+        setLoading(true);
+        // Get the start and end dates for the current week
+        const now = new Date();
+        const startOfWeek = new Date(now);
+        startOfWeek.setDate(now.getDate() - now.getDay()); // Start of current week
+        const endOfWeek = new Date(startOfWeek);
+        endOfWeek.setDate(startOfWeek.getDate() + 6); // End of current week
+
+        console.log('Fetching meal plans between:', startOfWeek.toISOString(), 'and', endOfWeek.toISOString());
+
+        // Fetch meal plans for the date range
         const response = await axios.get('/api/meal-plans', {
           headers: {
             Authorization: `Bearer ${localStorage.getItem('token')}`
-          }
+          },
+          params: {
+            startDate: startOfWeek.toISOString(),
+            endDate: endOfWeek.toISOString()
+          },
+          withCredentials: true
         });
 
-        // The API should return an array of meal plans
-        const mealPlans = response.data;
-        
-        if (mealPlans && Array.isArray(mealPlans) && mealPlans.length > 0) {
-          // Calculate total macros across all meal plans
-          const totalProtein = mealPlans.reduce((sum, plan) => sum + (plan.totalNutrition?.protein || 0), 0);
-          const totalCarbs = mealPlans.reduce((sum, plan) => sum + (plan.totalNutrition?.carbs || 0), 0);
-          const totalFats = mealPlans.reduce((sum, plan) => sum + (plan.totalNutrition?.fats || 0), 0);
-          
-          const totalMacros = totalProtein + totalCarbs + totalFats;
+        console.log('Received meal plans:', response.data);
 
-          // Calculate percentages
-          const proteinPct = totalMacros > 0 ? Math.round((totalProtein / totalMacros) * 100) : 0;
-          const carbsPct = totalMacros > 0 ? Math.round((totalCarbs / totalMacros) * 100) : 0;
-          const fatsPct = totalMacros > 0 ? Math.round((totalFats / totalMacros) * 100) : 0;
-
-          // Prepare the data for the pie chart
-          const macros = [
-            { name: 'Protein', value: totalProtein, color: MACRO_COLORS.PROTEIN, percentage: proteinPct },
-            { name: 'Carbs', value: totalCarbs, color: MACRO_COLORS.CARBS, percentage: carbsPct },
-            { name: 'Fats', value: totalFats, color: MACRO_COLORS.FATS, percentage: fatsPct }
-          ];
-
-          setMacroData(macros);
-        } else {
-          // Handle case where no meal plans are returned
-          setMacroData([]);
-        }
+        // Process the data to get macronutrient totals from completed meals
+        const processedData = processMacronutrientData(response.data);
+        console.log('Processed macronutrient data:', processedData);
+        setMacronutrientData(processedData);
+        setError(null);
       } catch (err) {
-        console.error('Error fetching meal data:', err);
-        setError('Failed to load macronutrient data');
+        console.error('Error fetching macronutrient data:', err);
+        console.error('Error response:', err.response?.data);
+        setError(err.response?.data?.message || 'Failed to load macronutrient data');
       } finally {
-        setIsLoading(false);
+        setLoading(false);
       }
     };
 
-    fetchMealData();
+    fetchMacronutrientData();
   }, [user]);
 
+  const processMacronutrientData = (mealPlans) => {
+    let totalProtein = 0;
+    let totalCarbs = 0;
+    let totalFats = 0;
+
+    // Sum up macronutrients from completed meals
+    mealPlans.forEach(plan => {
+      plan.meals.forEach(meal => {
+        if (meal.completed) {
+          totalProtein += meal.protein;
+          totalCarbs += meal.carbs;
+          totalFats += meal.fats;
+        }
+      });
+    });
+
+    // Calculate total grams
+    const totalGrams = totalProtein + totalCarbs + totalFats;
+
+    // Calculate percentages
+    const proteinPercentage = totalGrams > 0 ? Math.round((totalProtein / totalGrams) * 100) : 0;
+    const carbsPercentage = totalGrams > 0 ? Math.round((totalCarbs / totalGrams) * 100) : 0;
+    const fatsPercentage = totalGrams > 0 ? Math.round((totalFats / totalGrams) * 100) : 0;
+
+    return [
+      { name: 'Protein', value: totalProtein, color: MACRO_COLORS.PROTEIN, percentage: proteinPercentage },
+      { name: 'Carbs', value: totalCarbs, color: MACRO_COLORS.CARBS, percentage: carbsPercentage },
+      { name: 'Fats', value: totalFats, color: MACRO_COLORS.FATS, percentage: fatsPercentage }
+    ];
+  };
+
   // Render loading state
-  if (isLoading) {
+  if (loading) {
     return (
       <div 
         className="p-6 rounded-xl flex items-center justify-center"
@@ -164,7 +189,7 @@ const MacronutrientPieChart = () => {
   }
 
   // Render when no data is available
-  if (macroData.length === 0) {
+  if (macronutrientData.length === 0) {
     return (
       <div 
         className="p-6 rounded-xl flex items-center justify-center"
@@ -187,13 +212,16 @@ const MacronutrientPieChart = () => {
         boxShadow: 'inset 0 0 0 1px rgba(255, 255, 255, 0.05)'
       }}
     >
-      <h3 className="text-base sm:text-lg font-medium mb-2 sm:mb-4">Macronutrient Distribution</h3>
+      <div className="mb-6">
+        <h3 className="text-xl font-bold" style={{ color: COLORS.NEON_GREEN }}>Macronutrient Contribution of Calories</h3>
+        <p className="text-sm opacity-70">Distribution of protein, carbs, and fats from completed meals</p>
+      </div>
       
       <div className="h-56 sm:h-64">
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
             <Pie
-              data={macroData}
+              data={macronutrientData}
               cx="50%"
               cy="50%"
               innerRadius={50}
@@ -205,7 +233,7 @@ const MacronutrientPieChart = () => {
               label={({ name, percentage }) => `${percentage}%`}
               labelLine={false}
             >
-              {macroData.map((entry, index) => (
+              {macronutrientData.map((entry, index) => (
                 <Cell 
                   key={`cell-${index}`} 
                   fill={entry.color} 
@@ -220,7 +248,7 @@ const MacronutrientPieChart = () => {
       </div>
       
       <div className="mt-2 sm:mt-4 grid grid-cols-3 gap-1 sm:gap-2">
-        {macroData.map((macro, index) => (
+        {macronutrientData.map((macro, index) => (
           <div 
             key={index} 
             className="text-center p-2 rounded"

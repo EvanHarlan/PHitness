@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import StatsDisplay, { CHART_TYPES } from './StatsDisplay';
+import NutritionIntakeChart from './NutritionIntakeChart';
 import { COLORS } from '../lib/constants';
 import axios from 'axios';
 
@@ -112,13 +113,7 @@ const DashboardStats = ({ user }) => {
       />
       
       {/* Nutrition Intake Chart */}
-      <StatsDisplay 
-        title="Caloric Intake" 
-        description="Your daily caloric consumption"
-        chartType={CHART_TYPES.BAR}
-        dataKey="nutrition"
-        yAxisKey="calories"
-      />
+      <NutritionIntakeChart />
       
       {/* Add more charts as needed */}
     </div>

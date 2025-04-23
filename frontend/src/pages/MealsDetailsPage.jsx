@@ -67,12 +67,39 @@ const MealDetailsPage = () => {
   // Enhanced Meal card component
   const MealCard = ({ meal, index }) => {
     const [expanded, setExpanded] = useState(false);
+    const [isCompleted, setIsCompleted] = useState(meal.completed);
     
     // Calculate macronutrient percentages
     const totalCals = meal.protein * 4 + meal.carbs * 4 + meal.fats * 9;
     const proteinPerc = Math.round((meal.protein * 4 / totalCals) * 100);
     const carbsPerc = Math.round((meal.carbs * 4 / totalCals) * 100);
     const fatsPerc = Math.round((meal.fats * 9 / totalCals) * 100);
+
+    const handleCompleteMeal = async () => {
+      try {
+        const response = await axios.patch(`http://localhost:5000/api/meal-plans/${mealPlan._id}/meals/${index}/complete`, {}, { withCredentials: true });
+
+        if (response.status === 200) {
+          setIsCompleted(true);
+          toast.success('Meal completed successfully!', {
+            style: {
+              background: COLORS.DARK_GRAY,
+              color: COLORS.NEON_GREEN,
+              border: `1px solid ${COLORS.MEDIUM_GRAY}`
+            }
+          });
+        }
+      } catch (error) {
+        console.error('Error completing meal:', error);
+        toast.error('Failed to complete meal. Please try again.', {
+          style: {
+            background: COLORS.DARK_GRAY,
+            color: COLORS.WHITE,
+            border: `1px solid ${COLORS.MEDIUM_GRAY}`
+          }
+        });
+      }
+    };
     
     return (
       <div className="mb-6 overflow-hidden rounded-xl border transition-all" 
@@ -88,9 +115,18 @@ const MealDetailsPage = () => {
         >
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-3">
-              <div className="flex items-center justify-center h-10 w-10 rounded-full text-sm font-bold"
-                  style={{ backgroundColor: COLORS.BLACK, color: COLORS.NEON_GREEN }}>
-                {index + 1}
+              <div className="flex items-center justify-center h-10 w-10 rounded-full text-sm font-bold transition-colors"
+                  style={{ 
+                    backgroundColor: isCompleted ? COLORS.NEON_GREEN : COLORS.BLACK, 
+                    color: isCompleted ? COLORS.BLACK : COLORS.NEON_GREEN 
+                  }}>
+                {isCompleted ? (
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                  </svg>
+                ) : (
+                  index + 1
+                )}
               </div>
               <div>
                 <h3 className="text-xl font-bold" style={{ color: COLORS.NEON_GREEN }}>{meal.name}</h3>
@@ -206,11 +242,13 @@ const MealDetailsPage = () => {
             <div className="flex justify-end mt-6 gap-3">
               <button 
                 className="px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2"
-                style={{ backgroundColor: COLORS.BLACK, color: COLORS.WHITE, border: `1px solid ${COLORS.MEDIUM_GRAY}` }}>
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                style={{ backgroundColor: COLORS.BLACK, color: COLORS.WHITE, border: `1px solid ${COLORS.MEDIUM_GRAY}` }}
+                onClick={handleCompleteMeal}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" style={{ color: COLORS.NEON_GREEN }}>
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
                 </svg>
-                Save to Favorites
+                Complete Meal
               </button>
             </div>
           </div>
