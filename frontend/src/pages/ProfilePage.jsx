@@ -150,7 +150,7 @@ const ProfilePage = () =>
     const { setUnlockedAchievement } = useUserStore();
     const categorizedAchievements = useMemo(() => ({
         General: achievements.filter(a => a.title === "Account Created" || a.title === "Profile Updated"),
-        Workout: achievements.filter(a => a.title.includes("Workout") && !a.title.includes("Streak")),
+        Workout: achievements.filter(a => (a.title.includes("Workout") && !a.title.includes("Streak")) || a.title.includes("Max Lift")),
         Meals: achievements.filter(a => a.title.includes("Meal")),
         Streaks: achievements.filter(a => a.title.includes("Streak")),
         Special: achievements.filter(a =>
