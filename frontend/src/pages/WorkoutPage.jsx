@@ -16,7 +16,7 @@ const WorkoutPage = () => {
   // State variables (unchanged)
   const [workoutAmount, setWorkoutAmount] = useState(0);
   const [loading, setLoading] = useState(false);
-  const [showSavedWorkouts, setShowSavedWorkouts] = useState(false);
+  const [showSavedWorkouts, setShowSavedWorkouts] = useState(true);
   const navigate = useNavigate();
   const [fetchWorkoutCountError, setFetchWorkoutCountError] = useState(null);
   const { user, setUnlockedAchievement } = useUserStore();
