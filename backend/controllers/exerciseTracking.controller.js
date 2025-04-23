@@ -71,7 +71,7 @@ export const trackExercise = async (req, res) => {
 
     const totalTimeSpent = allExerciseTracking.reduce((total, tracking) => total + tracking.timeSpent, 0);
 
-    // Update the workout's total time spent
+    // Update the workout's totalTimeSpent
     await Workout.findByIdAndUpdate(
       workoutId,
       { totalTimeSpent },
