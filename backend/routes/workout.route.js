@@ -113,4 +113,29 @@ router.delete(
 // TOGGLE favorite status for a workout
 router.patch("/:id/favorite", protectRoute, toggleFavorite);
 
+// Complete a workout
+router.post("/:id/complete", protectRoute, async (req, res) => {
+  try {
+    const workout = await Workout.findOne({ _id: req.params.id, user: req.user._id });
+    
+    if (!workout) {
+      return res.status(404).json({ message: "Workout not found" });
+    }
+
+    // Update the workout as completed
+    workout.completed = true;
+    workout.completedAt = new Date();
+    await workout.save();
+
+    res.json({ 
+      success: true, 
+      message: "Workout completed successfully",
+      workout 
+    });
+  } catch (error) {
+    console.error("Error completing workout:", error);
+    res.status(500).json({ message: "Failed to complete workout" });
+  }
+});
+
 export default router;

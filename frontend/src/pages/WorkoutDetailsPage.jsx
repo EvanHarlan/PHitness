@@ -14,14 +14,23 @@ const WorkoutDetailsPage = () => {
   const [activeTab, setActiveTab] = useState('exercises');
   const [showDescription, setShowDescription] = useState({});
   const [trackingExercise, setTrackingExercise] = useState(null);
+  const [loggedExercises, setLoggedExercises] = useState(new Set());
   const [exerciseTrackingData, setExerciseTrackingData] = useState({});
+  const [allExercisesCompleted, setAllExercisesCompleted] = useState(false);
 
   useEffect(() => {
     if (workoutId) {
       fetchWorkoutDetails();
-      fetchExerciseTrackingData();
+      fetchLoggedExercises();
     }
   }, [workoutId]);
+
+  useEffect(() => {
+    if (workout && workout.exercises) {
+      const completed = workout.exercises.every(exercise => loggedExercises.has(exercise._id));
+      setAllExercisesCompleted(completed);
+    }
+  }, [workout, loggedExercises]);
 
   const fetchWorkoutDetails = async () => {
     try {
@@ -51,14 +60,17 @@ const WorkoutDetailsPage = () => {
     }
   };
 
-  const fetchExerciseTrackingData = async () => {
+  const fetchLoggedExercises = async () => {
     try {
       const response = await axios.get(`http://localhost:5000/api/exercise-tracking/workout/${workoutId}`, {
         withCredentials: true,
       });
       
       if (response.data.success) {
-        // Group tracking data by exercise ID
+        const loggedIds = new Set(response.data.data.map(tracking => tracking.exerciseId));
+        setLoggedExercises(loggedIds);
+        
+        // Store the tracking data for time spent calculations
         const trackingByExercise = {};
         response.data.data.forEach(tracking => {
           trackingByExercise[tracking.exerciseId] = tracking;
@@ -66,7 +78,7 @@ const WorkoutDetailsPage = () => {
         setExerciseTrackingData(trackingByExercise);
       }
     } catch (error) {
-      console.error('Error fetching exercise tracking data:', error);
+      console.error('Error fetching logged exercises:', error);
     }
   };
 
@@ -159,17 +171,14 @@ const WorkoutDetailsPage = () => {
       );
 
       if (response.data.success) {
-        // Update the tracking data state with the new progress
-        setExerciseTrackingData(prevData => ({
-          ...prevData,
+        setLoggedExercises(prev => new Set([...prev, progress.exerciseId]));
+        setExerciseTrackingData(prev => ({
+          ...prev,
           [progress.exerciseId]: {
-            ...prevData[progress.exerciseId],
-            timeSpent: progress.timeSpent,
-            weight: progress.weight,
-            reps: progress.reps
+            ...prev[progress.exerciseId],
+            timeSpent: progress.timeSpent
           }
         }));
-
         toast.success('Exercise progress saved successfully', {
           style: {
             background: COLORS.DARK_GRAY,
@@ -181,6 +190,36 @@ const WorkoutDetailsPage = () => {
     } catch (error) {
       console.error('Error saving exercise progress:', error);
       toast.error('Failed to save exercise progress', {
+        style: {
+          background: COLORS.DARK_GRAY,
+          color: COLORS.WHITE,
+          border: `1px solid ${COLORS.MEDIUM_GRAY}`,
+        },
+      });
+    }
+  };
+
+  const handleCompleteWorkout = async () => {
+    try {
+      const response = await axios.post(
+        `http://localhost:5000/api/workouts/${workoutId}/complete`,
+        {},
+        { withCredentials: true }
+      );
+
+      if (response.data.success) {
+        toast.success('Workout completed! Great job!', {
+          style: {
+            background: COLORS.DARK_GRAY,
+            color: COLORS.NEON_GREEN,
+            border: `1px solid ${COLORS.MEDIUM_GRAY}`,
+          },
+        });
+        navigate('/workouts');
+      }
+    } catch (error) {
+      console.error('Error completing workout:', error);
+      toast.error('Failed to complete workout', {
         style: {
           background: COLORS.DARK_GRAY,
           color: COLORS.WHITE,
@@ -242,52 +281,97 @@ const WorkoutDetailsPage = () => {
   }
 
   return (
-    <div className="p-6" style={{ backgroundColor: COLORS.DARK_GRAY, minHeight: '100vh' }}>
-      <div className="mb-4 flex justify-between items-center">
-        <button
-          onClick={() => navigate('/workout')}
-          className="px-3 py-1 rounded text-sm font-medium"
-          style={{ backgroundColor: COLORS.MEDIUM_GRAY, color: COLORS.WHITE }}
-        >
-          Back to Workouts
-        </button>
-        <div className="flex space-x-2">
-          <button
-            onClick={() => deleteWorkout()}
-            className="px-3 py-1 rounded text-sm font-medium"
-            style={{ backgroundColor: '#e74c3c', color: COLORS.WHITE }}
-          >
-            Delete Workout
-          </button>
-        </div>
-      </div>
-
-      <div className="border rounded-lg p-6" style={{ borderColor: COLORS.MEDIUM_GRAY, backgroundColor: COLORS.DARK_GRAY }}>
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-semibold" style={{ color: COLORS.WHITE }}>{workout.name}</h2>
-        </div>
-
-        {/* Workout Summary */}
-        <div className="mb-6 grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div className="rounded-lg p-4" style={{ backgroundColor: COLORS.BLACK }}>
-            <div className="flex justify-between">
-              <h3 className="text-sm uppercase font-medium" style={{ color: COLORS.LIGHT_GRAY }}>Difficulty</h3>
-              {renderDifficultyIndicator(workout.difficulty)}
+    <div className="min-h-screen pb-16" style={{ backgroundColor: COLORS.BLACK, color: COLORS.WHITE }}>
+      {/* Fixed header with blurred backdrop */}
+      <header className="sticky top-0 z-10 backdrop-blur-md border-b mb-8" 
+              style={{ backgroundColor: `${COLORS.BLACK}E6`, borderColor: COLORS.MEDIUM_GRAY }}>
+        <div className="max-w-6xl mx-auto p-6">
+          <div className="flex justify-between items-center">
+            <div>
+              <h1 className="text-3xl font-bold" style={{ color: COLORS.NEON_GREEN }}>
+                {workout.name}
+              </h1>
+              <p className="text-sm opacity-75">Created {new Date(workout.createdAt).toLocaleDateString()}</p>
+            </div>
+            <div className="flex items-center gap-3">
+              <button 
+                onClick={() => navigate('/workouts')} 
+                className="px-4 py-2 rounded-lg text-sm font-medium hidden md:flex items-center gap-2"
+                style={{ backgroundColor: COLORS.DARK_GRAY, color: COLORS.WHITE, border: `1px solid ${COLORS.MEDIUM_GRAY}` }}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+                Back
+              </button>
+              <button
+                onClick={() => deleteWorkout()}
+                className="px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2"
+                style={{ backgroundColor: '#e74c3c', color: COLORS.WHITE }}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+                Delete
+              </button>
             </div>
           </div>
-          <div className="rounded-lg p-4" style={{ backgroundColor: COLORS.BLACK }}>
-            <h3 className="text-sm uppercase font-medium" style={{ color: COLORS.LIGHT_GRAY }}>Est. Calories</h3>
-            <p className="text-lg font-medium" style={{ color: COLORS.WHITE }}>{workout.estimatedCalories || 'Not specified'}</p>
-          </div>
-          <div className="rounded-lg p-4" style={{ backgroundColor: COLORS.BLACK }}>
-            <h3 className="text-sm uppercase font-medium" style={{ color: COLORS.LIGHT_GRAY }}>Rest Period</h3>
-            <p className="text-lg font-medium" style={{ color: COLORS.WHITE }}>{workout.restPeriods || '60-90 seconds'}</p>
-          </div>
-          <div className="rounded-lg p-4" style={{ backgroundColor: COLORS.BLACK }}>
-            <h3 className="text-sm uppercase font-medium" style={{ color: COLORS.LIGHT_GRAY }}>Total Time Spent</h3>
-            <p className="text-lg font-medium" style={{ color: COLORS.WHITE }}>
-              {Object.values(exerciseTrackingData).reduce((total, exercise) => total + (exercise.timeSpent || 0), 0)} min
-            </p>
+        </div>
+      </header>
+
+      <div className="max-w-6xl mx-auto px-6">
+        {/* Summary card with workout stats */}
+        <div className="mb-10 rounded-xl overflow-hidden shadow-lg" 
+             style={{ backgroundColor: COLORS.DARK_GRAY, border: `1px solid ${COLORS.MEDIUM_GRAY}` }}>
+          <div className="p-6">
+            <h2 className="text-xl font-semibold mb-2">Workout Summary</h2>
+            <p className="text-sm opacity-70 mb-6">Complete breakdown of your workout plan</p>
+            
+            <div className="grid md:grid-cols-4 gap-6">
+              {/* Difficulty */}
+              <div className="p-4 rounded-lg" style={{ backgroundColor: `${COLORS.BLACK}80` }}>
+                <div className="flex items-center mb-2">
+                  <div className="h-3 w-3 rounded-full mr-2" style={{ backgroundColor: COLORS.NEON_GREEN }}></div>
+                  <span className="font-medium">Difficulty</span>
+                </div>
+                <div className="flex items-center">
+                  {renderDifficultyIndicator(workout.difficulty)}
+                </div>
+              </div>
+              
+              {/* Calories */}
+              <div className="p-4 rounded-lg" style={{ backgroundColor: `${COLORS.BLACK}80` }}>
+                <div className="flex justify-between items-center mb-2">
+                  <div className="flex items-center">
+                    <div className="h-3 w-3 rounded-full mr-2" style={{ backgroundColor: "#E74C3C" }}></div>
+                    <span className="font-medium">Calories</span>
+                  </div>
+                  <span>{workout.estimatedCalories || 'Not specified'}</span>
+                </div>
+              </div>
+              
+              {/* Rest Periods */}
+              <div className="p-4 rounded-lg" style={{ backgroundColor: `${COLORS.BLACK}80` }}>
+                <div className="flex items-center mb-2">
+                  <div className="h-3 w-3 rounded-full mr-2" style={{ backgroundColor: "#3498DB" }}></div>
+                  <span className="font-medium">Rest Periods</span>
+                </div>
+                <p className="text-sm" style={{ color: COLORS.WHITE }}>{workout.restPeriods || '60-90 seconds'}</p>
+              </div>
+              
+              {/* Time Spent */}
+              <div className="p-4 rounded-lg" style={{ backgroundColor: `${COLORS.BLACK}80` }}>
+                <div className="flex justify-between items-center mb-2">
+                  <div className="flex items-center">
+                    <div className="h-3 w-3 rounded-full mr-2" style={{ backgroundColor: "#F39C12" }}></div>
+                    <span className="font-medium">Time Spent</span>
+                  </div>
+                  <span>
+                    {Object.values(exerciseTrackingData).reduce((total, exercise) => total + (exercise.timeSpent || 0), 0)} min
+                  </span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -331,66 +415,85 @@ const WorkoutDetailsPage = () => {
             {workout.exercises.map((exercise, index) => (
               <div
                 key={index}
-                className="border rounded-lg p-4"
-                style={{ borderColor: COLORS.MEDIUM_GRAY, backgroundColor: COLORS.BLACK }}
+                className="rounded-xl overflow-hidden"
+                style={{ backgroundColor: COLORS.DARK_GRAY, border: `1px solid ${COLORS.MEDIUM_GRAY}` }}
               >
-                <div className="flex justify-between items-start">
-                  <h3 className="text-lg font-medium" style={{ color: COLORS.NEON_GREEN }}>
-                    {exercise.name}
-                  </h3>
-                  <span
-                    className="px-2 py-1 text-xs rounded"
-                    style={{ backgroundColor: COLORS.MEDIUM_GRAY, color: COLORS.WHITE }}
-                  >
-                    {exercise.targetMuscles}
-                  </span>
-                </div>
-
-                <div className="mt-3 flex flex-wrap gap-3">
-                  <div className="px-3 py-2 rounded" style={{ backgroundColor: COLORS.MEDIUM_GRAY }}>
-                    <span className="text-sm" style={{ color: COLORS.LIGHT_GRAY }}>
-                      Sets
-                    </span>
-                    <p className="text-xl font-semibold" style={{ color: COLORS.WHITE }}>
-                      {exercise.sets}
-                    </p>
-                  </div>
-                  <div className="px-3 py-2 rounded" style={{ backgroundColor: COLORS.MEDIUM_GRAY }}>
-                    <span className="text-sm" style={{ color: COLORS.LIGHT_GRAY }}>
-                      Reps
-                    </span>
-                    <p className="text-xl font-semibold" style={{ color: COLORS.WHITE }}>
-                      {exercise.reps}
-                    </p>
-                  </div>
-                  <div className="px-3 py-2 rounded" style={{ backgroundColor: COLORS.MEDIUM_GRAY }}>
-                    <span className="text-sm" style={{ color: COLORS.LIGHT_GRAY }}>
-                      Weight
-                    </span>
-                    <p className="text-xl font-semibold" style={{ color: COLORS.WHITE }}>
-                      {exercise.weight || 0} lbs
-                    </p>
-                  </div>
-                  <div className="px-3 py-2 rounded" style={{ backgroundColor: COLORS.MEDIUM_GRAY }}>
-                    <span className="text-sm" style={{ color: COLORS.LIGHT_GRAY }}>
-                      Time Spent
-                    </span>
-                    <p className="text-xl font-semibold" style={{ color: COLORS.WHITE }}>
-                      {exerciseTrackingData[exercise._id]?.timeSpent || 0} min
-                    </p>
-                  </div>
-                </div>
-
-                {exercise.description && (
-                  <div className="mt-3">
+                <div className="p-6">
+                  <div className="flex justify-between items-start">
+                    <div className="flex items-center gap-3">
+                      <h3 className="text-xl font-semibold mb-2" style={{ color: COLORS.NEON_GREEN }}>
+                        {exercise.name}
+                      </h3>
+                      {loggedExercises.has(exercise._id) && (
+                        <svg 
+                          xmlns="http://www.w3.org/2000/svg" 
+                          className="h-5 w-5" 
+                          viewBox="0 0 20 20" 
+                          fill={COLORS.NEON_GREEN}
+                        >
+                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                        </svg>
+                      )}
+                    </div>
                     <button
-                      className="flex items-center text-sm font-medium"
-                      style={{ color: COLORS.LIGHT_GRAY }}
                       onClick={() => toggleDescription(index)}
+                      className="p-2 rounded-lg hover:bg-gray-700 transition-colors"
+                      style={{ color: COLORS.LIGHT_GRAY }}
                     >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
-                        className={`h-4 w-4 mr-1 transition-transform ${showDescription[index] ? 'rotate-90' : ''}`}
+                        className={`h-5 w-5 transition-transform ${showDescription[index] ? 'rotate-180' : ''}`}
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </button>
+                  </div>
+
+                  <div className="mt-4 grid md:grid-cols-4 gap-4">
+                    <div className="p-3 rounded-lg" style={{ backgroundColor: `${COLORS.BLACK}80` }}>
+                      <span className="text-sm opacity-70">Sets</span>
+                      <p className="text-xl font-semibold" style={{ color: COLORS.WHITE }}>
+                        {exercise.sets}
+                      </p>
+                    </div>
+                    <div className="p-3 rounded-lg" style={{ backgroundColor: `${COLORS.BLACK}80` }}>
+                      <span className="text-sm opacity-70">Reps</span>
+                      <p className="text-xl font-semibold" style={{ color: COLORS.WHITE }}>
+                        {exercise.reps}
+                      </p>
+                    </div>
+                    <div className="p-3 rounded-lg" style={{ backgroundColor: `${COLORS.BLACK}80` }}>
+                      <span className="text-sm opacity-70">Weight</span>
+                      <p className="text-xl font-semibold" style={{ color: COLORS.WHITE }}>
+                        {exercise.weight || 0} lbs
+                      </p>
+                    </div>
+                    <div className="p-3 rounded-lg" style={{ backgroundColor: `${COLORS.BLACK}80` }}>
+                      <span className="text-sm opacity-70">Time Spent</span>
+                      <p className="text-xl font-semibold" style={{ color: COLORS.WHITE }}>
+                        {exerciseTrackingData[exercise._id]?.timeSpent || 0} min
+                      </p>
+                    </div>
+                  </div>
+
+                  {exercise.description && showDescription[index] && (
+                    <div className="mt-4 p-4 rounded-lg" style={{ backgroundColor: `${COLORS.BLACK}80` }}>
+                      <p style={{ color: COLORS.WHITE }}>{exercise.description}</p>
+                    </div>
+                  )}
+
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    <button
+                      className="px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2"
+                      style={{ backgroundColor: COLORS.NEON_GREEN, color: COLORS.BLACK }}
+                      onClick={() => handleStartExercise(exercise)}
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-4 w-4"
                         fill="none"
                         viewBox="0 0 24 24"
                         stroke="currentColor"
@@ -399,96 +502,66 @@ const WorkoutDetailsPage = () => {
                           strokeLinecap="round"
                           strokeLinejoin="round"
                           strokeWidth={2}
-                          d="M9 5l7 7-7 7"
+                          d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
                         />
                       </svg>
-                      {showDescription[index] ? 'Hide Description' : 'Show Description'}
+                      Log Exercise
                     </button>
-
-                    {showDescription[index] && (
-                      <div className="mt-2 p-3 rounded" style={{ backgroundColor: 'rgba(255,255,255,0.05)' }}>
-                        <p style={{ color: COLORS.WHITE }}>{exercise.description}</p>
-                      </div>
-                    )}
+                    <button
+                      className="px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2"
+                      style={{ backgroundColor: COLORS.BLACK, color: COLORS.WHITE, border: `1px solid ${COLORS.MEDIUM_GRAY}` }}
+                      onClick={() =>
+                        window.open(
+                          `https://www.youtube.com/results?search_query=${encodeURIComponent(
+                            exercise.videoKeywords || exercise.name + ' exercise tutorial'
+                          )}`,
+                          '_blank'
+                        )
+                      }
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-4 w-4"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"
+                        />
+                      </svg>
+                      Watch Tutorial
+                    </button>
+                    <button
+                      className="px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2"
+                      style={{ backgroundColor: COLORS.BLACK, color: COLORS.WHITE, border: `1px solid ${COLORS.MEDIUM_GRAY}` }}
+                      onClick={() =>
+                        window.open(
+                          `https://www.google.com/search?q=${encodeURIComponent(exercise.name + ' proper form')}`,
+                          '_blank'
+                        )
+                      }
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-4 w-4"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                        />
+                      </svg>
+                      Form Guide
+                    </button>
                   </div>
-                )}
-
-                <div className="mt-4 flex flex-wrap gap-2">
-                  <button
-                    className="px-3 py-1 rounded text-sm font-medium flex items-center"
-                    style={{ backgroundColor: COLORS.NEON_GREEN, color: COLORS.BLACK }}
-                    onClick={() => handleStartExercise(exercise)}
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-4 w-4 mr-1"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                      />
-                    </svg>
-                    Log Exercise
-                  </button>
-                  <button
-                    className="px-3 py-1 rounded text-sm font-medium flex items-center"
-                    style={{ backgroundColor: COLORS.MEDIUM_GRAY, color: COLORS.WHITE }}
-                    onClick={() =>
-                      window.open(
-                        `https://www.youtube.com/results?search_query=${encodeURIComponent(
-                          exercise.videoKeywords || exercise.name + ' exercise tutorial'
-                        )}`,
-                        '_blank'
-                      )
-                    }
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-4 w-4 mr-1"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"
-                      />
-                    </svg>
-                    Watch Tutorial
-                  </button>
-                  <button
-                    className="px-3 py-1 rounded text-sm font-medium flex items-center"
-                    style={{ backgroundColor: COLORS.MEDIUM_GRAY, color: COLORS.WHITE }}
-                    onClick={() =>
-                      window.open(
-                        `https://www.google.com/search?q=${encodeURIComponent(exercise.name + ' proper form')}`,
-                        '_blank'
-                      )
-                    }
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-4 w-4 mr-1"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                      />
-                    </svg>
-                    Form Guide
-                  </button>
                 </div>
               </div>
             ))}
@@ -498,51 +571,64 @@ const WorkoutDetailsPage = () => {
         {activeTab === 'details' && (
           <div className="space-y-6">
             {/* Notes Section */}
-            <div className="border rounded-lg p-4" style={{ borderColor: COLORS.MEDIUM_GRAY, backgroundColor: COLORS.BLACK }}>
-              <h3 className="text-lg font-medium mb-3" style={{ color: COLORS.NEON_GREEN }}>
-                Workout Notes
-              </h3>
-              <p style={{ color: COLORS.WHITE }}>{workout.notes || 'No specific notes for this workout.'}</p>
+            <div className="rounded-xl overflow-hidden" style={{ backgroundColor: COLORS.DARK_GRAY, border: `1px solid ${COLORS.MEDIUM_GRAY}` }}>
+              <div className="p-6">
+                <h3 className="text-xl font-semibold mb-3" style={{ color: COLORS.NEON_GREEN }}>
+                  Workout Notes
+                </h3>
+                <div className="p-4 rounded-lg" style={{ backgroundColor: `${COLORS.BLACK}80` }}>
+                  <p style={{ color: COLORS.WHITE }}>{workout.notes || 'No specific notes for this workout.'}</p>
+                </div>
+              </div>
             </div>
 
             {/* Progression Section */}
-            <div className="border rounded-lg p-4" style={{ borderColor: COLORS.MEDIUM_GRAY, backgroundColor: COLORS.BLACK }}>
-              <h3 className="text-lg font-medium mb-3" style={{ color: COLORS.NEON_GREEN }}>
-                Progression Plan
-              </h3>
-              <p style={{ color: COLORS.WHITE }}>{workout.progression || 'No progression plan specified for this workout.'}</p>
+            <div className="rounded-xl overflow-hidden" style={{ backgroundColor: COLORS.DARK_GRAY, border: `1px solid ${COLORS.MEDIUM_GRAY}` }}>
+              <div className="p-6">
+                <h3 className="text-xl font-semibold mb-3" style={{ color: COLORS.NEON_GREEN }}>
+                  Progression Plan
+                </h3>
+                <div className="p-4 rounded-lg" style={{ backgroundColor: `${COLORS.BLACK}80` }}>
+                  <p style={{ color: COLORS.WHITE }}>{workout.progression || 'No progression plan specified for this workout.'}</p>
+                </div>
+              </div>
             </div>
 
             {/* Calendar Planning */}
-            <div className="border rounded-lg p-4" style={{ borderColor: COLORS.MEDIUM_GRAY, backgroundColor: COLORS.BLACK }}>
-              <h3 className="text-lg font-medium mb-3" style={{ color: COLORS.NEON_GREEN }}>
-                Workout Schedule
-              </h3>
-              <div className="p-3 rounded" style={{ backgroundColor: 'rgba(255,255,255,0.05)' }}>
-                <div className="flex items-center mb-2">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-5 w-5 mr-2"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    style={{ color: COLORS.NEON_GREEN }}
+            <div className="rounded-xl overflow-hidden" style={{ backgroundColor: COLORS.DARK_GRAY, border: `1px solid ${COLORS.MEDIUM_GRAY}` }}>
+              <div className="p-6">
+                <h3 className="text-xl font-semibold mb-3" style={{ color: COLORS.NEON_GREEN }}>
+                  Workout Schedule
+                </h3>
+                <div className="p-4 rounded-lg" style={{ backgroundColor: `${COLORS.BLACK}80` }}>
+                  <div className="flex items-center mb-4">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-5 w-5 mr-2"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      style={{ color: COLORS.NEON_GREEN }}
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                      />
+                    </svg>
+                    <span style={{ color: COLORS.WHITE }}>Schedule this workout in your weekly plan</span>
+                  </div>
+                  <button
+                    className="w-full px-4 py-2 rounded-lg text-sm font-medium flex items-center justify-center gap-2"
+                    style={{ backgroundColor: COLORS.NEON_GREEN, color: COLORS.BLACK }}
                   >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                    />
-                  </svg>
-                  <span style={{ color: COLORS.WHITE }}>Schedule this workout in your weekly plan</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clipRule="evenodd" />
+                    </svg>
+                    Add to Calendar (Coming Soon)
+                  </button>
                 </div>
-                <button
-                  className="w-full px-3 py-2 rounded text-sm font-medium mt-2"
-                  style={{ backgroundColor: COLORS.MEDIUM_GRAY, color: COLORS.WHITE }}
-                >
-                  Add to Calendar (Coming Soon)
-                </button>
               </div>
             </div>
           </div>
@@ -551,51 +637,65 @@ const WorkoutDetailsPage = () => {
         {activeTab === 'alternatives' && (
           <div className="space-y-6">
             {/* Beginner Alternatives */}
-            <div className="border rounded-lg p-4" style={{ borderColor: COLORS.MEDIUM_GRAY, backgroundColor: COLORS.BLACK }}>
-              <h3 className="text-lg font-medium mb-2" style={{ color: COLORS.NEON_GREEN }}>
-                Beginner Modifications
-              </h3>
-              <div className="p-3 rounded" style={{ backgroundColor: 'rgba(255,255,255,0.05)' }}>
-                <p style={{ color: COLORS.WHITE }}>
-                  {workout.alternatives?.beginner || 'No specific beginner modifications provided for this workout.'}
-                </p>
+            <div className="rounded-xl overflow-hidden" style={{ backgroundColor: COLORS.DARK_GRAY, border: `1px solid ${COLORS.MEDIUM_GRAY}` }}>
+              <div className="p-6">
+                <h3 className="text-xl font-semibold mb-3" style={{ color: COLORS.NEON_GREEN }}>
+                  Beginner Modifications
+                </h3>
+                <div className="p-4 rounded-lg" style={{ backgroundColor: `${COLORS.BLACK}80` }}>
+                  <p style={{ color: COLORS.WHITE }}>
+                    {workout.alternatives?.beginner || 'No specific beginner modifications provided for this workout.'}
+                  </p>
+                </div>
               </div>
             </div>
 
             {/* Advanced Alternatives */}
-            <div className="border rounded-lg p-4" style={{ borderColor: COLORS.MEDIUM_GRAY, backgroundColor: COLORS.BLACK }}>
-              <h3 className="text-lg font-medium mb-2" style={{ color: COLORS.NEON_GREEN }}>
-                Advanced Challenges
-              </h3>
-              <div className="p-3 rounded" style={{ backgroundColor: 'rgba(255,255,255,0.05)' }}>
-                <p style={{ color: COLORS.WHITE }}>
-                  {workout.alternatives?.advanced || 'No specific advanced modifications provided for this workout.'}
-                </p>
+            <div className="rounded-xl overflow-hidden" style={{ backgroundColor: COLORS.DARK_GRAY, border: `1px solid ${COLORS.MEDIUM_GRAY}` }}>
+              <div className="p-6">
+                <h3 className="text-xl font-semibold mb-3" style={{ color: COLORS.NEON_GREEN }}>
+                  Advanced Challenges
+                </h3>
+                <div className="p-4 rounded-lg" style={{ backgroundColor: `${COLORS.BLACK}80` }}>
+                  <p style={{ color: COLORS.WHITE }}>
+                    {workout.alternatives?.advanced || 'No specific advanced modifications provided for this workout.'}
+                  </p>
+                </div>
               </div>
             </div>
 
             {/* Equipment Alternatives */}
-            <div className="border rounded-lg p-4" style={{ borderColor: COLORS.MEDIUM_GRAY, backgroundColor: COLORS.BLACK }}>
-              <h3 className="text-lg font-medium mb-2" style={{ color: COLORS.NEON_GREEN }}>
-                Equipment Alternatives
-              </h3>
-              <div className="p-3 rounded" style={{ backgroundColor: 'rgba(255,255,255,0.05)' }}>
-                <p style={{ color: COLORS.WHITE }}>
-                  If you don't have access to all equipment needed for this workout, search for alternatives by clicking
-                  on the exercise tutorials.
-                </p>
+            <div className="rounded-xl overflow-hidden" style={{ backgroundColor: COLORS.DARK_GRAY, border: `1px solid ${COLORS.MEDIUM_GRAY}` }}>
+              <div className="p-6">
+                <h3 className="text-xl font-semibold mb-3" style={{ color: COLORS.NEON_GREEN }}>
+                  Equipment Alternatives
+                </h3>
+                <div className="p-4 rounded-lg" style={{ backgroundColor: `${COLORS.BLACK}80` }}>
+                  <p style={{ color: COLORS.WHITE }}>
+                    If you don't have access to all equipment needed for this workout, search for alternatives by clicking
+                    on the exercise tutorials.
+                  </p>
+                </div>
               </div>
             </div>
           </div>
         )}
 
-        {/* Start Workout Button - Keep this here */}
-        <div className="mt-8 p-4 rounded-lg flex items-center justify-center" style={{ backgroundColor: 'rgba(255,255,255,0.05)' }}>
+        {/* Start Workout Button */}
+        <div className="mt-8 p-6 rounded-xl overflow-hidden flex items-center justify-center" 
+             style={{ backgroundColor: COLORS.DARK_GRAY, border: `1px solid ${COLORS.MEDIUM_GRAY}` }}>
           <button
-            className="px-6 py-3 rounded text-lg font-medium"
-            style={{ backgroundColor: COLORS.NEON_GREEN, color: COLORS.BLACK }}
+            className={`px-8 py-3 rounded-lg text-lg font-medium flex items-center gap-2 transition-all duration-300 ${
+              allExercisesCompleted ? 'opacity-100' : 'opacity-50 cursor-not-allowed'
+            }`}
+            style={{ 
+              backgroundColor: allExercisesCompleted ? COLORS.NEON_GREEN : COLORS.MEDIUM_GRAY,
+              color: COLORS.BLACK,
+              pointerEvents: allExercisesCompleted ? 'auto' : 'none'
+            }}
+            onClick={handleCompleteWorkout}
           >
-            Start Workout
+            Complete Exercise
           </button>
         </div>
       </div>
@@ -605,6 +705,7 @@ const WorkoutDetailsPage = () => {
           exercise={trackingExercise}
           workoutId={workoutId}
           onClose={() => setTrackingExercise(null)}
+          onSave={handleSaveExerciseProgress}
         />
       )}
     </div>
