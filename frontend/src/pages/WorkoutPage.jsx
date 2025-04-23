@@ -78,12 +78,47 @@ const WorkoutPage = () => {
 
     useEffect(() =>
     {
+        const checkHighestLift = async () =>
+        {
+            try
+            {
+                const response = await axios.get("http://localhost:5000/api/workouts", { withCredentials: true });
+                const allWorkouts = response.data || [];
+
+                let maxLift = 0;
+                allWorkouts.forEach(workout =>
+                {
+                    workout.exercises.forEach(ex =>
+                    {
+                        if (ex.weight && ex.weight > maxLift)
+                        {
+                            maxLift = ex.weight;
+                        }
+                    });
+                });
+
+                await axios.post("http://localhost:5000/api/auth/max-lift", { maxLift }, { withCredentials: true });
+
+                if (user?.maxLift !== undefined && maxLift > user.maxLift)
+                {
+                    setUnlockedAchievement({
+                        title: `New Max Lift: ${maxLift} lbs`,
+                        description: `You've hit a new personal record!`,
+                    });
+                }
+
+            } catch (err)
+            {
+                console.error("Error checking max lift:", err);
+            }
+        };
+
         if (user && !hasCheckedLift.current)
         {
             hasCheckedLift.current = true;
             checkHighestLift();
         }
-    }, [user]);
+    }, [user, setUnlockedAchievement]);
 
   useEffect(() => {
     const fetchWorkoutCount = async () => {
@@ -100,40 +135,6 @@ const WorkoutPage = () => {
     fetchWorkoutCount();
   }, []);
 
-    const checkHighestLift = async () =>
-    {
-        try
-        {
-            const response = await axios.get("http://localhost:5000/api/workouts", { withCredentials: true });
-            const allWorkouts = response.data || [];
-
-            let maxLift = 0;
-            allWorkouts.forEach(workout =>
-            {
-                workout.exercises.forEach(ex =>
-                {
-                    if (ex.weight && ex.weight > maxLift)
-                    {
-                        maxLift = ex.weight;
-                    }
-                });
-            });
-
-            await axios.post("http://localhost:5000/api/auth/max-lift", { maxLift }, { withCredentials: true });
-
-            if (user?.maxLift !== undefined && maxLift > user.maxLift)
-            {
-                setUnlockedAchievement({
-                    title: `New Max Lift: ${maxLift} lbs`,
-                    description: `You've hit a new personal record!`,
-                });
-            }
-
-        } catch (err)
-        {
-            console.error("Error checking max lift:", err);
-        }
-    };
  
   const generateWorkoutPlan = async () => {
     // Validate required fields
