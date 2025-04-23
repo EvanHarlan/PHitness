@@ -6,6 +6,8 @@ import { useUserStore } from "../stores/useUserStore";
 import { useMemo } from "react";
 
 
+
+
 const ProfilePage = () =>
 {
     const [workoutAmount, setWorkoutAmount] = useState(0);
@@ -18,7 +20,8 @@ const ProfilePage = () =>
         name: "",
         username: "",
         bio: "",
-        age: ""
+        age: "",
+        avatar: ""
     });
     const profileEdited = localStorage.getItem("profileEdited") === "true";
     const [streak, setStreak] = useState(0);
@@ -39,6 +42,8 @@ const ProfilePage = () =>
                   username: profileResponse.data.username || "",
                   bio: profileResponse.data.bio || "",
                   age: profileResponse.data.age || "",
+                  avatar: profileResponse.data.avatar || "avatar1.png"
+
               });
 
                 const countsResponse = await axios.get("http://localhost:5000/api/tracker/counts", {
@@ -95,6 +100,27 @@ const ProfilePage = () =>
         setStreak(storedStreak);
     }, []);
 
+    const avatarImages = {
+      default: "/profileIcon.png",
+      avatar1: "/avatar1.png",
+      avatar2: "/avatar2.png",
+      avatar3: "/avatar3.png",
+      avatar4: "/avatar4.png",
+      avatar5: "/avatar5.png",
+      avatar6: "/avatar6.png",
+      avatar7: "/avatar7.png",
+      avatar8: "/avatar8.png",
+      avatar9: "/avatar9.png",
+      avatar10: "/avatar10.png",
+      avatar11: "/avatar11.png",
+      avatar12: "/avatar12.png",
+      avatar13: "/avatar13.png",
+      avatar14: "/avatar14.png",
+      avatar15: "/avatar15.png",
+      avatar16: "/avatar16.png",
+      avatar17: "/avatar17.png",
+      avatar18: "/avatar18.png",
+    };
 
     const achievements = useMemo(() => [
         { title: "Account Created", description: "Welcome to PHitness! Your journey begins here.", threshold: 0, count: 1 },
@@ -234,7 +260,7 @@ const ProfilePage = () =>
         <div className="flex justify-between items-center mb-4">
           <div className="flex items-center">
             <img 
-              src="../../public/profileIcon.png" 
+              src={avatarImages[editedProfile.avatar] || avatarImages.default} 
               alt="Profile" 
               className="w-24 h-24 rounded-full mr-4"
             />
@@ -297,7 +323,22 @@ const ProfilePage = () =>
                     rows="3"
                   />
                 </div>
+                <div className="mb-2">
+                <label className="block text-sm" style={{ color: COLORS.NEON_GREEN }}>Select Avatar:</label>
+                <div className="flex gap-2 mt-2">
+                {Object.entries(avatarImages).map(([key, src]) => (
+                <img 
+                key={key}
+                src={src}
+                alt={key}
+                className={`w-16 h-16 rounded-full cursor-pointer border-2 ${editedProfile.avatar === key ? 'border-green-400' : 'border-transparent'}`}
+                onClick={() => setEditedProfile(prev => ({ ...prev, avatar: key }))}
+                />
+                ))}
               </div>
+              </div>
+            </div>
+              
             )}
           </div>
           <div>

@@ -148,3 +148,70 @@ export const removeFriend = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+// Get Friend Profile (respecting visibility)
+export const getFriendProfile = async (req, res) => {
+  try {
+      const requestedFriendId = req.params.friendId; // Get the ID of the profile being requested from URL param
+      const requestingUserId = req.user._id; // Get the ID of the user making the request (from protectRoute)
+
+      // Fetch the friend whose profile is requested
+      const requestedFriendUser = await User.findById(requestedFriendId)
+          .select('username name avatar bio achievements profileVisibility friends'); // Select needed fields
+
+      if (!requestedFriendUser) {
+          return res.status(404).json({ message: 'Friend user not found' });
+      }
+
+      // Fetch the user making the request to check friendship status easily
+      const requestingUser = await User.findById(requestingUserId).select('friends');
+       if (!requestingUser) {
+           // Should not happen if protectRoute works, but good practice
+          return res.status(404).json({ message: 'Requesting user not found' });
+      }
+
+      // Check visibility permissions
+      let canView = false;
+      const isFriend = requestingUser.friends.some(friendId => friendId.toString() === requestedFriendId.toString());
+      const isSelf = requestingUserId.toString() === requestedFriendId.toString(); // Check if viewing own profile
+
+
+      if (requestedFriendUser.profileVisibility === 'public') {
+          canView = true;
+      } else if (requestedFriendUser.profileVisibility === 'friends') {
+          // Check if the requesting user is friends with the requested user
+          canView = isFriend;
+      } else if (requestedFriendUser.profileVisibility === 'private') {
+          // Only the user themselves can view their private profile
+          canView = isSelf;
+      }
+
+      // Important: Even if they are friends, only allow viewing if the requesting user IS a friend
+      // This handles the case where someone might try to access a 'friends' profile they aren't friends with
+      if (!isFriend && !isSelf && requestedFriendUser.profileVisibility !== 'public') {
+           return res.status(403).json({ message: 'You do not have permission to view this profile.' });
+      }
+
+      // Final check based on determined visibility
+      if (!canView) {
+          return res.status(403).json({ message: 'Profile is private or you do not have permission.' });
+      }
+
+      // Return only the necessary public profile data
+      const profileData = {
+          _id: requestedFriendUser._id,
+          username: requestedFriendUser.username,
+          name: requestedFriendUser.name, // Include name
+          avatar: requestedFriendUser.avatar,
+          bio: requestedFriendUser.bio,
+          achievements: requestedFriendUser.achievements,
+          // Add any other *safe* fields you want to display
+      };
+
+      res.status(200).json(profileData);
+
+  } catch (error) {
+      console.error("Error fetching friend profile:", error);
+      res.status(500).json({ message: 'Server error fetching profile' });
+  }
+};

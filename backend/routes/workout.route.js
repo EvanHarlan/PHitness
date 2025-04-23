@@ -20,6 +20,36 @@ router.get("/", protectRoute, async (req, res) => {
   }
 });
 
+// GET workouts by date range
+router.get("/by-date", protectRoute, async (req, res) => {
+  try {
+    const { startDate, endDate } = req.query;
+    
+    if (!startDate || !endDate) {
+      return res.status(400).json({ message: "Start date and end date are required" });
+    }
+
+    const workouts = await Workout.find({
+      user: req.user._id,
+      createdAt: {
+        $gte: new Date(startDate),
+        $lte: new Date(endDate)
+      }
+    }).sort({ createdAt: 1 });
+
+    console.log('Found workouts:', workouts.map(w => ({
+      createdAt: w.createdAt,
+      totalTimeSpent: w.totalTimeSpent,
+      estimatedCalories: w.estimatedCalories
+    })));
+
+    res.json(workouts);
+  } catch (error) {
+    console.error("Error fetching workouts by date:", error);
+    res.status(500).json({ message: "Failed to fetch workouts by date" });
+  }
+});
+
 // GET a specific workout
 router.get("/:id", protectRoute, async (req, res) => {
   try {
@@ -82,5 +112,30 @@ router.delete(
 
 // TOGGLE favorite status for a workout
 router.patch("/:id/favorite", protectRoute, toggleFavorite);
+
+// Complete a workout
+router.post("/:id/complete", protectRoute, async (req, res) => {
+  try {
+    const workout = await Workout.findOne({ _id: req.params.id, user: req.user._id });
+    
+    if (!workout) {
+      return res.status(404).json({ message: "Workout not found" });
+    }
+
+    // Update the workout as completed
+    workout.completed = true;
+    workout.completedAt = new Date();
+    await workout.save();
+
+    res.json({ 
+      success: true, 
+      message: "Workout completed successfully",
+      workout 
+    });
+  } catch (error) {
+    console.error("Error completing workout:", error);
+    res.status(500).json({ message: "Failed to complete workout" });
+  }
+});
 
 export default router;

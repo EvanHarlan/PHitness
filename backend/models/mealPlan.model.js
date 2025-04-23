@@ -6,6 +6,10 @@ const mealPlanSchema = new mongoose.Schema({
     ref: 'User',
     required: true
   },
+  title: {
+    type: String,
+    required: true
+  },
   meals: [{
     name: {
       type: String,
@@ -38,6 +42,10 @@ const mealPlanSchema = new mongoose.Schema({
     instructions: {
       type: String,
       required: true
+    },
+    completed: {
+      type: Boolean,
+      default: false
     }
   }],
   totalNutrition: {
@@ -60,7 +68,7 @@ const mealPlanSchema = new mongoose.Schema({
   },
   isFavorite: {
     type: Boolean,
-    default: true
+    default: false
   },
   createdAt: {
     type: Date,
