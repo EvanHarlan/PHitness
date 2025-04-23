@@ -87,6 +87,13 @@ const workoutSchema = new mongoose.Schema(
     totalTimeSpent: {
       type: Number,
       default: 0
+    },
+    completed: {
+      type: Boolean,
+      default: false
+    },
+    completedAt: {
+      type: Date
     }
   },
   { timestamps: true }
