@@ -20,15 +20,7 @@ import { COLORS } from '../lib/constants';
 
 // Sample data for charts - replace with actual data from MongoDB later
 const PLACEHOLDER_DATA = {
-  workout: [
-    { day: 'Mon', minutes: 45, calories: 320 },
-    { day: 'Tue', minutes: 30, calories: 250 },
-    { day: 'Wed', minutes: 60, calories: 450 },
-    { day: 'Thu', minutes: 0, calories: 0 },
-    { day: 'Fri', minutes: 45, calories: 350 },
-    { day: 'Sat', minutes: 90, calories: 600 },
-    { day: 'Sun', minutes: 20, calories: 180 },
-  ],
+  
   nutrition: [
     { day: 'Mon', calories: 2100, protein: 120, carbs: 240, fat: 70 },
     { day: 'Tue', calories: 1950, protein: 130, carbs: 200, fat: 65 },
@@ -39,9 +31,7 @@ const PLACEHOLDER_DATA = {
     { day: 'Sun', calories: 1900, protein: 115, carbs: 210, fat: 63 },
   ],
   macros: [
-    { name: 'Protein', value: 120 },
-    { name: 'Carbs', value: 220 },
-    { name: 'Fat', value: 65 },
+    
   ],
   progress: [
     { month: 'Jan', weight: 185 },
@@ -62,7 +52,7 @@ const CustomTooltip = ({ active, payload, label }) => {
         <p className="font-medium mb-1">{label}</p>
         {payload.map((entry, index) => (
           <p key={index} style={{ color: entry.color }} className="text-sm">
-            {entry.name}: {entry.value} {entry.unit || ''}
+            {entry.dataKey === 'minutes' ? 'Total Time Spent' : 'Calories Burned'}: {entry.value} {entry.dataKey === 'minutes' ? 'min' : 'cal'}
           </p>
         ))}
       </div>
@@ -91,9 +81,6 @@ const StatsDisplay = ({
   // You can pass in real data here later from MongoDB
   data = null
 }) => {
-  // State to track active time range (for filtering in the future)
-  const [timeRange, setTimeRange] = useState('weekly');
-  
   // Use passed data or fallback to placeholder
   const chartData = data || PLACEHOLDER_DATA[dataKey];
   
@@ -170,30 +157,50 @@ const StatsDisplay = ({
         );
         
       case CHART_TYPES.LINE:
-      default:
         return (
           <ResponsiveContainer width="100%" height={height}>
             <LineChart data={chartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke={COLORS.MEDIUM_GRAY} />
-              <XAxis dataKey={xAxisKey} stroke={COLORS.WHITE} />
-              <YAxis stroke={COLORS.WHITE} />
+              <XAxis 
+                dataKey={xAxisKey} 
+                stroke={COLORS.WHITE}
+                tick={{ fill: COLORS.WHITE }}
+              />
+              <YAxis 
+                yAxisId="left"
+                stroke={COLORS.WHITE}
+                tick={{ fill: COLORS.WHITE }}
+                label={{ value: 'Minutes', angle: -90, position: 'insideLeft', fill: COLORS.WHITE }}
+              />
+              <YAxis 
+                yAxisId="right"
+                orientation="right"
+                stroke={COLORS.WHITE}
+                tick={{ fill: COLORS.WHITE }}
+                label={{ value: 'Calories', angle: 90, position: 'insideRight', fill: COLORS.WHITE }}
+              />
               <Tooltip content={<CustomTooltip />} />
+              <Legend />
               <Line 
+                yAxisId="left"
                 type="monotone" 
                 dataKey={yAxisKey} 
                 stroke={COLORS.NEON_GREEN} 
                 strokeWidth={2}
                 dot={{ r: 4, fill: COLORS.NEON_GREEN }}
                 activeDot={{ r: 6, fill: COLORS.NEON_GREEN }}
+                name="Time Spent"
               />
               {secondaryKey && (
                 <Line 
+                  yAxisId="right"
                   type="monotone" 
                   dataKey={secondaryKey} 
                   stroke="#36A2EB" 
                   strokeWidth={2}
                   dot={{ r: 4, fill: "#36A2EB" }}
                   activeDot={{ r: 6, fill: "#36A2EB" }}
+                  name="Calories Burned"
                 />
               )}
             </LineChart>
@@ -207,45 +214,9 @@ const StatsDisplay = ({
       className="p-6 rounded-lg"
       style={{ backgroundColor: COLORS.MEDIUM_GRAY, border: `1px solid ${COLORS.DARK_GRAY}` }}
     >
-      <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-6">
-        <div>
-          <h3 className="text-xl font-semibold mb-1" style={{ color: COLORS.NEON_GREEN }}>{title}</h3>
-          {description && <p className="text-sm text-[#B0B0B0]">{description}</p>}
-        </div>
-        
-        {/* Time range selector - functionality can be implemented later */}
-        <div className="mt-4 md:mt-0 flex space-x-2">
-          <button 
-            className={`px-3 py-1 text-sm rounded-md transition-colors duration-200 ${timeRange === 'weekly' ? 'text-black' : 'text-white'}`}
-            style={{ 
-              backgroundColor: timeRange === 'weekly' ? COLORS.NEON_GREEN : 'transparent',
-              border: timeRange !== 'weekly' ? `1px solid ${COLORS.NEON_GREEN}` : 'none'
-            }}
-            onClick={() => setTimeRange('weekly')}
-          >
-            Week
-          </button>
-          <button 
-            className={`px-3 py-1 text-sm rounded-md transition-colors duration-200 ${timeRange === 'monthly' ? 'text-black' : 'text-white'}`}
-            style={{ 
-              backgroundColor: timeRange === 'monthly' ? COLORS.NEON_GREEN : 'transparent', 
-              border: timeRange !== 'monthly' ? `1px solid ${COLORS.NEON_GREEN}` : 'none'
-            }}
-            onClick={() => setTimeRange('monthly')}
-          >
-            Month
-          </button>
-          <button 
-            className={`px-3 py-1 text-sm rounded-md transition-colors duration-200 ${timeRange === 'yearly' ? 'text-black' : 'text-white'}`}
-            style={{ 
-              backgroundColor: timeRange === 'yearly' ? COLORS.NEON_GREEN : 'transparent',
-              border: timeRange !== 'yearly' ? `1px solid ${COLORS.NEON_GREEN}` : 'none'
-            }}
-            onClick={() => setTimeRange('yearly')}
-          >
-            Year
-          </button>
-        </div>
+      <div className="mb-6">
+        <h3 className="text-xl font-semibold mb-1" style={{ color: COLORS.NEON_GREEN }}>{title}</h3>
+        {description && <p className="text-sm text-[#B0B0B0]">{description}</p>}
       </div>
       
       {/* The actual chart */}

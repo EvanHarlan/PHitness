@@ -103,9 +103,27 @@ const NutritionPage = () => {
   const generateMealPlan = async () => {
     setLoading(true);
     try {
+      // Create a properly formatted payload with all required fields
+      const payload = {
+        goal: userParams.goal,
+        weight: Number(userParams.weight),
+        height: userParams.height,
+        age: Number(userParams.age),
+        gender: userParams.gender,
+        activityLevel: userParams.activityLevel || 'moderate',
+        dietaryRestrictions: userParams.dietaryRestrictions || [],
+        mealFrequency: userParams.mealFrequency || 3,
+        snackPreference: userParams.snackPreference || 'no',
+        dailyWaterIntake: userParams.hydrationPreference || 'moderate',
+        cookingSkillLevel: userParams.cookingSkill || 'Intermediate'
+      };
+
+      // Log the payload for debugging
+      console.log("🚀 Payload being sent:", payload);
+
       const response = await axios.post(
         "http://localhost:5000/api/meal-plans/generate",
-        userParams,
+        payload,
         { withCredentials: true }
       );
 
