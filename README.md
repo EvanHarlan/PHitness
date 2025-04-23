@@ -10,6 +10,7 @@
 - **ioredis**: Redis client for caching frequent data (JWTs/cookies)
 - **nodemon**: Development server with hot-reloading
 - **lucide-react**: React icon package
+- **recharts**: React charting
 
 ## Project Structure
 ```bash
