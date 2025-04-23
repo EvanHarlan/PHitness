@@ -8,7 +8,8 @@ import {
     getUserMealPlans,       // Get all plans (history) / filter favorites
     getMealPlanById,        // Get specific plan details
     toggleFavoriteMealPlan, // Mark/unmark as favorite
-    deleteMealPlan          // Remove a plan
+    deleteMealPlan,         // Remove a plan
+    completeMeal            // Complete a meal
 } from '../controllers/mealPlan.controller.js';
 
 const router = express.Router();
@@ -40,5 +41,7 @@ router.patch('/:id/favorite', protectRoute, toggleFavoriteMealPlan);
 // DELETE /api/meal-plans/:id
 router.delete('/:id', protectRoute, deleteMealPlan);
 
+// Complete a meal
+router.patch('/:mealPlanId/meals/:mealIndex/complete', protectRoute, completeMeal);
 
 export default router; // Export the configured router

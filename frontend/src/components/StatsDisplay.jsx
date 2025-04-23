@@ -81,9 +81,6 @@ const StatsDisplay = ({
   // You can pass in real data here later from MongoDB
   data = null
 }) => {
-  // State to track active time range (for filtering in the future)
-  const [timeRange, setTimeRange] = useState('weekly');
-  
   // Use passed data or fallback to placeholder
   const chartData = data || PLACEHOLDER_DATA[dataKey];
   
@@ -217,45 +214,9 @@ const StatsDisplay = ({
       className="p-6 rounded-lg"
       style={{ backgroundColor: COLORS.MEDIUM_GRAY, border: `1px solid ${COLORS.DARK_GRAY}` }}
     >
-      <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-6">
-        <div>
-          <h3 className="text-xl font-semibold mb-1" style={{ color: COLORS.NEON_GREEN }}>{title}</h3>
-          {description && <p className="text-sm text-[#B0B0B0]">{description}</p>}
-        </div>
-        
-        {/* Time range selector - functionality can be implemented later */}
-        <div className="mt-4 md:mt-0 flex space-x-2">
-          <button 
-            className={`px-3 py-1 text-sm rounded-md transition-colors duration-200 ${timeRange === 'weekly' ? 'text-black' : 'text-white'}`}
-            style={{ 
-              backgroundColor: timeRange === 'weekly' ? COLORS.NEON_GREEN : 'transparent',
-              border: timeRange !== 'weekly' ? `1px solid ${COLORS.NEON_GREEN}` : 'none'
-            }}
-            onClick={() => setTimeRange('weekly')}
-          >
-            Week
-          </button>
-          <button 
-            className={`px-3 py-1 text-sm rounded-md transition-colors duration-200 ${timeRange === 'monthly' ? 'text-black' : 'text-white'}`}
-            style={{ 
-              backgroundColor: timeRange === 'monthly' ? COLORS.NEON_GREEN : 'transparent', 
-              border: timeRange !== 'monthly' ? `1px solid ${COLORS.NEON_GREEN}` : 'none'
-            }}
-            onClick={() => setTimeRange('monthly')}
-          >
-            Month
-          </button>
-          <button 
-            className={`px-3 py-1 text-sm rounded-md transition-colors duration-200 ${timeRange === 'yearly' ? 'text-black' : 'text-white'}`}
-            style={{ 
-              backgroundColor: timeRange === 'yearly' ? COLORS.NEON_GREEN : 'transparent',
-              border: timeRange !== 'yearly' ? `1px solid ${COLORS.NEON_GREEN}` : 'none'
-            }}
-            onClick={() => setTimeRange('yearly')}
-          >
-            Year
-          </button>
-        </div>
+      <div className="mb-6">
+        <h3 className="text-xl font-semibold mb-1" style={{ color: COLORS.NEON_GREEN }}>{title}</h3>
+        {description && <p className="text-sm text-[#B0B0B0]">{description}</p>}
       </div>
       
       {/* The actual chart */}

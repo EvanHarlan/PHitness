@@ -380,3 +380,32 @@ export const saveMealPlan = asyncHandler(async (req, res) => {
         });
     }
 });
+
+// @desc    Mark a meal as completed
+// @route   PATCH /api/meal-plans/:mealPlanId/meals/:mealIndex/complete
+// @access  Private
+export const completeMeal = asyncHandler(async (req, res) => {
+  const { mealPlanId, mealIndex } = req.params;
+
+  const mealPlan = await MealPlan.findById(mealPlanId);
+  if (!mealPlan) {
+    res.status(404);
+    throw new Error('Meal plan not found');
+  }
+
+  if (mealPlan.user.toString() !== req.user._id.toString()) {
+    res.status(401);
+    throw new Error('Not authorized to modify this meal plan');
+  }
+
+  if (mealIndex < 0 || mealIndex >= mealPlan.meals.length) {
+    res.status(400);
+    throw new Error('Invalid meal index');
+  }
+
+  // Mark the meal as completed
+  mealPlan.meals[mealIndex].completed = true;
+  await mealPlan.save();
+
+  res.status(200).json(mealPlan);
+});
