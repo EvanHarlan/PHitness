@@ -4,7 +4,7 @@ import axios from "axios";
 import { Dumbbell, Utensils, Trophy } from "lucide-react";
 import { useUserStore } from "../stores/useUserStore"; 
 import { useMemo } from "react";
-
+import PropTypes from "prop-types";
 
 
 
@@ -145,7 +145,7 @@ const ProfilePage = () =>
         { title: "Weekend Warrior", description: "You worked out on the weekend. Thats dedication!", threshold: 1, count: workoutAmount, iconType: "milestone_bronze" },
         { title: "Early Bird", description: "Logged a workout before 6AM. Rise and grind!", threshold: 1, count: workoutAmount, iconType: "milestone_silver" },
         { title: "Late Owl", description: "Logged a workout after 10PM. Burning the midnight oil!", threshold: 1, count: workoutAmount, iconType: "milestone_gold" }
-    ], [workoutAmount, mealAmount, maxLift, streak]);
+    ], [workoutAmount, mealAmount, maxLift, streak, profileEdited]);
 
     const { setUnlockedAchievement } = useUserStore();
     const categorizedAchievements = useMemo(() => ({
@@ -228,6 +228,11 @@ const ProfilePage = () =>
       };
   
       return icons[type] || <Trophy size={24} color={color} />; 
+    };
+
+    AchievementIcon.propTypes = {
+        type: PropTypes.string.isRequired,
+        filled: PropTypes.bool.isRequired
     };
     
 
