@@ -57,6 +57,14 @@ const userSchema = new mongoose.Schema({
     enum: ['public', 'friends', 'private'],
     default: 'friends'
     },
+  dailyStreak: {
+    current: { type: Number, default: 0 },
+    lastLogged: { type: Date, default: null }
+    },
+  maxLift: {
+    type: Number,
+    default: 0,
+    },
   achievements: [{
   title: { type: String, required: true },
   dateUnlocked: { type: Date, default: Date.now }

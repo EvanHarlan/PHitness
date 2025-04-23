@@ -12,6 +12,7 @@ const ProfilePage = () =>
 {
     const [workoutAmount, setWorkoutAmount] = useState(0);
     const [mealAmount, setMealAmount] = useState(0);
+    const [maxLift, setMaxLift] = useState(0);
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
     const [isEditing, setIsEditing] = useState(false); // State to toggle the edit form
@@ -22,6 +23,8 @@ const ProfilePage = () =>
         age: "",
         avatar: ""
     });
+    const profileEdited = localStorage.getItem("profileEdited") === "true";
+    const [streak, setStreak] = useState(0);
 
     useEffect(() =>
     {
@@ -49,6 +52,8 @@ const ProfilePage = () =>
 
                 setWorkoutAmount(countsResponse.data.workoutCount || 0);
                 setMealAmount(countsResponse.data.mealCount || 0);
+                setMaxLift(profileResponse.data.maxLift || 0);
+
             }
             catch (error)
             {
@@ -70,7 +75,8 @@ const ProfilePage = () =>
         if (success) {
           // Get the updated user from the store
           setUser(useUserStore.getState().user);
-          setIsEditing(false);
+            setIsEditing(false);
+            localStorage.setItem("profileEdited", "true");
         } else {
           alert("Failed to save profile. Please try again.");
         }
@@ -87,6 +93,12 @@ const ProfilePage = () =>
             [name]: value
         }));
     };
+
+    useEffect(() =>
+    {
+        const storedStreak = parseInt(localStorage.getItem("workoutStreak") || "0", 10);
+        setStreak(storedStreak);
+    }, []);
 
     const avatarImages = {
       default: "/profileIcon.png",
@@ -112,6 +124,8 @@ const ProfilePage = () =>
 
     const achievements = useMemo(() => [
         { title: "Account Created", description: "Welcome to PHitness! Your journey begins here.", threshold: 0, count: 1 },
+        { title: "Profile Updated", description: "You've customed your profile. Make it yours!", threshold: 1, count: profileEdited ? 1 : 0, iconType: "milestone_bronze" },
+        { title: `Max Lift: ${maxLift} lbs`, description: `Your highest recorded lift is ${maxLift} lbs.`, threshold: maxLift, count: maxLift, iconType: "workout_gold" },
         { title: "Completed 1 Workout", description: "Your first workout completed!", threshold: 1, count: workoutAmount, iconType: "workout_bronze" },
         { title: "Completed 5 Workouts", description: "You're getting into the routine!", threshold: 5, count: workoutAmount, iconType: "workout_silver" },
         { title: "Completed 10 Workouts", description: "A true fitness enthusiast!", threshold: 10, count: workoutAmount, iconType: "workout_gold" },
@@ -124,9 +138,26 @@ const ProfilePage = () =>
         { title: "Created 25 Meals", description: "A chef in the making!", threshold: 25, count: workoutAmount, iconType: "meal_diam" },
         { title: "Created 50 Meals", description: "The meal prep king!", threshold: 50, count: workoutAmount, iconType: "meal_ruby" },
         { title: "Created 100 Meals", description: "A Phitness meal planer!", threshold: 100, count: workoutAmount, iconType: "meal_phit" },
-    ], [workoutAmount, mealAmount]);
+        { title: "3-Day Workout Streak!", description: "You're building the habit! Keep it going!", threshold: 3, count: streak, iconType: "milestone_bronze" },
+        { title: "7-Day Workout Streak!", description: "A full week of grind!", threshold: 7, count: streak, iconType: "milestone_silver" },
+        { title: "14-Day Workout Streak!", description: "You're unstoppable!", threshold: 14, count: streak, iconType: "milestone_gold" },
+        { title: "30-Day Workout Streak!", description: "A month of dedication! You're a beast!", threshold: 30, count: streak, iconType: "milestone_diam" },
+        { title: "Weekend Warrior", description: "You worked out on the weekend. Thats dedication!", threshold: 1, count: workoutAmount, iconType: "milestone_bronze" },
+        { title: "Early Bird", description: "Logged a workout before 6AM. Rise and grind!", threshold: 1, count: workoutAmount, iconType: "milestone_silver" },
+        { title: "Late Owl", description: "Logged a workout after 10PM. Burning the midnight oil!", threshold: 1, count: workoutAmount, iconType: "milestone_gold" }
+    ], [workoutAmount, mealAmount, maxLift, streak]);
 
     const { setUnlockedAchievement } = useUserStore();
+    const categorizedAchievements = useMemo(() => ({
+        General: achievements.filter(a => a.title === "Account Created" || a.title === "Profile Updated"),
+        Workout: achievements.filter(a => a.title.includes("Workout") && !a.title.includes("Streak")),
+        Meals: achievements.filter(a => a.title.includes("Meal")),
+        Streaks: achievements.filter(a => a.title.includes("Streak")),
+        Special: achievements.filter(a =>
+            a.title === "Weekend Warrior" || a.title === "Early Bird" || a.title === "Late Owl"
+        )
+    }), [achievements]);
+
 
     useEffect(() =>
     {
@@ -141,7 +172,6 @@ const ProfilePage = () =>
             const alreadyUnlocked = user.achievements?.some(
                 (a) => a.title === achievement.title
             );
-
             if (
                 achievement.count >= achievement.threshold &&
                 (
@@ -168,7 +198,6 @@ const ProfilePage = () =>
                         console.error("Failed to save achievement:", error);
                     }
                 }
-
                 setUnlockedAchievement(achievement);
             }
         });
@@ -350,24 +379,41 @@ const ProfilePage = () =>
             )}
           </div>
         </div>
-      </div>
-      <div className="mt-6">
-        <h2 className="text-2xl font-bold mb-4" style={{ color: COLORS.NEON_GREEN }} >
-          Achievements
-        </h2>
-        <ul>
-        {achievements.map((achievement, index) => (
-          <li key={index} className="flex flex-col mb-4 p-3 rounded-lg" style={{ backgroundColor: COLORS.DARK_GRAY }}>
-            <div className="flex items-center text-lg font-bold">
-              <AchievementIcon type={achievement.iconType} filled={achievement.count >= achievement.threshold} />
-              {achievement.title}
+            </div> {/* <- closing for the top container inside return */}
+
+            <div className="mt-6">
+                <h2 className="text-2xl font-bold mb-4" style={{ color: COLORS.NEON_GREEN }}>
+                    Achievements
+                </h2>
+
+                {Object.entries(categorizedAchievements).map(([category, list]) => (
+                    <div key={category} className="mb-6">
+                        <h3 className="text-xl font-semibold mb-2" style={{ color: COLORS.WHITE }}>
+                            {category} Achievements
+                        </h3>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                            {list.map((achievement, index) => (
+                                <div
+                                    key={index}
+                                    className="flex flex-col p-4 rounded-lg"
+                                    style={{ backgroundColor: COLORS.DARK_GRAY }}
+                                >
+                                    <div className="flex items-center text-lg font-bold mb-2">
+                                        <AchievementIcon
+                                            type={achievement.iconType}
+                                            filled={achievement.count >= achievement.threshold}
+                                        />
+                                        <span className="ml-2">{achievement.title}</span>
+                                    </div>
+                                    <p className="text-sm text-[#B0B0B0]">{achievement.description}</p>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                ))}
             </div>
-            <p className="text-sm text-[#B0B0B0] ml-8">{achievement.description}</p>
-          </li>
-        ))}
-        </ul>
-      </div>
-    </div>
+        </div>
   );
 };
 
