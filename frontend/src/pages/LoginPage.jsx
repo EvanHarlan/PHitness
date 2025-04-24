@@ -1,5 +1,5 @@
 import { COLORS } from '../lib/constants';
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { LogIn, Mail, Lock, ArrowRight, Loader } from "lucide-react";
 import { motion } from "framer-motion";
@@ -9,8 +9,21 @@ const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errors, setError] = useState({});
+  const [isMobile, setIsMobile] = useState(false);
   const { login, loading } = useUserStore();
   const navigate = useNavigate();
+
+  // Detect mobile devices
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    handleResize(); // Check on initial load
+    window.addEventListener('resize', handleResize);
+    
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -30,24 +43,35 @@ const LoginPage = () => {
       });
   };
 
+  // Adjust animation settings for mobile
+  const animationSettings = {
+    duration: isMobile ? 0.5 : 0.8,
+    delay: isMobile ? 0.1 : 0.2
+  };
+
   return (
     <div className="min-h-screen bg-[#0a0a0a]/90 flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        <div className="bg-[#0a0a0a]/90 rounded-2xl shadow-xl overflow-hidden"
-        style={{
-          backgroundColor: COLORS.MEDIUM_GRAY,
-        }}>
+      <div className="w-full max-w-md mx-auto">
+        <div 
+          className="bg-[#0a0a0a]/90 rounded-xl sm:rounded-2xl shadow-xl overflow-hidden"
+          style={{
+            backgroundColor: COLORS.MEDIUM_GRAY,
+            maxWidth: isMobile ? "95%" : "100%",
+            margin: "0 auto",
+            boxShadow: "0 10px 25px rgba(0, 0, 0, 0.15)"
+          }}
+        >
           {/* Header Section */}
-          <div className="bg-gradient-to-r from-green-600 to-gray-700 px-8 py-12">
+          <div className="bg-gradient-to-r from-green-600 to-gray-700 px-5 sm:px-8 py-8 sm:py-12">
             <motion.div
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8 }}
+              transition={{ duration: animationSettings.duration }}
             >
-              <h2 className="text-3xl font-bold text-white text-center">
+              <h2 className="text-2xl sm:text-3xl font-bold text-white text-center">
                 Welcome Back
               </h2>
-              <p className="text-white text-center mt-2">
+              <p className="text-sm sm:text-base text-white text-center mt-2">
                 Enter your credentials to access your account
               </p>
             </motion.div>
@@ -57,17 +81,17 @@ const LoginPage = () => {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
+            transition={{ duration: animationSettings.duration, delay: animationSettings.delay }}
           >
-            <div className="p-8">
-              <form onSubmit={handleSubmit} className="space-y-6">
-                <div className="space-y-2">
-                  <label htmlFor="email" className="text-sm font-medium text-gray-300">
+            <div className="p-5 sm:p-8">
+              <form onSubmit={handleSubmit} className="space-y-5">
+                <div className="space-y-1.5">
+                  <label htmlFor="email" className="text-xs sm:text-sm font-medium text-gray-300">
                     Email address
                   </label>
                   <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <Mail className="h-5 w-5 text-gray-400" />
+                      <Mail className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400" />
                     </div>
                     <input
                       id="email"
@@ -75,27 +99,28 @@ const LoginPage = () => {
                       required
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="block w-full pl-10 px-3 py-3 rounded-xl 
+                      className="block w-full pl-10 px-3 py-3 rounded-lg sm:rounded-xl 
                       bg-[#0a0a0a]/90 text-gray-100 placeholder-gray-400 
                       focus:outline-none 
-                      focus:border-transparent transition duration-200"
+                      focus:border-transparent transition duration-200
+                      text-sm sm:text-base"
                       placeholder="you@example.com"
                       style={{
                         borderColor: COLORS.NEON_GREEN,
                         borderWidth: '1px'
                       }}
                     />
-                    {errors.email && <p className="text-red-500 text-sm">{errors.email}</p>} {/* Inline error */}
+                    {errors.email && <p className="text-red-500 text-xs sm:text-sm mt-1">{errors.email}</p>}
                   </div>
                 </div>
 
-                <div className="space-y-2">
-                  <label htmlFor="password" className="text-sm font-medium text-gray-300">
+                <div className="space-y-1.5">
+                  <label htmlFor="password" className="text-xs sm:text-sm font-medium text-gray-300">
                     Password
                   </label>
                   <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <Lock className="h-5 w-5 text-gray-400" />
+                      <Lock className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400" />
                     </div>
                     <input
                       id="password"
@@ -103,10 +128,11 @@ const LoginPage = () => {
                       required
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="block w-full pl-10 px-3 py-3 border border-gray-600 rounded-xl 
+                      className="block w-full pl-10 px-3 py-3 border border-gray-600 rounded-lg sm:rounded-xl 
                       bg-[#0a0a0a]/90 text-gray-100 placeholder-gray-400 
                       focus:outline-none focus:ring-2 focus:ring-gray-500 
-                      focus:border-transparent transition duration-200"
+                      focus:border-transparent transition duration-200
+                      text-sm sm:text-base"
                       placeholder="••••••••"
                       style={{
                         borderColor: COLORS.NEON_GREEN,
@@ -114,37 +140,38 @@ const LoginPage = () => {
                       }}
                     />
                   </div>
-                  {errors.password && <p className="text-red-500 text-sm">{errors.password}</p>} {/* Inline error */}
+                  {errors.password && <p className="text-red-500 text-xs sm:text-sm mt-1">{errors.password}</p>}
                 </div>
 
-                {errors.general && <p className="text-red-500 text-sm text-center">{errors.general}</p>} {/* Centered error for general issues */}
+                {errors.general && <p className="text-red-500 text-xs sm:text-sm text-center">{errors.general}</p>}
 
                 <button
                   type="submit"
                   disabled={loading}
                   className="w-full py-3 px-4 flex justify-center items-center bg-gradient-to-r 
                   from-green-600 to-gray-700 hover:from-green-700 hover:to-gray-800 
-                  text-white text-sm font-semibold rounded-xl shadow-lg hover:shadow-xl 
-                  transition duration-200 disabled:opacity-50"
+                  text-white text-xs sm:text-sm font-semibold rounded-lg sm:rounded-xl shadow-lg hover:shadow-xl 
+                  transition duration-200 disabled:opacity-50
+                  active:from-green-800 active:to-gray-900"
                   style={{
                     backgroundColor: COLORS.DARK_GRAY,
                   }}>
                   {loading ? (
                     <>
-                      <Loader className="mr-2 h-5 w-5 animate-spin" />
-                      Signing in...
+                      <Loader className="mr-2 h-4 w-4 sm:h-5 sm:w-5 animate-spin" />
+                      <span className="text-xs sm:text-sm">Signing in...</span>
                     </>
                   ) : (
                     <>
-                      <LogIn className="mr-2 h-5 w-5" />
-                      Sign in to your account
+                      <LogIn className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
+                      <span className="text-xs sm:text-sm">Sign in to your account</span>
                     </>
                   )}
                 </button>
               </form>
 
-              <div className="mt-8 text-center">
-                <p className="text-sm text-gray-400">
+              <div className="mt-7 text-center">
+                <p className="text-xs sm:text-sm text-gray-400">
                   Don't have an account?{" "}
                   <Link
                     to="/signup"
@@ -154,7 +181,7 @@ const LoginPage = () => {
                       backgroundColor: COLORS.MEDIUM_GRAY,
                     }}> 
                     Create one now
-                    <ArrowRight className="ml-1 h-4 w-4" />
+                    <ArrowRight className="ml-1 h-3 w-3 sm:h-4 sm:w-4" />
                   </Link>
                 </p>
               </div>
