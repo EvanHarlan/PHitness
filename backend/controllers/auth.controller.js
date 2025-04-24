@@ -34,7 +34,7 @@ const setCookies = (res, accessToken, refreshToken) => {
 };
 
 export const signup = async (req, res) => {
-	const { email, password, name } = req.body;
+	const { email, password, name, username, termsAccepted, age, height, weight, gender, experienceLevel, healthConditions, fitnessGoal } = req.body;
 	try {
 		if (password.length < 6) {
 			return res.status(400).json({ message: "Passwords needs to be at least 6 characters long"})
@@ -44,7 +44,7 @@ export const signup = async (req, res) => {
 		if (userExists) {
 			return res.status(400).json({ message: "User already exists" });
 		}
-		const user = await User.create({ name, email, password });
+		const user = await User.create({ name, email, password, username, termsAccepted, age, height, weight, gender, experienceLevel, healthConditions, fitnessGoal });
 
 		// authenticate
 		const { accessToken, refreshToken } = generateTokens(user._id);
@@ -165,6 +165,12 @@ export const getProfile = async (req, res) =>
 			sentRequests: user.sentRequests || [],
 			profileVisibility: user.profileVisibility,
 			maxLift: user.maxLift,
+			height: user.height,
+			weight: user.weight,
+			gender: user.gender,
+			experienceLevel: user.experienceLevel,
+			healthConditions: user.healthConditions,
+			fitnessGoal: user.fitnessGoal
 		});
 	} catch (error)
 	{
@@ -187,6 +193,9 @@ export const updateProfile = async (req, res) => {
 	  user.age = req.body.age || user.age;
 	  user.bio = req.body.bio || user.bio;
 	  user.avatar = req.body.avatar || user.avatar;
+	  user.height = req.body.height || user.height;
+	  user.weight = req.body.weight || user.weight;
+	  user.gender = req.body.gender || user.gender;
   
 	  await user.save(); // Save the updated user data
   

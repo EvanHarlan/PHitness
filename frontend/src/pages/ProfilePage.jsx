@@ -18,11 +18,28 @@ const ProfilePage = () => {
         username: "",
         bio: "",
         age: "",
-        avatar: ""
+        avatar: "",
+        height: "",
+        weight: "",
+        gender: "not-specified",
+        experienceLevel: "beginner",
+        healthConditions: "none",
+        fitnessGoal: ""
     });
     const profileEdited = localStorage.getItem("profileEdited") === "true";
     const [streak, setStreak] = useState(0);
     const [isMobile, setIsMobile] = useState(false);
+
+    const heightOptions = [
+        { value: "", label: "Select your height" },
+        ...[...Array(37)].map((_, i) =>
+        {
+            const feet = Math.floor((i + 60) / 12);
+            const inches = (i + 60) % 12;
+            const height = `${feet}'${inches}"`;
+            return { value: height, label: height };
+        })
+    ];
 
     // Detect mobile devices
     useEffect(() => {
@@ -55,7 +72,13 @@ const ProfilePage = () => {
                     username: profileResponse.data.username || "",
                     bio: profileResponse.data.bio || "",
                     age: profileResponse.data.age || "",
-                    avatar: profileResponse.data.avatar || "avatar1.png"
+                    avatar: profileResponse.data.avatar || "avatar1.png",
+                    height: profileResponse.data.height || "",
+                    weight: profileResponse.data.weight || "",
+                    gender: profileResponse.data.gender || "not-specified",
+                    experienceLevel: profileResponse.data.experienceLevel || "beginner",
+                    healthConditions: profileResponse.data.healthConditions || "none",
+                    fitnessGoal: profileResponse.data.fitnessGoal || ""
                 });
 
                 const countsResponse = await axios.get("http://localhost:5000/api/tracker/counts", {
@@ -290,7 +313,10 @@ const ProfilePage = () => {
                                 </p>
                             </div>
                         ) : (
-                            <div className="flex-1 w-full sm:w-auto">
+                            <div className="flex flex-col sm:flex-row gap-6 w-full">
+                                {/* Left Column */}
+                                <div className="flex-1 space-y-3">
+                                {/* Name */}
                                 <div className="mb-2">
                                     <label className="block text-xs sm:text-sm" style={{ color: COLORS.NEON_GREEN }}>Name:</label>
                                     <input
@@ -302,6 +328,7 @@ const ProfilePage = () => {
                                         style={{ borderColor: COLORS.NEON_GREEN }}
                                     />
                                 </div>
+                                {/* Username */}
                                 <div className="mb-2">
                                     <label className="block text-xs sm:text-sm" style={{ color: COLORS.NEON_GREEN }}>Username:</label>
                                     <input
@@ -313,6 +340,7 @@ const ProfilePage = () => {
                                         style={{ borderColor: COLORS.NEON_GREEN }}
                                     />
                                 </div>
+                                {/* Age */}
                                 <div className="mb-2">
                                     <label className="block text-xs sm:text-sm" style={{ color: COLORS.NEON_GREEN }}>Age:</label>
                                     <input
@@ -324,6 +352,7 @@ const ProfilePage = () => {
                                         style={{ borderColor: COLORS.NEON_GREEN }}
                                     />
                                 </div>
+                                {/* Bio */}
                                 <div className="mb-2">
                                     <label className="block text-xs sm:text-sm" style={{ color: COLORS.NEON_GREEN }}>Bio:</label>
                                     <textarea
@@ -334,7 +363,58 @@ const ProfilePage = () => {
                                         style={{ borderColor: COLORS.NEON_GREEN }}
                                         rows="3"
                                     />
+                                  </div>
                                 </div>
+
+                                {/* Right Column */}
+                                <div className="flex-1 space-y-3">
+                                {/* Height */}
+                                <div className="mb-2">
+                                    <label className="block text-xs sm:text-sm" style={{ color: COLORS.NEON_GREEN }}>Height:</label>
+                                    <select
+                                        name="height"
+                                        value={editedProfile.height}
+                                        onChange={handleInputChange}
+                                        className="w-full p-2 rounded bg-gray-800 text-white border text-sm sm:text-base"
+                                        style={{ borderColor: COLORS.NEON_GREEN }}
+                                    >
+                                        {heightOptions.map((option, index) => (
+                                            <option key={index} value={option.value}>{option.label}</option>
+                                        ))}
+                                    </select>
+                                </div>
+
+                                {/* Weight */}
+                                <div className="mb-2">
+                                    <label className="block text-xs sm:text-sm" style={{ color: COLORS.NEON_GREEN }}>Weight (lbs):</label>
+                                    <input
+                                        type="number"
+                                        name="weight"
+                                        value={editedProfile.weight}
+                                        onChange={handleInputChange}
+                                        className="w-full p-2 rounded bg-gray-800 text-white border text-sm sm:text-base"
+                                        style={{ borderColor: COLORS.NEON_GREEN }}
+                                    />
+                                </div>
+
+                                {/* Gender */}
+                                <div className="mb-2">
+                                    <label className="block text-xs sm:text-sm" style={{ color: COLORS.NEON_GREEN }}>Gender:</label>
+                                    <select
+                                        name="gender"
+                                        value={editedProfile.gender}
+                                        onChange={handleInputChange}
+                                        className="w-full p-2 rounded bg-gray-800 text-white border text-sm sm:text-base"
+                                        style={{ borderColor: COLORS.NEON_GREEN }}
+                                    >
+                                        <option value="not-specified">Prefer not to say</option>
+                                        <option value="male">Male</option>
+                                        <option value="female">Female</option>
+                                        <option value="other">Other</option>
+                                    </select>
+                                </div>
+                            </div>
+
                                 <div className="mb-2">
                                     <label className="block text-xs sm:text-sm" style={{ color: COLORS.NEON_GREEN }}>Select Avatar:</label>
                                     <div className="mt-2">
