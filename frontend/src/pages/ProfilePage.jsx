@@ -5,51 +5,8 @@ import { Dumbbell, Utensils, Trophy } from "lucide-react";
 import { useUserStore } from "../stores/useUserStore"; 
 import { useMemo } from "react";
 import PropTypes from "prop-types";
-import { useNavigate } from 'react-router-dom';
-
-
-
-const handleDeleteClick = () => {
-  const confirmed = window.confirm(
-    'Are you sure you want to delete your account? This action cannot be undone.'
-  );
-  if (confirmed) {
-    handleDeleteAccount();
-  }
-};
-
-const handleDeleteAccount = async () => {
-  try {
-    const res = await fetch('/api/auth/delete', {
-      method: 'DELETE',
-      credentials: 'include', 
-    });
-
-    if (!res.ok) {
-      const errorData = await res.json();
-      throw new Error(errorData.message || 'Failed to delete account');
-    }
-
-   
-    window.location.href = '/LoginPage'; 
-  } catch (err) {
-    console.error('Error deleting account:', err);
-    alert('There was an error deleting your account.');
-  }
-};
-
-
-
-
-
-
-const ProfilePage = () =>
-{ 
-    const navigate = useNavigate(); 
-    
 
 const ProfilePage = () => {
-
     const [workoutAmount, setWorkoutAmount] = useState(0);
     const [mealAmount, setMealAmount] = useState(0);
     const [maxLift, setMaxLift] = useState(0);
@@ -79,20 +36,6 @@ const ProfilePage = () => {
         return () => window.removeEventListener('resize', handleResize);
     }, []);
 
-
-    
-  const handleNavigateClick = () => {
-    console.log('Navigating to update profile...');
-    navigate("/update-profile");   page
-  };
-
-    useEffect(() =>
-    {
-        const fetchProfileAndCounts = async () =>
-        {
-            try
-            {
-
     // Adjust animation settings for mobile
     const animationSettings = {
         duration: isMobile ? 0.5 : 0.8,
@@ -102,7 +45,6 @@ const ProfilePage = () => {
     useEffect(() => {
         const fetchProfileAndCounts = async () => {
             try {
-
                 const profileResponse = await axios.get("http://localhost:5000/api/auth/profile", {
                     withCredentials: true,
                 });
@@ -318,61 +260,6 @@ const ProfilePage = () => {
                 style={{ 
                     backgroundColor: COLORS.MEDIUM_GRAY 
                 }}
-
-              >
-                Edit Profile
-              </button>
-            ) : (
-              <div className="flex flex-col gap-2">
-                <button
-                  onClick={handleSaveChanges}
-                  className="px-4 py-2 rounded font-medium"
-                  style={{ 
-                    backgroundColor: COLORS.NEON_GREEN,
-                    color: COLORS.BLACK
-                  }}
-                >
-                  Save Changes
-                </button>
-                <button
-                  onClick={() => setIsEditing(false)}
-                  className="px-4 py-2 rounded font-medium"
-                  style={{ 
-                    backgroundColor: COLORS.DARK_GRAY,
-                    color: COLORS.WHITE
-                  }}
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleDeleteClick}
-                  className="px-4 py-2 rounded font-medium"
-                  style={{
-                  backgroundColor: 'red',
-                  color: 'white',
-                  }}
-                  >     
-                  Delete Account
-                  </button>
-
-              <div className="mt-4 space-y-3">
-                <button
-                onClick={handleNavigateClick}
-                className="px-4 py-2 rounded font-medium"
-                  style={{ 
-                    backgroundColor: COLORS.NEON_GREEN,
-                    color: COLORS.BLACK
-                  }}
-                >
-                Update Email or Password
-                </button>
-              </div>
-              </div>
-            )}
-          </div>
-        </div>
-            </div> {/* <- closing for the top container inside return */}
-
             >
                 <div className="flex flex-col sm:flex-row justify-between sm:items-center mb-4">
                     <div className="flex flex-col sm:flex-row sm:items-center mb-4 sm:mb-0">
@@ -554,7 +441,6 @@ const ProfilePage = () => {
                     </div>
                 </div>
             </div>
-
 
             <div className="mt-4 sm:mt-6">
                 <h2 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4" style={{ color: COLORS.NEON_GREEN }}>

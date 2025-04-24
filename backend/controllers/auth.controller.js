@@ -1,8 +1,6 @@
 import { redis } from "../lib/redis.js";
 import User from "../models/user.model.js";
 import jwt from "jsonwebtoken";
-import MealPlan from "../models/mealPlan.model.js";
-import Workout from "../models/workout.model.js";
 
 const generateTokens = (userId) => {
 	const accessToken = jwt.sign({ userId }, process.env.ACCESS_TOKEN_SECRET, {
@@ -301,50 +299,5 @@ export const searchUsers = async (req, res) => {
 	} catch (error) {
 	  console.error('Error searching users:', error);
 	  res.status(500).json({ message: error.message });
-	}
-  };
-
-  export const deleteAccount = async (req, res) => {
-	try {
-		const userId = req.user.id;
-		console.log(`Deleting account for user with ID: ${userId}`);
-
-	
-		await MealPlan.deleteMany({ user: userId });
-
-		await Workout.deleteMany({ user: userId });
-
-		
-		await User.findByIdAndDelete(userId);
-
-		console.log(`User with ID ${userId} and all related data deleted successfully`);
-
-		res.status(200).json({ message: "Account and related data deleted successfully" });
-	} catch (err) {
-		console.error("Error deleting account:", err);
-		res.status(500).json({ message: "Error deleting account" });
-	}
-};
-
-export const updateUserProfile = async (req, res) => {
-	const { newEmail, newPassword } = req.body; 
-  
-	try {
-	  const user = await User.findById(req.user._id);
-  
-	  if (!user) {
-		return res.status(404).json({ message: "User not found" });
-	  }
-  
-	  // Update email and/or password if provided
-	  if (newEmail) user.email = newEmail;
-	  if (newPassword) user.password = newPassword;
-  
-	  await user.save();
-  
-	  res.status(200).json({ message: "Credentials updated successfully", user });
-	} catch (error) {
-	  console.error("Error updating credentials:", error);
-	  res.status(500).json({ message: "An error occurred while updating credentials" });
 	}
   };
