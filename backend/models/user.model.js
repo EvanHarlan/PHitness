@@ -40,6 +40,33 @@ const userSchema = new mongoose.Schema({
   bio:{
     type: String,
   },
+  height: {
+    type: String,
+    default: ""
+  },
+  weight: {
+    type: Number,
+    default: 0
+  },
+  gender: {
+    type: String,
+    enum: ['male', 'female', 'other', 'not-specified'],
+    default: 'not-specified'
+  },
+  experienceLevel: {
+    type: String,
+    enum: ['beginner', 'intermediate', 'advanced'],
+    default: 'beginner'
+  },
+  healthConditions: {
+    type: String,
+    default: 'none'
+  },
+  fitnessGoal: {
+    type: String,
+    enum: ['weight-loss', 'muscle-gain', 'strength', 'endurance', 'flexibility', 'overall-fitness', ''],
+    default: ''
+  },
   friends: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User'
