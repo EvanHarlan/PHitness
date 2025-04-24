@@ -20,21 +20,32 @@ const NutritionPage = () => {
   const navigate = useNavigate();
   const [fetchMealCountError, setFetchMealCountError] = useState(null);
   const { user } = useUserStore();
-  // Track viewport size for responsive design
   const [isMobile, setIsMobile] = useState(false);
+
+  // Detect mobile devices
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    handleResize(); // Check on initial load
+    window.addEventListener('resize', handleResize);
+    
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   // Form state for user parameters
   const [userParams, setUserParams] = useState({
     dietaryRestrictions: "none",
-    targetCalories: "",
+    targetCalories: "", // Changed from calorieGoal to targetCalories
     mealType: "balanced",
     ingredientsToInclude: "",
     ingredientsToExclude: "",
-    height: "",
+    height: ``, // Initialize as empty strings to avoid potential issues
     weight: '',
     age: '',
     gender: '',
-    goal: '',
+    goal: '', // Changed from nutritionGoal to goal
     activityLevel: '',
     mealFrequency: '',
     snackPreference: '',
@@ -54,9 +65,9 @@ const NutritionPage = () => {
             backgroundColor: COLORS.DARK_GRAY,
             color: COLORS.WHITE,
             border: `1px solid ${COLORS.MEDIUM_GRAY}`,
-            fontSize: '0.75rem',
-            padding: '6px 10px',
-            maxWidth: '250px',
+            fontSize: isMobile ? '0.75rem' : '0.875rem',
+            padding: isMobile ? '6px 10px' : '8px 12px',
+            maxWidth: isMobile ? '250px' : '300px',
             zIndex: 9999,
           },
           arrow: {
@@ -67,45 +78,20 @@ const NutritionPage = () => {
     }
   });
 
-  // Mobile-specific tooltip adjustments
-  const getMobileTooltipStyles = () => ({
-    components: {
-      MuiTooltip: {
-        styleOverrides: {
-          tooltip: {
-            fontSize: isMobile ? '0.75rem' : '0.875rem',
-            padding: isMobile ? '6px 10px' : '8px 12px',
-            maxWidth: isMobile ? '250px' : '300px',
-          }
-        }
-      }
-    }
-  });
+  // Adjust animation settings for mobile
+  const animationSettings = {
+    duration: isMobile ? 0.5 : 0.8,
+    delay: isMobile ? 0.1 : 0.2
+  };
 
-  // Detect mobile viewport on component mount and window resize
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-    
-    // Check initially
-    checkMobile();
-    
-    // Add event listener for resize
-    window.addEventListener('resize', checkMobile);
-    
-    // Cleanup event listener on component unmount
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
-
-  // Info tooltip component with mobile optimization
+  // Info tooltip component to match the website
   const InfoTooltip = ({ title }) => (
     <Tooltip 
       title={title} 
       arrow 
       placement={isMobile ? "bottom" : "top"}
-      enterTouchDelay={50}
-      leaveTouchDelay={1500}
+      enterTouchDelay={isMobile ? 50 : 100}
+      leaveTouchDelay={isMobile ? 1500 : 500}
     >
       <HelpOutlineIcon
         sx={{
@@ -114,12 +100,11 @@ const NutritionPage = () => {
           marginLeft: '5px',
           verticalAlign: 'middle',
           cursor: 'pointer',
-          padding: isMobile ? '2px' : '0', // Increase touch target size
+          padding: isMobile ? '2px' : '0',
           '&:hover': {
-            color: COLORS.LIGHT_GRAY,
+            color: COLORS.LIGHT_GRAY, // Slightly lighter on hover for feedback
           }
         }}
-        aria-label={`Info: ${title}`}
       />
     </Tooltip>
   );
@@ -133,7 +118,7 @@ const NutritionPage = () => {
       try {
         const response = await axios.get("http://localhost:5000/api/tracker/counts", { withCredentials: true });
         setMealAmount(response.data.mealCount || 0);
-        setFetchMealCountError(null);
+        setFetchMealCountError(null); // Clear any previous error
       } catch (error) {
         console.error("Error fetching meal count:", error);
         setFetchMealCountError(error);
@@ -161,6 +146,7 @@ const NutritionPage = () => {
         cookingSkillLevel: userParams.cookingSkill || 'Intermediate'
       };
 
+      // Log the payload for debugging
       console.log("🚀 Payload being sent:", payload);
 
       const response = await axios.post(
@@ -181,24 +167,25 @@ const NutritionPage = () => {
             background: COLORS.DARK_GRAY,
             color: COLORS.NEON_GREEN,
             border: `1px solid ${COLORS.MEDIUM_GRAY}`,
-            fontSize: isMobile ? '0.875rem' : '1rem',
-            padding: isMobile ? '8px 12px' : '10px 16px'
+            fontSize: isMobile ? '0.875rem' : '1rem'
           }
         });
 
         setMealAmount(prevMealAmount => prevMealAmount + 1);
 
+        // Navigate to the details page of the newly saved meal (if applicable)
         if (response.data.savedMeal && response.data.savedMeal._id) {
           navigate(`/meals/${response.data.savedMeal._id}`);
         } else {
+          // Automatically scroll to results if navigation fails or isn't desired
           setTimeout(() => {
-            document.getElementById('meal-result')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            document.getElementById('meal-result')?.scrollIntoView({ behavior: 'smooth' });
           }, 200);
         }
       } else {
         toast.dismiss();
         console.error("Error generating meal plan:", response);
-        toast.error(`Failed to generate meal plan. Please try again.`, {
+        toast.error(`Failed to generate meal plan. Please try again later.`, {
           style: {
             background: COLORS.DARK_GRAY,
             color: '#ff6b6b',
@@ -209,7 +196,7 @@ const NutritionPage = () => {
     } catch (error) {
       toast.dismiss();
       console.error("Error generating meal plan:", error);
-      toast.error("Network error. Please try again.", {
+      toast.error("Failed to generate meal plan. Please check your connection.", {
         style: {
           background: COLORS.DARK_GRAY,
           color: '#ff6b6b',
@@ -222,6 +209,7 @@ const NutritionPage = () => {
   };
 
   const addMeal = async () => {
+    // Show loading toast
     const loadingToast = toast.loading("Logging meal...", {
       style: {
         background: COLORS.DARK_GRAY,
@@ -256,7 +244,7 @@ const NutritionPage = () => {
       } else {
         toast.dismiss(loadingToast);
         console.error("Error logging meal:", response);
-        toast.error(`Failed to log meal. Please try again.`, {
+        toast.error(`Failed to log meal. Please try again later.`, {
           style: {
             background: COLORS.DARK_GRAY,
             color: '#ff6b6b',
@@ -268,7 +256,7 @@ const NutritionPage = () => {
       toast.dismiss(loadingToast);
 
       console.error("Error logging meal:", error);
-      toast.error("Network error. Please try again.", {
+      toast.error("Failed to log meal. Please check your connection.", {
         style: {
           background: COLORS.DARK_GRAY,
           color: '#ff6b6b',
@@ -280,16 +268,9 @@ const NutritionPage = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen p-4 sm:p-6" 
-        style={{ backgroundColor: COLORS.BLACK }}
-        role="status"
-        aria-live="polite"
-      >
-        <div className="p-4 sm:p-6 text-base sm:text-lg font-medium rounded-lg flex items-center justify-center" 
-          style={{ color: COLORS.WHITE, backgroundColor: COLORS.DARK_GRAY, maxWidth: '90%' }}>
-          <svg className="animate-spin h-5 w-5 sm:h-6 sm:w-6 mr-2 sm:mr-3" 
-            xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-            aria-hidden="true">
+      <div className="flex items-center justify-center min-h-screen p-4" style={{ backgroundColor: COLORS.BLACK }}>
+        <div className="p-4 sm:p-6 text-base sm:text-lg font-medium" style={{ color: COLORS.WHITE }}>
+          <svg className="animate-spin h-5 w-5 sm:h-6 sm:w-6 mr-2 sm:mr-3 inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
           </svg>
@@ -300,34 +281,28 @@ const NutritionPage = () => {
   }
 
   return (
-    <ThemeProvider theme={createTheme({
-      ...tooltipTheme,
-      ...getMobileTooltipStyles()
-    })}>
+    // Wrap the entire display within the themeprovider to have access to the theme for the tooltip styling
+    <ThemeProvider theme={tooltipTheme}>
       <div className="min-h-screen p-4 sm:p-6" style={{ backgroundColor: COLORS.BLACK }}>
         <header className="mb-6 sm:mb-10">
           <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-2 sm:mb-4 text-center"
             style={{ color: COLORS.NEON_GREEN }}>
             Nutrition Planner
           </h1>
-          <p className="text-base sm:text-lg md:text-xl text-[#B0B0B0] text-center px-2">
+          <p className="text-base sm:text-lg md:text-xl text-[#B0B0B0] text-center">
             Get AI-powered custom meal plans tailored to your needs.
           </p>
         </header>
         
-        {/* Skip to content link for keyboard accessibility */}
-        <a href="#main-content" 
-          className="sr-only focus:not-sr-only focus:absolute focus:p-2 focus:m-2 focus:text-white focus:bg-neon-green focus:z-50 focus:rounded">
-          Skip to main content
-        </a>
-        
-        <main id="main-content" className="max-w-5xl mx-auto">
+        <div className="max-w-5xl mx-auto">
           <div className="grid gap-6 sm:gap-8">
             {/* Nutrition Parameters Form */}
-            <section className="rounded-lg sm:rounded-xl shadow-sm p-4 sm:p-6 border" 
-              style={{ backgroundColor: COLORS.DARK_GRAY, borderColor: COLORS.MEDIUM_GRAY }}>
-              <h2 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4 flex items-center" 
-                style={{ color: COLORS.WHITE }}>
+            <div className="rounded-lg sm:rounded-xl shadow-sm p-4 sm:p-6 border" 
+                 style={{ 
+                   backgroundColor: COLORS.DARK_GRAY, 
+                   borderColor: COLORS.MEDIUM_GRAY,
+                 }}>
+              <h2 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4" style={{ color: COLORS.WHITE }}>
                 Your Preferences
                 <InfoTooltip title="Answer questions to get personalized meal suggestions based on your dietary needs and goals." />
               </h2>
@@ -337,45 +312,42 @@ const NutritionPage = () => {
                 setUserParams={setUserParams}
                 onSubmit={generateMealPlan}
                 loading={loading}
-                isMobile={isMobile}
               />
-            </section>
+            </div>
 
             {/* Nutrition Tracker */}
-            <section className="rounded-lg sm:rounded-xl shadow-sm p-4 sm:p-6 border" 
-              style={{ backgroundColor: COLORS.DARK_GRAY, borderColor: COLORS.MEDIUM_GRAY }}>
-              <h2 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4" 
-                style={{ color: COLORS.WHITE }}>
+            <div className="rounded-lg sm:rounded-xl shadow-sm p-4 sm:p-6 border" 
+                 style={{ 
+                   backgroundColor: COLORS.DARK_GRAY, 
+                   borderColor: COLORS.MEDIUM_GRAY,
+                 }}>
+              <h2 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4" style={{ color: COLORS.WHITE }}>
                 Nutrition Tracker
               </h2>
 
-              <p className="mb-3 sm:mb-4 text-sm sm:text-base" 
-                style={{ color: COLORS.LIGHT_GRAY }}>
+              <p className="mb-3 sm:mb-4 text-sm sm:text-base" style={{ color: COLORS.LIGHT_GRAY }}>
                 Keep track of your meals to stay on top of your nutrition goals.
               </p>
 
               <div className="p-3 sm:p-4 border rounded-lg mb-3 sm:mb-4" 
-                style={{ borderColor: COLORS.MEDIUM_GRAY, backgroundColor: COLORS.DARK_GRAY }}>
-                <h3 className="font-medium text-sm sm:text-base flex items-center" 
-                  style={{ color: COLORS.WHITE }}>
+                   style={{ borderColor: COLORS.MEDIUM_GRAY, backgroundColor: COLORS.DARK_GRAY }}>
+                <h3 className="font-medium text-sm sm:text-base" style={{ color: COLORS.WHITE }}>
                   Logged Meals
                   <InfoTooltip title="Total number of meals you've logged as consumed." />
                 </h3>
-                <p className="text-xl sm:text-2xl font-bold mb-2 sm:mb-3" 
-                  style={{ color: COLORS.NEON_GREEN }}>
+                <p className="text-xl sm:text-2xl font-bold mb-2 sm:mb-3" style={{ color: COLORS.NEON_GREEN }}>
                   {mealAmount !== null ? mealAmount : 'N/A'}
                 </p>
               </div>
 
               <div className="flex flex-col space-y-3">
                 <button
-                  className="px-3 sm:px-4 py-2 rounded-lg transition font-medium flex items-center justify-center hover:opacity-90 active:opacity-80 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-neon-green min-h-[44px]"
+                  className="px-3 sm:px-4 py-2 rounded-lg transition font-medium flex items-center justify-center 
+                             hover:opacity-90 active:opacity-80 min-h-[44px]"
                   style={{ backgroundColor: COLORS.NEON_GREEN, color: COLORS.BLACK }}
                   onClick={addMeal}
-                  aria-label="Log a meal"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 sm:h-5 sm:w-5 mr-2" 
-                    viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 sm:h-5 sm:w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 000 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clipRule="evenodd" />
                   </svg>
                   <span className="text-xs sm:text-sm">Log Meal</span>
@@ -383,14 +355,12 @@ const NutritionPage = () => {
                 </button>
 
                 <button
-                  className="px-3 sm:px-4 py-2 rounded-lg transition font-medium flex items-center justify-center hover:opacity-90 active:opacity-80 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-medium-gray min-h-[44px]"
+                  className="px-3 sm:px-4 py-2 rounded-lg transition font-medium flex items-center justify-center 
+                             hover:opacity-90 active:opacity-80 min-h-[44px]"
                   style={{ backgroundColor: COLORS.MEDIUM_GRAY, color: COLORS.WHITE }}
                   onClick={() => setShowSavedMeals(!showSavedMeals)}
-                  aria-expanded={showSavedMeals}
-                  aria-controls="saved-meals-section"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 sm:h-5 sm:w-5 mr-2" 
-                    viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 sm:h-5 sm:w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
                     <path d="M7 3a1 1 0 000 2h6a1 1 0 010-2H7zM4 7a1 1 0 011-1h10a1 1 0 011 1H5a1 1 0 01-1-1zM2 11a2 2 0 012-2h12a2 2 0 012 2v4a2 2 0 01-2 2H4a2 2 0 01-2-2v-4z" />
                   </svg>
                   <span className="text-xs sm:text-sm">
@@ -401,33 +371,30 @@ const NutritionPage = () => {
               </div>
               
               {fetchMealCountError && (
-                <p className="mt-2 text-xs sm:text-sm text-red-500 flex items-center">
+                <p className="mt-2 text-xs sm:text-sm text-red-500">
                   Failed to load meal count
                   <InfoTooltip title="Network error loading your meal count. Try refreshing the page." />
                 </p>
               )}
-            </section>
+            </div>
           </div>
 
           {/* Display saved meals */}
           {showSavedMeals && (
-            <section 
-              id="saved-meals-section"
-              className="mt-6 sm:mt-8 rounded-lg sm:rounded-xl shadow-sm p-4 sm:p-6 border" 
-              style={{ backgroundColor: COLORS.DARK_GRAY, borderColor: COLORS.MEDIUM_GRAY }}>
-              <h2 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4 flex items-center" 
-                style={{ color: COLORS.WHITE }}>
+            <div className="mt-6 sm:mt-8 rounded-lg sm:rounded-xl shadow-sm p-4 sm:p-6 border" 
+                 style={{ backgroundColor: COLORS.DARK_GRAY, borderColor: COLORS.MEDIUM_GRAY }}>
+              <h2 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4" style={{ color: COLORS.WHITE }}>
                 Your Meal Library
                 <InfoTooltip title="Your personal collection of saved meal plans" />
               </h2>
 
-              <SavedMealsList isMobile={isMobile} />
-            </section>
+              <SavedMealsList />
+            </div>
           )}
           
           {/* Add an element for meal plan results to scroll to */}
           {mealData && <div id="meal-result" className="pt-4"></div>}
-        </main>
+        </div>
       </div>
     </ThemeProvider>
   );
