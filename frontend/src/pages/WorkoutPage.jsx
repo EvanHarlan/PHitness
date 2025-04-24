@@ -9,19 +9,17 @@ import WorkoutQuestionnaire from "../components/WorkoutQuestionnaire";
 import SavedWorkoutsList from "../components/SavedWorkoutsList";
 import COLORS from '../lib/constants';
 import { useUserStore } from "../stores/useUserStore";
+import WorkoutStreak from "../components/WorkoutStreak";
+
 
 const WorkoutPage = () => {
   // State variables (unchanged)
   const [workoutAmount, setWorkoutAmount] = useState(0);
   const [loading, setLoading] = useState(false);
-  const [workoutData, setWorkoutData] = useState(null);
-  const [savedWorkout, setSavedWorkout] = useState(null);
-  const [showSavedWorkouts, setShowSavedWorkouts] = useState(false);
+  const [showSavedWorkouts, setShowSavedWorkouts] = useState(true);
   const navigate = useNavigate();
   const [fetchWorkoutCountError, setFetchWorkoutCountError] = useState(null);
   const { user, setUnlockedAchievement } = useUserStore();
-  const [streak, setStreak] = useState(0);
-  const unlockedStreaks = useRef(new Set());
   const hasCheckedLift = useRef(false);
 
   // Form state for user parameters (unchanged)
@@ -80,18 +78,47 @@ const WorkoutPage = () => {
 
     useEffect(() =>
     {
-        const storedStreak = parseInt(localStorage.getItem("workoutStreak") || "0", 10);
-        setStreak(storedStreak);
-    }, []);
+        const checkHighestLift = async () =>
+        {
+            try
+            {
+                const response = await axios.get("http://localhost:5000/api/workouts", { withCredentials: true });
+                const allWorkouts = response.data || [];
 
-    useEffect(() =>
-    {
+                let maxLift = 0;
+                allWorkouts.forEach(workout =>
+                {
+                    workout.exercises.forEach(ex =>
+                    {
+                        if (ex.weight && ex.weight > maxLift)
+                        {
+                            maxLift = ex.weight;
+                        }
+                    });
+                });
+
+                await axios.post("http://localhost:5000/api/auth/max-lift", { maxLift }, { withCredentials: true });
+
+                if (user?.maxLift !== undefined && maxLift > user.maxLift)
+                {
+                    setUnlockedAchievement({
+                        title: `New Max Lift: ${maxLift} lbs`,
+                        description: `You've hit a new personal record!`,
+                    });
+                }
+
+            } catch (err)
+            {
+                console.error("Error checking max lift:", err);
+            }
+        };
+
         if (user && !hasCheckedLift.current)
         {
             hasCheckedLift.current = true;
             checkHighestLift();
         }
-    }, [user]);
+    }, [user, setUnlockedAchievement]);
 
   useEffect(() => {
     const fetchWorkoutCount = async () => {
@@ -108,73 +135,7 @@ const WorkoutPage = () => {
     fetchWorkoutCount();
   }, []);
 
-    const checkHighestLift = async () =>
-    {
-        try
-        {
-            const response = await axios.get("http://localhost:5000/api/workouts", { withCredentials: true });
-            const allWorkouts = response.data || [];
-
-            let maxLift = 0;
-            allWorkouts.forEach(workout =>
-            {
-                workout.exercises.forEach(ex =>
-                {
-                    if (ex.weight && ex.weight > maxLift)
-                    {
-                        maxLift = ex.weight;
-                    }
-                });
-            });
-
-            await axios.post("http://localhost:5000/api/auth/max-lift", { maxLift }, { withCredentials: true });
-
-            if (user?.maxLift !== undefined && maxLift > user.maxLift)
-            {
-                setUnlockedAchievement({
-                    title: `New Max Lift: ${maxLift} lbs`,
-                    description: `You've hit a new personal record!`,
-                });
-            }
-
-        } catch (err)
-        {
-            console.error("Error checking max lift:", err);
-        }
-    };
-
-
-
-    const updateWorkoutStreak = () =>
-    {
-        const today = new Date().toDateString();
-        const lastDate = localStorage.getItem("lastWorkoutDate");
-        let streak = parseInt(localStorage.getItem("workoutStreak") || "0", 10);
-
-        if (!lastDate)
-        {
-            streak = 1;
-        } else
-        {
-            const last = new Date(lastDate);
-            const diff = Math.floor((new Date() - last) / (1000 * 60 * 60 * 24));
-            streak = diff === 1 ? streak + 1 : 1;
-        }
-
-        localStorage.setItem("lastWorkoutDate", today);
-        localStorage.setItem("workoutStreak", streak.toString());
-        return streak;
-    };
-
-
-    useEffect(() =>
-    {
-        const streak = updateWorkoutStreak();
-        setStreak(streak);
-    }, []);
  
-
-
   const generateWorkoutPlan = async () => {
     // Validate required fields
     if (!userParams.height || !userParams.weight || !userParams.fitnessGoal) {
@@ -216,8 +177,6 @@ const WorkoutPage = () => {
             border: `1px solid ${COLORS.MEDIUM_GRAY}`
           }
         });
-
-        setWorkoutAmount(prevWorkoutAmount => prevWorkoutAmount + 1);
 
         // Navigate to the details page of the newly saved workout
         if (response.data.savedWorkout && response.data.savedWorkout._id) {
@@ -262,63 +221,9 @@ const WorkoutPage = () => {
         toast.dismiss(loadingToast);
 
         console.log("Api Response:", response.data);
-        setWorkoutAmount(prevWorkoutAmount => prevWorkoutAmount + 1);
 
-        const newStreak = updateWorkoutStreak();
-          setStreak(newStreak);
-
-      const streakMilestones = [3, 7, 14, 30];
-      for (const milestone of streakMilestones) {
-        if (newStreak >= milestone && !unlockedStreaks.current.has(milestone)) {
-          unlockedStreaks.current.add(milestone);
-
-          // Try saving to backend
-          try {
-            await axios.post("http://localhost:5000/api/auth/unlock-achievement", {
-              title: `${milestone}-Day Workout Streak!`,
-            }, { withCredentials: true });
-          } catch (err) {
-            console.error(`Failed to save ${milestone}-day streak achievement`, err);
-          }
-
-          // Display the popup
-          setUnlockedAchievement({
-            title: `${milestone}-Day Workout Streak!`,
-            description: `You've worked out ${milestone} days in a row. Keep it going!`,
-          });
-        }
-      }
-
-      const now = new Date();
-      const hour = now.getHours();
-      const day = now.getDay(); // 0 = Sun, 6 = Sat
-
-      const unlockIfNeeded = async (key, title, description) => {
-        if (!localStorage.getItem(key)) {
-          try {
-            await axios.post("http://localhost:5000/api/auth/unlock-achievement", {
-              title,
-            }, { withCredentials: true });
-
-            setUnlockedAchievement({ title, description });
-            localStorage.setItem(key, "true");
-          } catch (err) {
-            console.error(`Failed to unlock ${title}:`, err);
-          }
-        }
-      };
-
-      if (day === 0 || day === 6) {
-        await unlockIfNeeded("weekendWarriorUnlocked", "Weekend Warrior", "You worked out on the weekend. Thats dedication!");
-      }
-
-      if (hour < 6) {
-        await unlockIfNeeded("earlyBirdUnlocked", "Early Bird", "You worked out before 6 AM. Rise and grind!");
-      } else if (hour >= 22) {
-        await unlockIfNeeded("lateOwlUnlocked", "Late Owl", "You worked out after 10 PM. Midnight gains!");
-      }
-
-
+        // Trigger streak update component via event
+        window.dispatchEvent(new Event("workoutLogged"));
 
         toast.success("Workout logged successfully!", {
           duration: 2000,
@@ -418,15 +323,8 @@ const WorkoutPage = () => {
                 <p className="text-2xl font-bold mb-3" style={{ color: COLORS.NEON_GREEN }}>{workoutAmount !== null ? workoutAmount : 'N/A'}</p>
               </div>
 
-              <div className="p-4 border rounded-lg mb-4" style={{ borderColor: COLORS.MEDIUM_GRAY, backgroundColor: COLORS.DARK_GRAY }}>
-                <h3 className="font-medium" style={{ color: COLORS.WHITE }}>
-                   Daily Workout Streak
-                   <InfoTooltip title="This shows your current streak of consecutive days you've logged a workout!" />
-                </h3>
-                <p className="text-2xl font-bold mb-3" style={{ color: COLORS.NEON_GREEN }}>
-                   {streak} day{streak === 1 ? "" : "s"}
-                </p>
-              </div>
+              <WorkoutStreak onWorkoutLogged={() => setWorkoutAmount(prev => prev + 1)} />
+
 
               <div className="flex flex-col space-y-3">
                 <button
