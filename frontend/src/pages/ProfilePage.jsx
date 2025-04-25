@@ -6,7 +6,41 @@ import { useUserStore } from "../stores/useUserStore";
 import { useMemo } from "react";
 import PropTypes from "prop-types";
 
+import { useNavigate } from 'react-router-dom';
+ 
+ 
+ 
+ const handleDeleteClick = () => {
+   const confirmed = window.confirm(
+     'Are you sure you want to delete your account? This action cannot be undone.'
+   );
+   if (confirmed) {
+     handleDeleteAccount();
+   }
+ };
+ 
+ const handleDeleteAccount = async () => {
+   try {
+     const res = await fetch('/api/auth/delete', {
+       method: 'DELETE',
+       credentials: 'include', 
+     });
+ 
+     if (!res.ok) {
+       const errorData = await res.json();
+       throw new Error(errorData.message || 'Failed to delete account');
+     }
+ 
+    
+     window.location.href = '/LoginPage'; 
+   } catch (err) {
+     console.error('Error deleting account:', err);
+     alert('There was an error deleting your account.');
+   }
+ };
+
 const ProfilePage = () => {
+    const navigate = useNavigate(); 
     const [workoutAmount, setWorkoutAmount] = useState(0);
     const [mealAmount, setMealAmount] = useState(0);
     const [maxLift, setMaxLift] = useState(0);
@@ -30,6 +64,7 @@ const ProfilePage = () => {
     const [streak, setStreak] = useState(0);
     const [isMobile, setIsMobile] = useState(false);
 
+
     const heightOptions = [
         { value: "", label: "Select your height" },
         ...[...Array(37)].map((_, i) =>
@@ -40,6 +75,12 @@ const ProfilePage = () => {
             return { value: height, label: height };
         })
     ];
+
+    const handleNavigateClick = () => {
+        console.log('Navigating to update profile...');
+        navigate("/update-profile");   page
+      };
+
 
     // Detect mobile devices
     useEffect(() => {
@@ -516,6 +557,29 @@ const ProfilePage = () => {
                                 >
                                     Cancel
                                 </button>
+                                <button
+                   onClick={handleDeleteClick}
+                   className="px-4 py-2 rounded font-medium"
+                   style={{
+                   backgroundColor: 'red',
+                   color: 'white',
+                   }}
+                   >     
+                   Delete Account
+                   </button>
+ 
+               <div className="mt-4 space-y-3">
+                 <button
+                 onClick={handleNavigateClick}
+                 className="px-4 py-2 rounded font-medium"
+                   style={{ 
+                     backgroundColor: COLORS.NEON_GREEN,
+                     color: COLORS.BLACK
+                   }}
+                 >
+                 Update Email or Password
+                 </button>
+               </div>
                             </div>
                         )}
                     </div>
