@@ -12,6 +12,13 @@ const SignUpPage = () => {
     password: "",
     confirmPassword: "",
     termsAccepted: false,
+    age: "",
+    weight: "",
+    height: "",
+    gender: "not-specified",
+    experienceLevel: "beginner",
+    healthConditions: "none",
+    fitnessGoal: ""
   });
 
   const [errors, setErrors] = useState({});
@@ -222,6 +229,67 @@ const SignUpPage = () => {
                     />
                   </div>
                   {errors.confirmPassword && <p className="text-red-500 text-xs sm:text-sm mt-1">{errors.confirmPassword}</p>}
+                </div>
+
+                {/* Age */}
+                <div className="space-y-1.5 sm:space-y-2">
+                    <label htmlFor="age" className="text-xs sm:text-sm font-medium text-gray-300">Age</label>
+                    <input
+                        id="age"
+                        type="number"
+                        value={formData.age}
+                        onChange={(e) => setFormData({ ...formData, age: e.target.value })}
+                        className="block w-full px-3 py-2 rounded-lg bg-[#0a0a0a]/90 text-gray-100 placeholder-gray-400 focus:outline-none"
+                        placeholder="Your age"
+                    />
+                </div>
+
+                {/* Weight */}
+                <div className="space-y-1.5 sm:space-y-2">
+                    <label htmlFor="weight" className="text-xs sm:text-sm font-medium text-gray-300">Weight (lbs)</label>
+                    <input
+                        id="weight"
+                        type="number"
+                        value={formData.weight}
+                        onChange={(e) => setFormData({ ...formData, weight: e.target.value })}
+                        className="block w-full px-3 py-2 rounded-lg bg-[#0a0a0a]/90 text-gray-100 placeholder-gray-400 focus:outline-none"
+                        placeholder="Your weight"
+                    />
+                </div>
+
+                {/* Height */}
+                <div className="space-y-1.5 sm:space-y-2">
+                    <label htmlFor="height" className="text-xs sm:text-sm font-medium text-gray-300">Height</label>
+                    <select
+                         id="height"
+                         value={formData.height}
+                         onChange={(e) => setFormData({ ...formData, height: e.target.value })}
+                         className="block w-full px-3 py-2 rounded-lg bg-[#0a0a0a]/90 text-gray-100 focus:outline-none"
+                    >
+                         <option value="">Select height</option>
+                         {[...Array(37)].map((_, i) => {
+                           const feet = Math.floor((i + 60) / 12);
+                           const inches = (i + 60) % 12;
+                           const height = `${feet}'${inches}"`;
+                           return <option key={height} value={height}>{height}</option>;
+                         })}
+                    </select>
+                </div>
+
+                {/* Gender */}
+                <div className="space-y-1.5 sm:space-y-2">
+                    <label htmlFor="gender" className="text-xs sm:text-sm font-medium text-gray-300">Gender</label>
+                    <select
+                         id="gender"
+                         value={formData.gender}
+                         onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
+                         className="block w-full px-3 py-2 rounded-lg bg-[#0a0a0a]/90 text-gray-100 focus:outline-none"
+                    >
+                         <option value="not-specified">Prefer not to say</option>
+                         <option value="male">Male</option>
+                         <option value="female">Female</option>
+                         <option value="other">Other</option>
+                    </select>
                 </div>
 
                 <div className="space-y-1.5 sm:space-y-2">
