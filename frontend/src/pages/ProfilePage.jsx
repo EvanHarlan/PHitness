@@ -543,7 +543,11 @@ const ProfilePage = () => {
                                     <div className="flex items-center text-base sm:text-lg font-bold mb-1 sm:mb-2">
                                         <AchievementIcon
                                             type={achievement.iconType}
-                                            filled={achievement.count >= achievement.threshold}
+                                            filled={achievement.title === "Early Bird"
+                                                ? localStorage.getItem("earlyBirdUnlocked") === "true"
+                                                : achievement.title === "Late Owl"
+                                                ? localStorage.getItem("lateOwlUnlocked") === "true"
+                                                : achievement.count >= achievement.threshold}
                                         />
                                         <span className="ml-2 text-sm sm:text-base">{achievement.title}</span>
                                     </div>
