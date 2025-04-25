@@ -12,51 +12,117 @@ import { useUserStore } from "../stores/useUserStore";
 import WorkoutStreak from "../components/WorkoutStreak";
 
 
-const WorkoutPage = () => {
-  // State variables (unchanged)
-  const [workoutAmount, setWorkoutAmount] = useState(0);
-  const [loading, setLoading] = useState(false);
-  const [showSavedWorkouts, setShowSavedWorkouts] = useState(true);
-  const navigate = useNavigate();
-  const [fetchWorkoutCountError, setFetchWorkoutCountError] = useState(null);
-  const { user, setUnlockedAchievement } = useUserStore();
-  const hasCheckedLift = useRef(false);
+const WorkoutPage = () =>
+{
+    // State variables (unchanged)
+    const [workoutAmount, setWorkoutAmount] = useState(0);
+    const [loading, setLoading] = useState(false);
+    const [showSavedWorkouts, setShowSavedWorkouts] = useState(true);
+    const navigate = useNavigate();
+    const [fetchWorkoutCountError, setFetchWorkoutCountError] = useState(null);
+    const { user, setUnlockedAchievement } = useUserStore();
+    const hasCheckedLift = useRef(false);
+    const [autoFillEnabled, setAutoFillEnabled] = useState(() =>
+    {
+        const stored = localStorage.getItem("autoFillEnabled");
+        return stored === "true"; // returns true or false
+    });
+    const didInitialAutoFill = useRef(false);
 
-  // Form state for user parameters (unchanged)
-  const [userParams, setUserParams] = useState({
-    height: "",
-    weight: "",
-    age: "",
-    gender: "not-specified",
-    fitnessGoal: "",
-    experienceLevel: "beginner",
-    equipment: "minimal",
-    timeFrame: "30-minutes",
-    healthConditions: "none",
-    frequency: "3-4"
-  });
 
-  // Custom theme for tooltips to match the website (This is for the description)
-  const tooltipTheme = createTheme({
-    components: {
-      MuiTooltip: {
-        styleOverrides: {
-          tooltip: {
-            backgroundColor: COLORS.DARK_GRAY,
-            color: COLORS.WHITE,
-            border: `1px solid ${COLORS.MEDIUM_GRAY}`,
-            fontSize: '0.875rem',
-            padding: '8px 12px',
-            maxWidth: '300px',
-            zIndex: 9999,
-          },
-          arrow: {
-            color: COLORS.DARK_GRAY,
-          }
+    // Form state for user parameters (unchanged)
+    const [userParams, setUserParams] = useState({
+        height: "",
+        weight: "",
+        age: "",
+        gender: "not-specified",
+        fitnessGoal: "",
+        experienceLevel: "beginner",
+        equipment: "minimal",
+        timeFrame: "30-minutes",
+        healthConditions: "none",
+        frequency: "3-4"
+    });
+
+    // Custom theme for tooltips to match the website (This is for the description)
+    const tooltipTheme = createTheme({
+        components: {
+            MuiTooltip: {
+                styleOverrides: {
+                    tooltip: {
+                        backgroundColor: COLORS.DARK_GRAY,
+                        color: COLORS.WHITE,
+                        border: `1px solid ${COLORS.MEDIUM_GRAY}`,
+                        fontSize: '0.875rem',
+                        padding: '8px 12px',
+                        maxWidth: '300px',
+                        zIndex: 9999,
+                    },
+                    arrow: {
+                        color: COLORS.DARK_GRAY,
+                    }
+                }
+            }
         }
-      }
-    }
-  });
+    });
+
+        const fetchProfileData = async (silent = false) => 
+        {
+            try
+            {
+                const res = await axios.get("http://localhost:5000/api/auth/profile", { withCredentials: true });
+                const profile = res.data;
+
+                setUserParams(prev => ({
+                    ...prev,
+                    height: profile.height || "",
+                    weight: profile.weight || "",
+                    age: profile.age || "",
+                    gender: profile.gender || "not-specified",
+                    fitnessGoal: profile.fitnessGoal || "",
+                    experienceLevel: profile.experienceLevel || "beginner",
+                    healthConditions: profile.healthConditions || "none"
+                }));
+
+                if (!silent)
+                {
+                    toast.success("Workout form auto-filled from profile!", {
+                        duration: 3000,
+                        icon: '✅',
+                        style: {
+                            background: COLORS.DARK_GRAY,
+                            color: COLORS.NEON_GREEN,
+                            border: `1px solid ${COLORS.MEDIUM_GRAY}`
+                        }
+                    });
+                }
+            }
+            catch (error)
+            {
+                console.error("Error autofilling from profile:", error);
+                toast.error("Failed to autofill. Please try again.", {
+                    duration: 3000,
+                    style:
+                    {
+                        background: COLORS.DARK_GRAY,
+                        color: COLORS.WHITE,
+                        border: `1px solid ${COLORS.MEDIUM_GRAY}`
+                    }
+                });
+            }
+        };
+
+    useEffect(() =>
+    {
+        if (autoFillEnabled)
+        {
+            fetchProfileData(!didInitialAutoFill.current);
+            didInitialAutoFill.current = true;
+        }
+    }, [autoFillEnabled]);
+        
+    
+
 
   // Info tooltip component to match the website (This is for the icon)
   const InfoTooltip = ({ title }) => (
@@ -119,6 +185,7 @@ const WorkoutPage = () => {
             checkHighestLift();
         }
     }, [user, setUnlockedAchievement]);
+
 
   useEffect(() => {
     const fetchWorkoutCount = async () => {
@@ -296,6 +363,23 @@ const WorkoutPage = () => {
                 Your Parameters
                 <InfoTooltip title="Fill out the questions to get a personalized workout plan based on your specific goals and information." />
               </h2>
+              
+              <div className="mb-4 flex items-center gap-3">
+                <label htmlFor="autofill-toggle" className="text-sm font-medium" style={{ color: COLORS.WHITE }}>
+                  Autofill From Profile
+                </label>
+                <input
+                  id="autofill-toggle"
+                  type="checkbox"
+                  checked={autoFillEnabled}
+                  onChange={(e) => {
+                      const checked = e.target.checked;
+                      setAutoFillEnabled(checked);
+                      localStorage.setItem("autoFillEnabled", checked.toString());
+                  }}
+                  className="toggle-checkbox w-6 h-6 rounded"
+                />
+              </div>
 
               <WorkoutQuestionnaire
                 userParams={userParams}

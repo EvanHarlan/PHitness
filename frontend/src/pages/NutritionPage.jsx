@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
@@ -21,6 +21,14 @@ const NutritionPage = () => {
   const [fetchMealCountError, setFetchMealCountError] = useState(null);
   const { user } = useUserStore();
   const [isMobile, setIsMobile] = useState(false);
+  const [autoFillEnabled, setAutoFillEnabled] = useState(() => 
+  {
+      const stored = localStorage.getItem("nutritionAutoFillEnabled");
+      return stored === "true";
+  });
+  const firstLoad = useRef(true);
+
+
 
   // Detect mobile devices
   useEffect(() => {
@@ -108,6 +116,64 @@ const NutritionPage = () => {
       />
     </Tooltip>
   );
+
+  const fetchProfileData = async (silent = false) =>
+  {
+      try
+      {
+          const res = await axios.get("http://localhost:5000/api/auth/profile", { withCredentials: true });
+          const profile = res.data;
+
+          setUserParams(prev => ({
+              ...prev,
+              height: profile.height || "",
+              weight: profile.weight || "",
+              age: profile.age || "",
+              gender: profile.gender || "not-specified"
+          }));
+
+          if (!silent)
+          {
+              toast.success("Nutrition form auto-filled from profile!", {
+                  duration: 3000,
+                  icon: '✅',
+                  style: {
+                      background: COLORS.DARK_GRAY,
+                      color: COLORS.NEON_GREEN,
+                      border: `1px solid ${COLORS.MEDIUM_GRAY}`
+                  }
+              });
+          }
+      } catch (error)
+      {
+          console.error("Error autofilling nutrition profile:", error);
+          toast.error("Failed to autofill nutrition form. Please try again.");
+      }
+  };
+
+  useEffect(() => {
+      if (autoFillEnabled)
+      {
+          fetchProfileData(true); // silent to prevent double toast
+      }
+  }, []);
+
+  useEffect(() => {
+    if (firstLoad.current) 
+    {
+        firstLoad.current = false;
+        return;
+    }
+
+    if (autoFillEnabled)
+    {
+        fetchProfileData();
+    }
+}, [autoFillEnabled]);
+
+
+
+
 
   useEffect(() => {
     console.log("🧍 User from store:", user);
@@ -306,6 +372,25 @@ const NutritionPage = () => {
                 Your Preferences
                 <InfoTooltip title="Answer questions to get personalized meal suggestions based on your dietary needs and goals." />
               </h2>
+
+              <div className="mb-4 flex items-center gap-3">
+                <label htmlFor="autofill-toggle" className="text-sm font-medium" style={{ color: COLORS.WHITE }}>
+                    Autofill From Profile
+                </label>
+               <input
+                   id="autofill-toggle"
+                   type="checkbox"
+                   checked={autoFillEnabled}
+                   onChange={(e) =>
+                   {
+                       const checked = e.target.checked;
+                       setAutoFillEnabled(checked);
+                       localStorage.setItem("nutritionAutoFillEnabled", checked.toString());
+                   }}
+                   className="toggle-checkbox w-6 h-6 rounded"
+                />
+              </div>
+
 
               <NutritionQuestionnaire
                 userParams={userParams}
