@@ -1,6 +1,6 @@
 import COLORS from '../lib/constants';
 
-const NutritionQuestionnaire = ({ userParams, setUserParams, onSubmit, loading }) => {
+const NutritionQuestionnaire = ({ userParams, setUserParams, onSubmit, loading, canGenerateMealPlan, nextGenerationTime }) => {
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setUserParams(prev => ({
@@ -187,6 +187,21 @@ const NutritionQuestionnaire = ({ userParams, setUserParams, onSubmit, loading }
     { value: "other", label: "Other (Please specify if this becomes a necessary option)" },
   ];
 
+  const formatTimeRemaining = (nextTime) => {
+    if (!nextTime) return "No previous meal plan generation";
+    
+    const now = new Date();
+    const diff = nextTime - now;
+    
+    if (diff <= 0) return "Available now!";
+    
+    const hours = Math.floor(diff / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+    
+    return `${hours}h ${minutes}m ${seconds}s remaining`;
+  };
+
   return (
     <form className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -216,13 +231,19 @@ const NutritionQuestionnaire = ({ userParams, setUserParams, onSubmit, loading }
       <div className="pt-4">
         <button
           type="button"
-          className="px-4 py-2 rounded-lg transition font-medium"
-          style={{ backgroundColor: COLORS.NEON_GREEN, color: COLORS.BLACK }}
+          className="w-full px-4 py-3 rounded-lg transition font-medium"
+          style={{ 
+            backgroundColor: canGenerateMealPlan ? COLORS.NEON_GREEN : COLORS.MEDIUM_GRAY,
+            color: COLORS.BLACK,
+            cursor: canGenerateMealPlan ? 'pointer' : 'not-allowed',
+            opacity: canGenerateMealPlan ? 1 : 0.7,
+            fontSize: '1.1rem'
+          }}
           onClick={onSubmit}
-          disabled={loading}
+          disabled={!canGenerateMealPlan || loading}
         >
           {loading ? (
-            <span className="flex items-center">
+            <span className="flex items-center justify-center">
               <svg className="animate-spin h-5 w-5 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
@@ -230,9 +251,14 @@ const NutritionQuestionnaire = ({ userParams, setUserParams, onSubmit, loading }
               Creating Optimal Meal Plan...
             </span>
           ) : (
-            "Generate Optimal Meal Plan"
+            canGenerateMealPlan ? 'Generate Optimal Meal Plan' : 'Meal Plan Generated Today'
           )}
         </button>
+        {!canGenerateMealPlan && !loading && (
+          <p className="text-center mt-2 text-sm" style={{ color: COLORS.LIGHT_GRAY }}>
+            Next generation available in {formatTimeRemaining(nextGenerationTime)}
+          </p>
+        )}
       </div>
     </form>
   );
