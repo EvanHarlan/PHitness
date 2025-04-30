@@ -1,6 +1,12 @@
 import { redis } from "../lib/redis.js";
 import User from "../models/user.model.js";
 import jwt from "jsonwebtoken";
+import MealPlan from "../models/mealPlan.model.js";
+import Workout from "../models/workout.model.js";
+import sendEmail from '../lib/sendEmail.js';
+import crypto from 'crypto';
+
+
 
 const generateTokens = (userId) => {
 	const accessToken = jwt.sign({ userId }, process.env.ACCESS_TOKEN_SECRET, {
@@ -34,7 +40,7 @@ const setCookies = (res, accessToken, refreshToken) => {
 };
 
 export const signup = async (req, res) => {
-	const { email, password, name } = req.body;
+	const { email, password, name, username, termsAccepted, age, height, weight, gender, experienceLevel, healthConditions, fitnessGoal } = req.body;
 	try {
 		if (password.length < 6) {
 			return res.status(400).json({ message: "Passwords needs to be at least 6 characters long"})
@@ -44,7 +50,7 @@ export const signup = async (req, res) => {
 		if (userExists) {
 			return res.status(400).json({ message: "User already exists" });
 		}
-		const user = await User.create({ name, email, password });
+		const user = await User.create({ name, email, password, username, termsAccepted, age, height, weight, gender, experienceLevel, healthConditions, fitnessGoal });
 
 		// authenticate
 		const { accessToken, refreshToken } = generateTokens(user._id);
@@ -165,6 +171,12 @@ export const getProfile = async (req, res) =>
 			sentRequests: user.sentRequests || [],
 			profileVisibility: user.profileVisibility,
 			maxLift: user.maxLift,
+			height: user.height,
+			weight: user.weight,
+			gender: user.gender,
+			experienceLevel: user.experienceLevel,
+			healthConditions: user.healthConditions,
+			fitnessGoal: user.fitnessGoal
 		});
 	} catch (error)
 	{
@@ -187,6 +199,9 @@ export const updateProfile = async (req, res) => {
 	  user.age = req.body.age || user.age;
 	  user.bio = req.body.bio || user.bio;
 	  user.avatar = req.body.avatar || user.avatar;
+	  user.height = req.body.height || user.height;
+	  user.weight = req.body.weight || user.weight;
+	  user.gender = req.body.gender || user.gender;
   
 	  await user.save(); // Save the updated user data
   
@@ -301,3 +316,83 @@ export const searchUsers = async (req, res) => {
 	  res.status(500).json({ message: error.message });
 	}
   };
+  export const deleteAccount = async (req, res) => {
+	try {
+		const userId = req.user.id;
+		console.log(`Deleting account for user with ID: ${userId}`);
+
+	
+		await MealPlan.deleteMany({ user: userId });
+
+		await Workout.deleteMany({ user: userId });
+
+		
+		await User.findByIdAndDelete(userId);
+
+		console.log(`User with ID ${userId} and all related data deleted successfully`);
+
+		res.status(200).json({ message: "Account and related data deleted successfully" });
+	} catch (err) {
+		console.error("Error deleting account:", err);
+		res.status(500).json({ message: "Error deleting account" });
+	}
+};
+
+export const updateUserProfile = async (req, res) => {
+	const { newEmail, newPassword } = req.body; 
+  
+	try {
+	  const user = await User.findById(req.user._id);
+  
+	  if (!user) {
+		return res.status(404).json({ message: "User not found" });
+	  }
+  
+	  // Update email and/or password if provided
+	  if (newEmail) user.email = newEmail;
+	  if (newPassword) user.password = newPassword;
+  
+	  await user.save();
+  
+	  res.status(200).json({ message: "Credentials updated successfully", user });
+	} catch (error) {
+	  console.error("Error updating credentials:", error);
+	  res.status(500).json({ message: "An error occurred while updating credentials" });
+	}
+};
+
+
+
+export const forgotPassword = async (req, res) => {
+	const { email } = req.body;
+  
+	try {
+	  const user = await User.findOne({ email });
+	  if (!user) {
+		return res.status(400).json({ message: "No user found with that email." });
+	  }
+  
+	  
+	  const tempPassword = crypto.randomBytes(6).toString("hex"); 
+  
+	  user.password = tempPassword;
+	  await user.save();
+  
+	  
+	  const message = `
+		Hey its PHitness! This email is being sent to you because you requested for your email to be reset. Here is your new temporary password:
+  
+		${tempPassword}
+  
+		Please log in and change it immediately in the edit profile scetion of the profile page.
+	  `;
+  
+	  await sendEmail(email, "Temporary Password", message);
+  
+	  res.status(200).json({ message: "Temporary password sent to your email." });
+	} catch (err) {
+	  console.error("Error in forgotPassword:", err);
+	  res.status(500).json({ message: "Server error during password reset." });
+	}
+  };
+  

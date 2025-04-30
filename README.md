@@ -11,6 +11,7 @@
 - **nodemon**: Development server with hot-reloading
 - **lucide-react**: React icon package
 - **recharts**: React charting
+- **prop-types**: React typechecking
 
 ## Project Structure
 ```bash

@@ -4,6 +4,7 @@ import { calculateMacroLimits, getMacroRatio } from '../lib/macroHelpers.js';
 // import { rotateMealType } from '../lib/mealHelpers.js'; // Keep if used, otherwise remove
 import crypto from 'crypto';
 import MealPlan from '../models/mealPlan.model.js';
+import Tracker from '../models/tracker.model.js';
 
 // Simple in-memory cache for last generated meal plans (Optional: Review if still needed with robust saving)
 const lastPlanCache = new Map();
@@ -21,16 +22,24 @@ const hashMealPlan = (mealPlan) => {
     return crypto.createHash('md5').update(mealSignatures).digest('hex');
 };
 
-// @desc    Get all meal plans for a user (supports favorite filtering)
-// @route   GET /api/meal-plans
-// @access  Private
+// @desc    Get all meal plans for a user (supports favorite and completed filtering)
+// @route   GET /api/meal-plans
+// @access  Private
 export const getUserMealPlans = asyncHandler(async (req, res) => {
-    const filter = { user: req.user._id };
-    if (req.query.favoritesOnly === 'true') {
-        filter.isFavorite = true;
-    }
-    const mealPlans = await MealPlan.find(filter).sort({ createdAt: -1 });
-    res.json(mealPlans);
+    const filter = { user: req.user._id };
+    
+    // Handle favorite filter
+    if (req.query.favoritesOnly === 'true') {
+        filter.isFavorite = true;
+    }
+    
+    // Handle completed filter
+    if (req.query.completedOnly === 'true') {
+        filter.completed = true;
+    }
+    
+    const mealPlans = await MealPlan.find(filter).sort({ createdAt: -1 });
+    res.json(mealPlans);
 });
 
 // @desc    Get a single meal plan by ID
@@ -191,10 +200,32 @@ const generateMealPlanTitle = (userData) => {
 // @route   POST /api/meal-plans/generate
 // @access  Private
 export const generateMealPlan = asyncHandler(async (req, res) => {
-    // Outer try...catch to handle errors before or after the main generation/save block
     try {
         console.log("🚀 Starting meal plan generation request for user:", req.user?._id);
         console.log("Request Body:", req.body);
+
+        // Check if user has already generated a meal plan today
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        
+        // Check the tracker for last generation
+        const tracker = await Tracker.findOne({ 
+            user: req.user._id,
+            type: 'meal-plan'
+        });
+
+        if (tracker) {
+            const lastGenDate = new Date(tracker.lastGenerationDate);
+            const isToday = lastGenDate.toDateString() === today.toDateString();
+            
+            if (isToday) {
+                return res.status(429).json({ 
+                    success: false,
+                    error: "You can only generate one meal plan per day. Please try again tomorrow.",
+                    lastGenerationDate: tracker.lastGenerationDate
+                });
+            }
+        }
 
         // --- Start Validation ---
         const requiredFields = [
@@ -308,10 +339,27 @@ export const generateMealPlan = asyncHandler(async (req, res) => {
                 isFavorite: false,
             });
 
+            // Update or create tracker
+            const now = new Date();
+            if (tracker) {
+                tracker.lastGenerationDate = now;
+                await tracker.save();
+            } else {
+                await Tracker.create({
+                    user: req.user._id,
+                    type: 'meal-plan',
+                    lastGenerationDate: now,
+                    date: now
+                });
+            }
+
             console.log(`💾 Meal plan saved successfully with ID: ${newPlan._id} for user: ${req.user._id}`);
 
             // Send the newly SAVED plan back to the client
-            res.status(201).json({ mealPlan: newPlan }); // Use 201 Created status
+            res.status(201).json({ 
+                mealPlan: newPlan,
+                lastGenerationDate: now
+            });
 
         } catch (gptOrDbError) {
             console.error("❌ Error during GPT call or Database save:", gptOrDbError);
@@ -409,3 +457,25 @@ export const completeMeal = asyncHandler(async (req, res) => {
 
   res.status(200).json(mealPlan);
 });
+
+export const completeMealPlan = async (req, res) => {
+  try {
+    const mealPlan = await MealPlan.findById(req.params.id);
+    if (!mealPlan) {
+      return res.status(404).json({ message: 'Meal plan not found' });
+    }
+
+    if (mealPlan.user.toString() !== req.user.id) {
+      return res.status(401).json({ message: 'Not authorized' });
+    }
+
+    mealPlan.completed = true;
+    mealPlan.completedAt = new Date();
+    await mealPlan.save();
+
+    res.json(mealPlan);
+  } catch (error) {
+    console.error('Error completing meal plan:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
