@@ -1,6 +1,5 @@
 import express from 'express';
 import { protectRoute } from '../middleware/auth.middleware.js'; // Ensure this middleware correctly attaches req.user
-import MealPlan from '../models/mealPlan.model.js';
 
 // Import all necessary controller functions
 import {
@@ -10,8 +9,7 @@ import {
     getMealPlanById,        // Get specific plan details
     toggleFavoriteMealPlan, // Mark/unmark as favorite
     deleteMealPlan,         // Remove a plan
-    completeMeal,           // Complete a meal
-    completeMealPlan        // Complete a meal plan
+    completeMeal            // Complete a meal
 } from '../controllers/mealPlan.controller.js';
 
 const router = express.Router();
@@ -45,8 +43,5 @@ router.delete('/:id', protectRoute, deleteMealPlan);
 
 // Complete a meal
 router.patch('/:mealPlanId/meals/:mealIndex/complete', protectRoute, completeMeal);
-
-// Mark meal plan as completed
-router.patch('/:id/complete', protectRoute, completeMealPlan);
 
 export default router; // Export the configured router

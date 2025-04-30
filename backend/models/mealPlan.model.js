@@ -70,18 +70,11 @@ const mealPlanSchema = new mongoose.Schema({
     type: Boolean,
     default: false
   },
-  completed: {
-    type: Boolean,
-    default: false
-  },
-  completedAt: {
-    type: Date
-  },
   createdAt: {
     type: Date,
     default: Date.now
   }
-}, { timestamps: true });
+});
 
 const MealPlan = mongoose.model('MealPlan', mealPlanSchema);
 

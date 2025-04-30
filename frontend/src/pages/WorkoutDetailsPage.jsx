@@ -208,13 +208,6 @@ const WorkoutDetailsPage = () => {
       );
 
       if (response.data.success) {
-        // Update workout count
-        await axios.post(
-          "http://localhost:5000/api/tracker",
-          { type: "workout" },
-          { withCredentials: true }
-        );
-
         toast.success('Workout completed! Great job!', {
           style: {
             background: COLORS.DARK_GRAY,
@@ -702,7 +695,7 @@ const WorkoutDetailsPage = () => {
             }}
             onClick={handleCompleteWorkout}
           >
-            Complete Workout
+            Complete Exercise
           </button>
         </div>
       </div>

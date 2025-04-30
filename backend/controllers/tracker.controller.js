@@ -1,7 +1,5 @@
 import Tracker from "../models/tracker.model.js";
 import User from "../models/user.model.js";
-import Workout from "../models/workout.model.js";
-import MealPlan from "../models/mealPlan.model.js";
 
 export const addTrackerEntry = async (req, res) =>
 {
@@ -52,25 +50,26 @@ export const getAllTrackerEntries = async (req, res) =>
     }
 }
 
-export const getTrackerCounts = async (req, res) => {
-    try {
-        // Count completed workouts
-        const completedWorkouts = await Workout.countDocuments({
-            user: req.user._id,
-            completed: true
+export const getTrackerCounts = async (req, res) =>
+{
+    try
+    {
+        const counts = await Tracker.aggregate([
+            { $match: { user: req.user._id } },
+            { $group: { _id: "$type", count: { $sum: "$amount" } } }
+        ]);
+
+        const result = { workoutCount: 0, mealCount: 0 };
+        counts.forEach(({ _id, count }) =>
+        {
+            if (_id === "workout") result.workoutCount = count;
+            if (_id === "meal") result.mealCount = count;
         });
 
-        // Count completed meal plans
-        const completedMealPlans = await MealPlan.countDocuments({
-            user: req.user._id,
-            completed: true
-        });
-
-        res.json({
-            workoutCount: completedWorkouts,
-            mealCount: completedMealPlans
-        });
-    } catch (error) {
+        res.json(result);
+    }
+    catch (error)
+    {
         console.error("Error counting tracker entries:", error);
         res.status(500).json({ message: "Server error" });
     }
