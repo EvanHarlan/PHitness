@@ -4,6 +4,7 @@ import { calculateMacroLimits, getMacroRatio } from '../lib/macroHelpers.js';
 // import { rotateMealType } from '../lib/mealHelpers.js'; // Keep if used, otherwise remove
 import crypto from 'crypto';
 import MealPlan from '../models/mealPlan.model.js';
+import Tracker from '../models/tracker.model.js';
 
 // Simple in-memory cache for last generated meal plans (Optional: Review if still needed with robust saving)
 const lastPlanCache = new Map();
@@ -199,7 +200,6 @@ const generateMealPlanTitle = (userData) => {
 // @route   POST /api/meal-plans/generate
 // @access  Private
 export const generateMealPlan = asyncHandler(async (req, res) => {
-    // Outer try...catch to handle errors before or after the main generation/save block
     try {
         console.log("🚀 Starting meal plan generation request for user:", req.user?._id);
         console.log("Request Body:", req.body);
@@ -208,16 +208,23 @@ export const generateMealPlan = asyncHandler(async (req, res) => {
         const today = new Date();
         today.setHours(0, 0, 0, 0);
         
-        const existingPlan = await MealPlan.findOne({ 
+        // Check the tracker for last generation
+        const tracker = await Tracker.findOne({ 
             user: req.user._id,
-            createdAt: { $gte: today }
+            type: 'meal-plan'
         });
 
-        if (existingPlan) {
-            return res.status(429).json({ 
-                success: false,
-                error: "You can only generate one meal plan per day. Please try again tomorrow." 
-            });
+        if (tracker) {
+            const lastGenDate = new Date(tracker.lastGenerationDate);
+            const isToday = lastGenDate.toDateString() === today.toDateString();
+            
+            if (isToday) {
+                return res.status(429).json({ 
+                    success: false,
+                    error: "You can only generate one meal plan per day. Please try again tomorrow.",
+                    lastGenerationDate: tracker.lastGenerationDate
+                });
+            }
         }
 
         // --- Start Validation ---
@@ -332,10 +339,27 @@ export const generateMealPlan = asyncHandler(async (req, res) => {
                 isFavorite: false,
             });
 
+            // Update or create tracker
+            const now = new Date();
+            if (tracker) {
+                tracker.lastGenerationDate = now;
+                await tracker.save();
+            } else {
+                await Tracker.create({
+                    user: req.user._id,
+                    type: 'meal-plan',
+                    lastGenerationDate: now,
+                    date: now
+                });
+            }
+
             console.log(`💾 Meal plan saved successfully with ID: ${newPlan._id} for user: ${req.user._id}`);
 
             // Send the newly SAVED plan back to the client
-            res.status(201).json({ mealPlan: newPlan }); // Use 201 Created status
+            res.status(201).json({ 
+                mealPlan: newPlan,
+                lastGenerationDate: now
+            });
 
         } catch (gptOrDbError) {
             console.error("❌ Error during GPT call or Database save:", gptOrDbError);

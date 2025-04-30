@@ -39,8 +39,13 @@ const SavedMealsList = () => {
     if (!window.confirm('Are you sure you want to delete this meal plan?')) return;
 
     try {
-      await axios.delete(`http://localhost:5000/api/meal-plans/${mealId}`, { withCredentials: true }); // Corrected endpoint
+      await axios.delete(`http://localhost:5000/api/meal-plans/${mealId}`, { withCredentials: true });
       setMeals(meals.filter(meal => meal._id !== mealId));
+      
+      // Dispatch a custom event to notify parent components
+      const event = new CustomEvent('mealPlanDeleted', { detail: { mealId } });
+      window.dispatchEvent(event);
+      
       toast.success('Meal plan deleted successfully', {
         style: {
           background: COLORS.DARK_GRAY,

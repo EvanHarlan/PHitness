@@ -28,18 +28,34 @@ const NutritionPage = () => {
   });
   const firstLoad = useRef(true);
   const [nextGenerationTime, setNextGenerationTime] = useState(null);
+  const [lastMealPlanGeneration, setLastMealPlanGeneration] = useState(null);
+  const [canGenerateMealPlan, setCanGenerateMealPlan] = useState(true);
 
   // Function to calculate time until next generation
   const calculateNextGenerationTime = () => {
+    if (!lastMealPlanGeneration) return new Date();
+    
     const now = new Date();
-    const tomorrow = new Date(now);
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    tomorrow.setHours(0, 0, 0, 0);
-    return tomorrow;
+    const lastGen = new Date(lastMealPlanGeneration);
+    
+    // Check if the last generation was today
+    const isToday = lastGen.toDateString() === now.toDateString();
+    
+    if (isToday) {
+      // If generated today, next generation is 24 hours from last generation
+      const nextGen = new Date(lastGen);
+      nextGen.setHours(nextGen.getHours() + 24);
+      return nextGen;
+    } else {
+      // If not generated today, can generate now
+      return now;
+    }
   };
 
   // Function to format time remaining
   const formatTimeRemaining = (nextTime) => {
+    if (!nextTime) return "No previous meal plan generation";
+    
     const now = new Date();
     const diff = nextTime - now;
     
@@ -47,21 +63,31 @@ const NutritionPage = () => {
     
     const hours = Math.floor(diff / (1000 * 60 * 60));
     const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
     
-    return `${hours}h ${minutes}m remaining`;
+    return `${hours}h ${minutes}m ${seconds}s remaining`;
   };
 
-  // Update next generation time every minute
+  // Update next generation time every second
   useEffect(() => {
     const updateTimer = () => {
-      setNextGenerationTime(calculateNextGenerationTime());
+      const nextTime = calculateNextGenerationTime();
+      setNextGenerationTime(nextTime);
+      
+      // Update canGenerateMealPlan based on the next generation time
+      if (nextTime) {
+        const now = new Date();
+        setCanGenerateMealPlan(now >= nextTime);
+      } else {
+        setCanGenerateMealPlan(true);
+      }
     };
 
     updateTimer();
-    const interval = setInterval(updateTimer, 60000); // Update every minute
+    const interval = setInterval(updateTimer, 1000); // Update every second
 
     return () => clearInterval(interval);
-  }, []);
+  }, [lastMealPlanGeneration]);
 
   // Detect mobile devices
   useEffect(() => {
@@ -204,10 +230,6 @@ const NutritionPage = () => {
     }
 }, [autoFillEnabled]);
 
-
-
-
-
   useEffect(() => {
     console.log("🧍 User from store:", user);
   }, [user]);
@@ -227,7 +249,86 @@ const NutritionPage = () => {
     fetchMealCount();
   }, []);
 
+  // Fetch last meal plan generation time on component mount
+  useEffect(() => {
+    const fetchLastMealPlanGeneration = async () => {
+      try {
+        // Get the tracker for meal plans
+        const response = await axios.get("http://localhost:5000/api/tracker", { withCredentials: true });
+        const tracker = response.data.find(t => t.type === "meal-plan");
+        
+        if (tracker && tracker.lastGenerationDate) {
+          const lastGenDate = new Date(tracker.lastGenerationDate);
+          setLastMealPlanGeneration(lastGenDate);
+          
+          // Check if the last generation was today
+          const now = new Date();
+          const isToday = lastGenDate.toDateString() === now.toDateString();
+          
+          if (isToday) {
+            setCanGenerateMealPlan(false);
+            // Calculate next generation time (24 hours from last generation)
+            const nextGen = new Date(lastGenDate);
+            nextGen.setHours(nextGen.getHours() + 24);
+            setNextGenerationTime(nextGen);
+          } else {
+            setCanGenerateMealPlan(true);
+            setNextGenerationTime(now);
+          }
+        } else {
+          setCanGenerateMealPlan(true);
+          setNextGenerationTime(new Date());
+        }
+      } catch (error) {
+        console.error("Error fetching meal plan tracker:", error);
+        // Default to allowing generation if there's an error
+        setCanGenerateMealPlan(true);
+        setNextGenerationTime(new Date());
+      }
+    };
+
+    fetchLastMealPlanGeneration();
+
+    // Add event listener for meal plan deletion
+    const handleMealPlanDeleted = () => {
+      fetchLastMealPlanGeneration();
+    };
+
+    window.addEventListener('mealPlanDeleted', handleMealPlanDeleted);
+
+    return () => {
+      window.removeEventListener('mealPlanDeleted', handleMealPlanDeleted);
+    };
+  }, []);
+
+  // Update timer every second
+  useEffect(() => {
+    const timer = setInterval(() => {
+      if (nextGenerationTime) {
+        const now = new Date();
+        if (now >= nextGenerationTime) {
+          setCanGenerateMealPlan(true);
+          setNextGenerationTime(now);
+        }
+      }
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [nextGenerationTime]);
+
   const generateMealPlan = async () => {
+    if (!canGenerateMealPlan) {
+      toast.error("You can only generate one meal plan per day. Please try again tomorrow.", {
+        duration: 4000,
+        style: {
+          background: COLORS.DARK_GRAY,
+          color: COLORS.WHITE,
+          border: `1px solid ${COLORS.MEDIUM_GRAY}`
+        }
+      });
+      return;
+    }
+
     setLoading(true);
     try {
       // Create a properly formatted payload with all required fields
@@ -245,9 +346,6 @@ const NutritionPage = () => {
         cookingSkillLevel: userParams.cookingSkill || 'Intermediate'
       };
 
-      // Log the payload for debugging
-      console.log("🚀 Payload being sent:", payload);
-
       const response = await axios.post(
         "http://localhost:5000/api/meal-plans/generate",
         payload,
@@ -257,7 +355,18 @@ const NutritionPage = () => {
       if (response.status >= 200 && response.status < 300) {
         setMealData(response.data.mealPlan);
         setSavedMeal(response.data.savedMeal);
-        toast.dismiss();
+        
+        // Update the last generation time from the response
+        if (response.data.lastGenerationDate) {
+          const lastGenDate = new Date(response.data.lastGenerationDate);
+          setLastMealPlanGeneration(lastGenDate);
+          
+          // Calculate next generation time (24 hours from last generation)
+          const nextGen = new Date(lastGenDate);
+          nextGen.setHours(nextGen.getHours() + 24);
+          setNextGenerationTime(nextGen);
+          setCanGenerateMealPlan(false);
+        }
 
         toast.success("Meal plan generated!", {
           duration: 2000,
@@ -270,45 +379,28 @@ const NutritionPage = () => {
           }
         });
 
-        // Navigate to the details page of the newly saved meal (if applicable)
         if (response.data.savedMeal && response.data.savedMeal._id) {
           navigate(`/meals/${response.data.savedMeal._id}`);
         } else {
-          // Automatically scroll to results if navigation fails or isn't desired
           setTimeout(() => {
             document.getElementById('meal-result')?.scrollIntoView({ behavior: 'smooth' });
           }, 200);
         }
-      } else {
-        toast.dismiss();
-        console.error("Error generating meal plan:", response);
-        
-        if (response.status === 429) {
-          setNextGenerationTime(calculateNextGenerationTime());
-          toast.error(response.data.error, {
-            style: {
-              background: COLORS.DARK_GRAY,
-              color: COLORS.WHITE,
-              border: `1px solid ${COLORS.MEDIUM_GRAY}`
-            }
-          });
-        } else {
-          toast.error(`Failed to generate meal plan. Please try again later.`, {
-            style: {
-              background: COLORS.DARK_GRAY,
-              color: '#ff6b6b',
-              fontSize: isMobile ? '0.875rem' : '1rem'
-            }
-          });
-        }
       }
     } catch (error) {
-      toast.dismiss();
       console.error("Error generating meal plan:", error);
       
       if (error.response?.status === 429) {
-        setNextGenerationTime(calculateNextGenerationTime());
+        // Update the last generation time from the error response if available
+        const lastGenDate = error.response.data.lastGenerationDate;
+        if (lastGenDate) {
+          setLastMealPlanGeneration(new Date(lastGenDate));
+          setNextGenerationTime(calculateNextGenerationTime());
+          setCanGenerateMealPlan(false);
+        }
+        
         toast.error(error.response.data.error, {
+          duration: 4000,
           style: {
             background: COLORS.DARK_GRAY,
             color: COLORS.WHITE,
@@ -370,25 +462,22 @@ const NutritionPage = () => {
                 <InfoTooltip title="Answer questions to get personalized meal suggestions based on your dietary needs and goals." />
               </h2>
 
-              {nextGenerationTime && (
-                <div className="mb-4 p-3 rounded-lg" style={{ 
-                  backgroundColor: `${COLORS.BLACK}80`,
-                  border: `1px solid ${COLORS.MEDIUM_GRAY}`
-                }}>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm" style={{ color: COLORS.WHITE }}>
-                      Next meal plan generation available:
-                    </span>
-                    <span className="text-sm font-medium" style={{ 
-                      color: formatTimeRemaining(nextGenerationTime) === "Available now!" 
-                        ? COLORS.NEON_GREEN 
-                        : COLORS.WHITE 
-                    }}>
-                      {formatTimeRemaining(nextGenerationTime)}
-                    </span>
-                  </div>
+              {/* Next Generation Time Indicator */}
+              <div className="mb-4 p-3 rounded-lg" style={{ 
+                backgroundColor: `${COLORS.BLACK}80`,
+                border: `1px solid ${COLORS.MEDIUM_GRAY}`
+              }}>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm" style={{ color: COLORS.WHITE }}>
+                    {canGenerateMealPlan ? "You can now generate a meal plan." : "Next meal plan generation available:"}
+                  </span>
+                  <span className="text-sm font-medium" style={{ 
+                    color: canGenerateMealPlan ? COLORS.NEON_GREEN : COLORS.WHITE 
+                  }}>
+                    {canGenerateMealPlan ? "Generate now!" : formatTimeRemaining(nextGenerationTime)}
+                  </span>
                 </div>
-              )}
+              </div>
 
               <div className="mb-4 flex items-center gap-3">
                 <label htmlFor="autofill-toggle" className="text-sm font-medium" style={{ color: COLORS.WHITE }}>
@@ -408,12 +497,13 @@ const NutritionPage = () => {
                 />
               </div>
 
-
               <NutritionQuestionnaire
                 userParams={userParams}
                 setUserParams={setUserParams}
                 onSubmit={generateMealPlan}
                 loading={loading}
+                canGenerateMealPlan={canGenerateMealPlan}
+                nextGenerationTime={nextGenerationTime}
               />
             </div>
 

@@ -21,6 +21,8 @@ const WorkoutPage = () =>
     const [workoutData, setWorkoutData] = useState(null);
     const [savedWorkout, setSavedWorkout] = useState(null);
     const [nextGenerationTime, setNextGenerationTime] = useState(null);
+    const [lastWorkoutGeneration, setLastWorkoutGeneration] = useState(null);
+    const [canGenerateWorkout, setCanGenerateWorkout] = useState(true);
     const navigate = useNavigate();
     const [fetchWorkoutCountError, setFetchWorkoutCountError] = useState(null);
     const { user, setUnlockedAchievement } = useUserStore();
@@ -208,15 +210,29 @@ const WorkoutPage = () =>
  
   // Function to calculate time until next generation
   const calculateNextGenerationTime = () => {
+    if (!lastWorkoutGeneration) return null;
+    
     const now = new Date();
-    const tomorrow = new Date(now);
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    tomorrow.setHours(0, 0, 0, 0);
-    return tomorrow;
+    const lastGen = new Date(lastWorkoutGeneration);
+    
+    // Check if the last generation was today
+    const isToday = lastGen.toDateString() === now.toDateString();
+    
+    if (isToday) {
+      // If generated today, next generation is 24 hours from last generation
+      const nextGen = new Date(lastGen);
+      nextGen.setHours(nextGen.getHours() + 24);
+      return nextGen;
+    } else {
+      // If not generated today, can generate now
+      return now;
+    }
   };
 
   // Function to format time remaining
   const formatTimeRemaining = (nextTime) => {
+    if (!nextTime) return "No previous workout generation";
+    
     const now = new Date();
     const diff = nextTime - now;
     
@@ -224,23 +240,62 @@ const WorkoutPage = () =>
     
     const hours = Math.floor(diff / (1000 * 60 * 60));
     const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
     
-    return `${hours}h ${minutes}m remaining`;
+    return `${hours}h ${minutes}m ${seconds}s remaining`;
   };
 
-  // Update next generation time every minute
+  // Update next generation time every second
   useEffect(() => {
     const updateTimer = () => {
-      setNextGenerationTime(calculateNextGenerationTime());
+      const nextTime = calculateNextGenerationTime();
+      setNextGenerationTime(nextTime);
+      
+      // Update canGenerateWorkout based on the next generation time
+      if (nextTime) {
+        const now = new Date();
+        setCanGenerateWorkout(now >= nextTime);
+      } else {
+        setCanGenerateWorkout(true);
+      }
     };
 
     updateTimer();
-    const interval = setInterval(updateTimer, 60000); // Update every minute
+    const interval = setInterval(updateTimer, 1000); // Update every second
 
     return () => clearInterval(interval);
+  }, [lastWorkoutGeneration]);
+
+  // Fetch last workout generation time on component mount
+  useEffect(() => {
+    const fetchLastWorkoutGeneration = async () => {
+      try {
+        const response = await axios.get("http://localhost:5000/api/tracker", { withCredentials: true });
+        const tracker = response.data.find(t => t.type === "workout");
+        if (tracker && tracker.lastWorkoutGenerationDate) {
+          setLastWorkoutGeneration(tracker.lastWorkoutGenerationDate);
+        }
+      } catch (error) {
+        console.error("Error fetching last workout generation:", error);
+      }
+    };
+
+    fetchLastWorkoutGeneration();
   }, []);
 
   const generateWorkoutPlan = async () => {
+    if (!canGenerateWorkout) {
+      toast.error("You can only generate one workout per day. Please try again tomorrow.", {
+        duration: 4000,
+        style: {
+          background: COLORS.DARK_GRAY,
+          color: COLORS.WHITE,
+          border: `1px solid ${COLORS.MEDIUM_GRAY}`
+        }
+      });
+      return;
+    }
+
     // Validate required fields
     if (!userParams.height || !userParams.weight || !userParams.fitnessGoal) {
       toast.error("Please fill in the required fields: Height, Weight, and Fitness Goal", {
@@ -280,7 +335,9 @@ const WorkoutPage = () =>
         toast.dismiss(loadingToast);
         setWorkoutData(response.data.workoutPlan);
         setSavedWorkout(response.data.savedWorkout);
+        setLastWorkoutGeneration(new Date());
         setNextGenerationTime(calculateNextGenerationTime());
+        setCanGenerateWorkout(false);
 
         toast.success("Workout generated and saved successfully!", {
           duration: 2000,
@@ -439,25 +496,21 @@ const WorkoutPage = () =>
               </h2>
               
               {/* Next Generation Time Indicator */}
-              {nextGenerationTime && (
-                <div className="mb-4 p-3 rounded-lg" style={{ 
-                  backgroundColor: `${COLORS.BLACK}80`,
-                  border: `1px solid ${COLORS.MEDIUM_GRAY}`
-                }}>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm" style={{ color: COLORS.WHITE }}>
-                      Next workout generation available:
-                    </span>
-                    <span className="text-sm font-medium" style={{ 
-                      color: formatTimeRemaining(nextGenerationTime) === "Available now!" 
-                        ? COLORS.NEON_GREEN 
-                        : COLORS.WHITE 
-                    }}>
-                      {formatTimeRemaining(nextGenerationTime)}
-                    </span>
-                  </div>
+              <div className="mb-4 p-3 rounded-lg" style={{ 
+                backgroundColor: `${COLORS.BLACK}80`,
+                border: `1px solid ${COLORS.MEDIUM_GRAY}`
+              }}>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm" style={{ color: COLORS.WHITE }}>
+                    {canGenerateWorkout ? "You can now generate a workout." : "Next workout generation available:"}
+                  </span>
+                  <span className="text-sm font-medium" style={{ 
+                    color: canGenerateWorkout ? COLORS.NEON_GREEN : COLORS.WHITE 
+                  }}>
+                    {canGenerateWorkout ? "Generate now!" : formatTimeRemaining(nextGenerationTime)}
+                  </span>
                 </div>
-              )}
+              </div>
               
               <div className="mb-4 flex items-center gap-3">
                 <label htmlFor="autofill-toggle" className="text-sm font-medium" style={{ color: COLORS.WHITE }}>
@@ -481,6 +534,7 @@ const WorkoutPage = () =>
                 setUserParams={setUserParams}
                 onSubmit={generateWorkoutPlan}
                 loading={loading}
+                canGenerateWorkout={canGenerateWorkout}
               />
             </div>
 
