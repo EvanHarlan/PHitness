@@ -1,3 +1,4 @@
+import React from 'react';
 import COLORS from '../lib/constants';
 
 const NutritionQuestionnaire = ({ userParams, setUserParams, onSubmit, loading }) => {
@@ -8,6 +9,83 @@ const NutritionQuestionnaire = ({ userParams, setUserParams, onSubmit, loading }
       [name]: value
     }));
   };
+
+  // Handle height selection specifically to store in a format that can be used by the API
+  const handleHeightChange = (feet, inches) => {
+    // Store height in a format that can be easily converted to cm for the API if needed
+    const heightStr = `${feet}'${inches}"`;
+    const heightInInches = (parseInt(feet) * 12) + parseInt(inches);
+    
+    setUserParams(prev => ({
+      ...prev,
+      height: heightStr,
+      heightInInches: heightInInches
+    }));
+  };
+
+  // Parse height string (e.g. "5'10"") into feet and inches components
+  const parseHeight = (heightStr) => {
+    if (!heightStr || typeof heightStr !== 'string') return { feet: '', inches: '' };
+    
+    const match = heightStr.match(/(\d+)'(\d+)"/);
+    if (match) {
+      return {
+        feet: match[1],
+        inches: match[2]
+      };
+    }
+    return { feet: '', inches: '' };
+  };
+
+  // Toggle a selected option (for tag-based selection)
+  const toggleSelection = (value, field) => {
+    setUserParams(prev => {
+      // Handle "none" option specially - if selecting "none", clear other selections
+      if (value === "none") {
+        return {
+          ...prev,
+          [field]: prev[field].includes("none") ? [] : ["none"]
+        };
+      }
+
+      // If a value other than "none" is selected, remove "none" from the array if present
+      let updatedArray = prev[field].includes(value)
+        ? prev[field].filter(item => item !== value)
+        : [...prev[field].filter(item => item !== "none"), value];
+
+      return {
+        ...prev,
+        [field]: updatedArray
+      };
+    });
+  };
+
+  // Custom Tag component for multi-select
+  const SelectionTag = ({ label, selected, onClick, disabled = false }) => (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      className={`px-3 py-1.5 rounded-full text-xs sm:text-sm font-medium transition-all mr-2 mb-2 ${
+        selected 
+          ? 'bg-neon-green text-black' 
+          : 'bg-black text-white border border-medium-gray hover:border-light-gray'
+      }`}
+      style={
+        selected 
+          ? { backgroundColor: COLORS.NEON_GREEN, color: COLORS.BLACK } 
+          : { 
+              backgroundColor: COLORS.BLACK, 
+              color: COLORS.WHITE,
+              borderColor: COLORS.MEDIUM_GRAY,
+              cursor: disabled ? 'not-allowed' : 'pointer',
+              opacity: disabled ? 0.6 : 1
+            }
+      }
+    >
+      {label}
+    </button>
+  );
 
   const inputStyles = {
     backgroundColor: COLORS.MEDIUM_GRAY,
@@ -44,30 +122,55 @@ const NutritionQuestionnaire = ({ userParams, setUserParams, onSubmit, loading }
           onChange={handleInputChange}
           placeholder={label}
           required={required}
-          readOnly // Ensure no custom input for text-based fields
         />
       )}
     </div>
   );
 
-  // Height options array (Standard US measurements)
-  const heightOptions = [
-    { value: "", label: "Select your height" },
-    ...Array.from({ length: 49 }, (_, i) => { // From 4'0" to 8'0"
-      const totalInches = 48 + i;
-      const feet = Math.floor(totalInches / 12);
-      const inches = totalInches % 12;
-      return { value: `${feet}'${inches}"`, label: `${feet}'${inches}"` };
-    }),
-  ];
+  // Parsed height from userParams
+  const parsedHeight = parseHeight(userParams.height);
 
-  const weightOptions = [
-    { value: "", label: "Select your weight (lbs)" },
-    ...Array.from({ length: 501 }, (_, i) => ({ // From 80 lbs to 580 lbs
-      value: 80 + i,
-      label: `${80 + i} lbs`,
-    })),
-  ];
+  // Feet and inches dropdowns for height selection
+  const HeightSelector = () => {
+    return (
+      <div className="space-y-2">
+        <label className="block text-sm font-medium mb-1" style={{ color: COLORS.LIGHT_GRAY }}>
+          Height <span className="text-red-500">*</span>
+        </label>
+        <div className="flex space-x-2">
+          <div className="flex-1">
+            <select
+              className="w-full px-4 py-2 rounded-lg focus:outline-none focus:ring-2 transition"
+              style={inputStyles}
+              value={parsedHeight.feet}
+              onChange={(e) => handleHeightChange(e.target.value, parsedHeight.inches)}
+              required
+            >
+              <option value="">Feet</option>
+              {Array.from({ length: 8 }, (_, i) => i + 3).map(feet => (
+                <option key={feet} value={feet}>{feet} ft</option>
+              ))}
+            </select>
+          </div>
+          <div className="flex-1">
+            <select
+              className="w-full px-4 py-2 rounded-lg focus:outline-none focus:ring-2 transition"
+              style={inputStyles}
+              value={parsedHeight.inches}
+              onChange={(e) => handleHeightChange(parsedHeight.feet, e.target.value)}
+              required
+              disabled={!parsedHeight.feet}
+            >
+              <option value="">Inches</option>
+              {Array.from({ length: 12 }, (_, i) => i).map(inches => (
+                <option key={inches} value={inches}>{inches} in</option>
+              ))}
+            </select>
+          </div>
+        </div>
+      </div>
+    );
+  };
 
   const ageOptions = [
     { value: "", label: "Select your age" },
@@ -104,6 +207,7 @@ const NutritionQuestionnaire = ({ userParams, setUserParams, onSubmit, loading }
     { value: "extra-active", label: "Extra Active (very intense training or physically demanding job)" },
   ];
 
+  // Dietary restrictions options for the tag-based selection
   const dietaryRestrictionsOptions = [
     { value: "none", label: "No restrictions" },
     { value: "vegetarian", label: "Vegetarian" },
@@ -170,40 +274,59 @@ const NutritionQuestionnaire = ({ userParams, setUserParams, onSubmit, loading }
     { value: "high", label: "High" },
   ];
 
+  // Health conditions options for the tag-based selection
   const healthConditionsOptions = [
     { value: "none", label: "No known conditions" },
     { value: "diabetes-type1", label: "Diabetes Type 1" },
     { value: "diabetes-type2", label: "Diabetes Type 2" },
     { value: "high-cholesterol", label: "High Cholesterol" },
     { value: "high-blood-pressure", label: "High Blood Pressure" },
-    { value: "ibs", label: "Irritable Bowel Syndrome (IBS)" },
-    { value: "gerd", label: "GERD / Acid Reflux" },
-    { value: "celiac-disease", label: "Celiac Disease / Gluten Sensitivity" },
+    { value: "ibs", label: "IBS" },
+    { value: "gerd", label: "GERD" },
+    { value: "celiac-disease", label: "Celiac Disease" },
     { value: "lactose-intolerance", label: "Lactose Intolerance" },
     { value: "kidney-disease", label: "Kidney Disease" },
-    { value: "allergies", label: "Specific Food Allergies (see Dietary Restrictions)" },
+    { value: "allergies", label: "Food Allergies" },
     { value: "pregnancy", label: "Pregnancy" },
     { value: "breastfeeding", label: "Breastfeeding" },
-    { value: "other", label: "Other (Please specify if this becomes a necessary option)" },
   ];
 
   return (
-    <form className="space-y-6">
+    <form className="space-y-6" onSubmit={(e) => {
+      e.preventDefault();
+      onSubmit();
+    }}>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Basic Information - Left Column */}
         <div className="space-y-4">
-          {getFormField("Height", "height", "select", heightOptions, true)}
-          {getFormField("Weight", "weight", "select", weightOptions, true)}
+          <HeightSelector />
+          
+          <div className="space-y-2">
+            <label className="block text-sm font-medium mb-1" style={{ color: COLORS.LIGHT_GRAY }}>
+              Weight (lbs) <span className="text-red-500">*</span>
+            </label>
+            <input
+              className="w-full px-4 py-2 rounded-lg focus:outline-none focus:ring-2 transition"
+              style={inputStyles}
+              type="number"
+              name="weight"
+              value={userParams.weight}
+              onChange={handleInputChange}
+              placeholder="Enter your weight in pounds"
+              min="50"
+              max="500"
+              required
+            />
+          </div>
+          
           {getFormField("Age", "age", "select", ageOptions)}
           {getFormField("Gender", "gender", "select", genderOptions)}
           {getFormField("Primary Goal", "goal", "select", goalOptions, true)}
           {getFormField("Typical Activity Level", "activityLevel", "select", activityLevelOptions)}
-          {getFormField("Relevant Health Conditions", "healthConditions", "select", healthConditionsOptions)}
         </div>
 
         {/* Dietary Preferences - Right Column */}
         <div className="space-y-4">
-          {getFormField("Dietary Restrictions", "dietaryRestrictions", "select", dietaryRestrictionsOptions)}
           {getFormField("Preferred Meal Frequency", "mealFrequency", "select", mealFrequencyOptions)}
           {getFormField("Snack Preference", "snackPreference", "select", snackPreferenceOptions)}
           {getFormField("Daily Water Intake", "hydrationPreference", "select", hydrationPreferenceOptions)}
@@ -213,16 +336,51 @@ const NutritionQuestionnaire = ({ userParams, setUserParams, onSubmit, loading }
         </div>
       </div>
 
+      {/* Dietary Restrictions Tag Selection */}
+      <div className="mb-6 pt-4">
+        <label className="block text-sm font-medium mb-2" style={{ color: COLORS.LIGHT_GRAY }}>
+          Dietary Restrictions
+        </label>
+        <div className="flex flex-wrap">
+          {dietaryRestrictionsOptions.map(option => (
+            <SelectionTag
+              key={option.value}
+              label={option.label}
+              selected={userParams.dietaryRestrictions.includes(option.value)}
+              onClick={() => toggleSelection(option.value, 'dietaryRestrictions')}
+              disabled={option.value !== "none" && userParams.dietaryRestrictions.includes("none")}
+            />
+          ))}
+        </div>
+      </div>
+
+      {/* Health Conditions Tag Selection */}
+      <div className="mb-6">
+        <label className="block text-sm font-medium mb-2" style={{ color: COLORS.LIGHT_GRAY }}>
+          Health Conditions
+        </label>
+        <div className="flex flex-wrap">
+          {healthConditionsOptions.map(option => (
+            <SelectionTag
+              key={option.value}
+              label={option.label}
+              selected={userParams.healthConditions.includes(option.value)}
+              onClick={() => toggleSelection(option.value, 'healthConditions')}
+              disabled={option.value !== "none" && userParams.healthConditions.includes("none")}
+            />
+          ))}
+        </div>
+      </div>
+
       <div className="pt-4">
         <button
-          type="button"
-          className="px-4 py-2 rounded-lg transition font-medium"
+          type="submit"
+          className="px-4 py-2 rounded-lg transition font-medium w-full"
           style={{ backgroundColor: COLORS.NEON_GREEN, color: COLORS.BLACK }}
-          onClick={onSubmit}
           disabled={loading}
         >
           {loading ? (
-            <span className="flex items-center">
+            <span className="flex items-center justify-center">
               <svg className="animate-spin h-5 w-5 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
