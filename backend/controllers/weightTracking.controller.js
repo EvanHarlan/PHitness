@@ -1,40 +1,39 @@
 import WeightTracking from '../models/weightTracking.model.js';
-import { startOfWeek, startOfDay, isSameDay } from 'date-fns';
+import { startOfWeek, startOfDay } from 'date-fns';
 
 // Helper function to get the start of the current week
 const getCurrentWeekStart = () => {
-  return startOfWeek(new Date(), { weekStartsOn: 1 }); // Start week on Monday
+  const now = new Date();
+  const weekStart = startOfWeek(now, { weekStartsOn: 1 }); // Start week on Monday
+  console.log('Current week start details:', {
+    rawDate: now,
+    weekStart,
+    weekStartISO: weekStart.toISOString(),
+    weekStartLocal: weekStart.toLocaleString(),
+    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
+  });
+  return weekStart;
 };
 
 /**
  * Weight submission strategy:
- * - Only one weight entry is allowed per user per day/week
- * - If an entry exists for the same date, it will be updated
+ * - Only one weight entry is allowed per user per week
+ * - If an entry exists for the same week, it will be updated
  * - This ensures data consistency for charts and statistics
  */
 export const submitWeight = async (req, res) => {
   try {
-    // Log the incoming request body
-    console.log("➡️ Incoming body:", req.body);
-
     // Log the incoming request body and user
     console.log("Incoming weight payload:", req.body);
     console.log("Authenticated user:", req.user);
 
-    const { weight, entryType = 'daily', userId } = req.body;
+    const { weight, userId, date } = req.body;
 
     // Input validation
     if (!weight || isNaN(weight)) {
       return res.status(400).json({
         error: 'Invalid weight value',
         details: 'Weight must be a valid number'
-      });
-    }
-
-    if (!['daily', 'weekly'].includes(entryType)) {
-      return res.status(400).json({
-        error: 'Invalid entry type',
-        details: 'Entry type must be either "daily" or "weekly"'
       });
     }
 
@@ -56,42 +55,84 @@ export const submitWeight = async (req, res) => {
       });
     }
 
-    // Determine the date for the entry
-    const date = entryType === 'weekly' ? getCurrentWeekStart() : startOfDay(new Date());
-    console.log(`Looking for existing ${entryType} entry for date:`, date);
+    // Parse the incoming date and get the start of that week
+    const submissionDate = new Date(date);
+    const submissionWeekStart = startOfWeek(submissionDate, { weekStartsOn: 1 });
+    
+    console.log('Submission date details:', {
+      rawInput: date,
+      parsedDate: submissionDate,
+      parsedDateISO: submissionDate.toISOString(),
+      parsedDateLocal: submissionDate.toLocaleString(),
+      weekStart: submissionWeekStart,
+      weekStartISO: submissionWeekStart.toISOString(),
+      weekStartLocal: submissionWeekStart.toLocaleString(),
+      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
+    });
+
+    // Get the start of the current week for comparison
+    const currentWeekStart = getCurrentWeekStart();
+    
+    console.log('Date comparison details:', {
+      submissionWeekStart: {
+        timestamp: submissionWeekStart.getTime(),
+        date: submissionWeekStart.toISOString()
+      },
+      currentWeekStart: {
+        timestamp: currentWeekStart.getTime(),
+        date: currentWeekStart.toISOString()
+      },
+      difference: submissionWeekStart.getTime() - currentWeekStart.getTime(),
+      isSameWeek: submissionWeekStart.getTime() === currentWeekStart.getTime()
+    });
+
+    // Check if the submission date is in the current week
+    if (submissionWeekStart.getTime() !== currentWeekStart.getTime()) {
+      console.log('Date mismatch detected:', {
+        submissionWeekStart,
+        currentWeekStart,
+        difference: submissionWeekStart.getTime() - currentWeekStart.getTime()
+      });
+      return res.status(400).json({
+        error: 'Invalid submission date',
+        details: 'Weight entries must be submitted for the current week',
+        submissionWeekStart: submissionWeekStart.toISOString(),
+        currentWeekStart: currentWeekStart.toISOString()
+      });
+    }
 
     // Check for existing entry
     const existingEntry = await WeightTracking.findOne({
       user: targetUserId,
-      date
+      date: submissionWeekStart
     });
 
     let weightEntry;
     if (existingEntry) {
-      console.log(`Found existing ${entryType} entry:`, existingEntry);
+      console.log("Found existing weekly entry:", existingEntry);
       
       // Update existing entry
       existingEntry.weight = weightValue;
-      existingEntry.entryType = entryType;
+      existingEntry.entryType = 'weekly';
       weightEntry = await existingEntry.save();
       
       console.log("🟢 Weight entry updated:", weightEntry);
       
       return res.json({
         success: true,
-        message: `Updated your weight entry for ${entryType === 'weekly' ? 'this week' : 'today'}`,
+        message: 'Updated your weight entry for this week',
         weightEntry,
         isUpdate: true
       });
     }
 
     // Create new weight entry
-    console.log(`Creating new ${entryType} entry for date:`, date);
+    console.log("Creating new weekly entry for date:", submissionWeekStart);
     weightEntry = new WeightTracking({
       user: targetUserId,
       weight: weightValue,
-      date,
-      entryType
+      date: submissionWeekStart,
+      entryType: 'weekly'
     });
 
     await weightEntry.save();
@@ -99,7 +140,7 @@ export const submitWeight = async (req, res) => {
 
     res.json({
       success: true,
-      message: `Created new weight entry for ${entryType === 'weekly' ? 'this week' : 'today'}`,
+      message: 'Created new weight entry for this week',
       weightEntry,
       isUpdate: false
     });
@@ -118,7 +159,7 @@ export const submitWeight = async (req, res) => {
     if (error.code === 11000) { // Duplicate key error
       return res.status(400).json({
         error: 'Duplicate Entry',
-        details: 'A weight entry already exists for this date'
+        details: 'A weight entry already exists for this week'
       });
     }
 
@@ -152,8 +193,7 @@ export const checkWeeklyWeightStatus = async (req, res) => {
     
     const weightEntry = await WeightTracking.findOne({
       user: req.user._id,
-      date: weekStartDate,
-      entryType: 'weekly'
+      date: weekStartDate
     });
 
     res.json({
