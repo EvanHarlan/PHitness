@@ -27,8 +27,41 @@ const NutritionPage = () => {
       return stored === "true";
   });
   const firstLoad = useRef(true);
+  const [nextGenerationTime, setNextGenerationTime] = useState(null);
 
+  // Function to calculate time until next generation
+  const calculateNextGenerationTime = () => {
+    const now = new Date();
+    const tomorrow = new Date(now);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    tomorrow.setHours(0, 0, 0, 0);
+    return tomorrow;
+  };
 
+  // Function to format time remaining
+  const formatTimeRemaining = (nextTime) => {
+    const now = new Date();
+    const diff = nextTime - now;
+    
+    if (diff <= 0) return "Available now!";
+    
+    const hours = Math.floor(diff / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    
+    return `${hours}h ${minutes}m remaining`;
+  };
+
+  // Update next generation time every minute
+  useEffect(() => {
+    const updateTimer = () => {
+      setNextGenerationTime(calculateNextGenerationTime());
+    };
+
+    updateTimer();
+    const interval = setInterval(updateTimer, 60000); // Update every minute
+
+    return () => clearInterval(interval);
+  }, []);
 
   // Detect mobile devices
   useEffect(() => {
@@ -237,8 +270,6 @@ const NutritionPage = () => {
           }
         });
 
-        setMealAmount(prevMealAmount => prevMealAmount + 1);
-
         // Navigate to the details page of the newly saved meal (if applicable)
         if (response.data.savedMeal && response.data.savedMeal._id) {
           navigate(`/meals/${response.data.savedMeal._id}`);
@@ -251,66 +282,41 @@ const NutritionPage = () => {
       } else {
         toast.dismiss();
         console.error("Error generating meal plan:", response);
-        toast.error(`Failed to generate meal plan. Please try again later.`, {
-          style: {
-            background: COLORS.DARK_GRAY,
-            color: '#ff6b6b',
-            fontSize: isMobile ? '0.875rem' : '1rem'
-          }
-        });
+        
+        if (response.status === 429) {
+          setNextGenerationTime(calculateNextGenerationTime());
+          toast.error(response.data.error, {
+            style: {
+              background: COLORS.DARK_GRAY,
+              color: COLORS.WHITE,
+              border: `1px solid ${COLORS.MEDIUM_GRAY}`
+            }
+          });
+        } else {
+          toast.error(`Failed to generate meal plan. Please try again later.`, {
+            style: {
+              background: COLORS.DARK_GRAY,
+              color: '#ff6b6b',
+              fontSize: isMobile ? '0.875rem' : '1rem'
+            }
+          });
+        }
       }
     } catch (error) {
       toast.dismiss();
       console.error("Error generating meal plan:", error);
-      toast.error("Failed to generate meal plan. Please check your connection.", {
-        style: {
-          background: COLORS.DARK_GRAY,
-          color: '#ff6b6b',
-          fontSize: isMobile ? '0.875rem' : '1rem'
-        }
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const addMeal = async () => {
-    // Show loading toast
-    const loadingToast = toast.loading("Logging meal...", {
-      style: {
-        background: COLORS.DARK_GRAY,
-        color: COLORS.WHITE,
-        border: `1px solid ${COLORS.MEDIUM_GRAY}`,
-        fontSize: isMobile ? '0.875rem' : '1rem'
-      }
-    });
-
-    try {
-      const response = await axios.post("http://localhost:5000/api/tracker",
-        { type: "meal" },
-        { withCredentials: true }
-      );
-
-      if (response.status >= 200 && response.status < 300) {
-        toast.dismiss(loadingToast);
-
-        console.log("Api Response (Meal Log):", response.data);
-        setMealAmount(prevMealAmount => prevMealAmount + 1);
-
-        toast.success("Meal logged!", {
-          duration: 2000,
-          icon: '🥗',
+      
+      if (error.response?.status === 429) {
+        setNextGenerationTime(calculateNextGenerationTime());
+        toast.error(error.response.data.error, {
           style: {
             background: COLORS.DARK_GRAY,
-            color: COLORS.NEON_GREEN,
-            border: `1px solid ${COLORS.MEDIUM_GRAY}`,
-            fontSize: isMobile ? '0.875rem' : '1rem'
+            color: COLORS.WHITE,
+            border: `1px solid ${COLORS.MEDIUM_GRAY}`
           }
         });
       } else {
-        toast.dismiss(loadingToast);
-        console.error("Error logging meal:", response);
-        toast.error(`Failed to log meal. Please try again later.`, {
+        toast.error("Failed to generate meal plan. Please check your connection.", {
           style: {
             background: COLORS.DARK_GRAY,
             color: '#ff6b6b',
@@ -318,17 +324,8 @@ const NutritionPage = () => {
           }
         });
       }
-    } catch (error) {
-      toast.dismiss(loadingToast);
-
-      console.error("Error logging meal:", error);
-      toast.error("Failed to log meal. Please check your connection.", {
-        style: {
-          background: COLORS.DARK_GRAY,
-          color: '#ff6b6b',
-          fontSize: isMobile ? '0.875rem' : '1rem'
-        }
-      });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -372,6 +369,26 @@ const NutritionPage = () => {
                 Your Preferences
                 <InfoTooltip title="Answer questions to get personalized meal suggestions based on your dietary needs and goals." />
               </h2>
+
+              {nextGenerationTime && (
+                <div className="mb-4 p-3 rounded-lg" style={{ 
+                  backgroundColor: `${COLORS.BLACK}80`,
+                  border: `1px solid ${COLORS.MEDIUM_GRAY}`
+                }}>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm" style={{ color: COLORS.WHITE }}>
+                      Next meal plan generation available:
+                    </span>
+                    <span className="text-sm font-medium" style={{ 
+                      color: formatTimeRemaining(nextGenerationTime) === "Available now!" 
+                        ? COLORS.NEON_GREEN 
+                        : COLORS.WHITE 
+                    }}>
+                      {formatTimeRemaining(nextGenerationTime)}
+                    </span>
+                  </div>
+                </div>
+              )}
 
               <div className="mb-4 flex items-center gap-3">
                 <label htmlFor="autofill-toggle" className="text-sm font-medium" style={{ color: COLORS.WHITE }}>
@@ -417,28 +434,18 @@ const NutritionPage = () => {
               <div className="p-3 sm:p-4 border rounded-lg mb-3 sm:mb-4" 
                    style={{ borderColor: COLORS.MEDIUM_GRAY, backgroundColor: COLORS.DARK_GRAY }}>
                 <h3 className="font-medium text-sm sm:text-base" style={{ color: COLORS.WHITE }}>
-                  Logged Meals
-                  <InfoTooltip title="Total number of meals you've logged as consumed." />
+                  Completed Meal Plans
+                  <InfoTooltip title="Total number of meal plans you've completed." />
                 </h3>
                 <p className="text-xl sm:text-2xl font-bold mb-2 sm:mb-3" style={{ color: COLORS.NEON_GREEN }}>
                   {mealAmount !== null ? mealAmount : 'N/A'}
                 </p>
+                <p className="text-xs sm:text-sm" style={{ color: COLORS.LIGHT_GRAY }}>
+                  Complete your daily meal plan to increase your count. Visit your meal plan and follow the recipes to mark it as complete.
+                </p>
               </div>
 
               <div className="flex flex-col space-y-3">
-                <button
-                  className="px-3 sm:px-4 py-2 rounded-lg transition font-medium flex items-center justify-center 
-                             hover:opacity-90 active:opacity-80 min-h-[44px]"
-                  style={{ backgroundColor: COLORS.NEON_GREEN, color: COLORS.BLACK }}
-                  onClick={addMeal}
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 sm:h-5 sm:w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 000 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clipRule="evenodd" />
-                  </svg>
-                  <span className="text-xs sm:text-sm">Log Meal</span>
-                  <InfoTooltip title="Click to record that you've had a meal." />
-                </button>
-
                 <button
                   className="px-3 sm:px-4 py-2 rounded-lg transition font-medium flex items-center justify-center 
                              hover:opacity-90 active:opacity-80 min-h-[44px]"

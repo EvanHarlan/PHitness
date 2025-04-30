@@ -26,6 +26,25 @@ export default async (req, res) => {
   }
 
   try {
+    // Check if user has already generated a workout today
+    if (isStructuredRequest) {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      
+      const tracker = await Tracker.findOne({ 
+        user: req.user._id, 
+        type: "workout",
+        lastWorkoutGenerationDate: { $gte: today }
+      });
+
+      if (tracker) {
+        return res.status(429).json({ 
+          success: false,
+          error: "You can only generate one workout per day. Please try again tomorrow." 
+        });
+      }
+    }
+
     console.log("OpenAI API Key:", process.env.OPENAI_API_KEY ? "Found (starts with " + process.env.OPENAI_API_KEY.substring(0, 5) + "...)" : "Not found");
     
     const openai = new OpenAI({
@@ -154,32 +173,28 @@ Provide this workout as structured JSON with exactly 5 exercises - NO HTML forma
           content: content
         }
       ],
-      max_tokens: 1000, // Increased token limit for more detailed responses
+      max_tokens: 1000,
       response_format: isStructuredRequest ? { type: "json_object" } : { type: "text" }
     });
     
-    // Get the response content
     let responseContent = response.choices[0].message.content;
     
     if (isStructuredRequest) {
       try {
-        // Parse the JSON response
         const workoutData = JSON.parse(responseContent);
         
-        // Extract exercises for database storage
         const exercises = workoutData.exercises.map(exercise => ({
           name: exercise.name,
           sets: parseInt(exercise.sets),
           reps: typeof exercise.reps === 'string' && exercise.reps.includes('-') 
             ? parseInt(exercise.reps.split('-')[0]) 
             : parseInt(exercise.reps),
-          weight: 0, // Default weight, can be updated later
+          weight: 0,
           description: exercise.description,
           targetMuscles: exercise.targetMuscles,
           videoKeywords: exercise.videoKeywords
         }));
 
-        // Create a new workout in the database
         const workout = new Workout({
           user: req.user._id,
           name: workoutData.title || `Custom ${timeFrame} ${fitnessGoal} Workout`,
@@ -193,42 +208,52 @@ Provide this workout as structured JSON with exactly 5 exercises - NO HTML forma
 
         await workout.save();
 
-        // Update workout tracker
+        // Update workout tracker with last generation date
         await Tracker.findOneAndUpdate(
           { user: req.user._id, type: "workout" },
-          { $inc: { amount: 1 } },
+          { 
+            $inc: { amount: 1 },
+            lastWorkoutGenerationDate: new Date()
+          },
           { new: true, upsert: true }
         );
 
-        // Return both the API response and the saved workout
-        return res.json({
+        return res.status(200).json({
+          success: true,
+          message: "Workout generated successfully",
           workoutPlan: workoutData,
           savedWorkout: workout
         });
       } catch (error) {
         console.error("Error parsing workout response:", error);
         return res.status(500).json({
+          success: false,
           error: "Failed to process the workout data",
           details: error.message
         });
       }
     } else {
       // Return free-form question response
-      return res.json({ answer: responseContent });
+      return res.status(200).json({ 
+        success: true,
+        message: "Question answered successfully",
+        answer: responseContent 
+      });
     }
   } catch (error) {
     console.error("OpenAI API error details:", error);
     
-    // More specific error handling
     if (error.response) {
       console.error("OpenAI API response error:", error.response.data);
       return res.status(500).json({
+        success: false,
         error: "OpenAI API error",
         details: error.response.data
       });
     } else {
       console.error("Error details:", error.message);
       return res.status(500).json({
+        success: false,
         error: "Error fetching response from OpenAI",
         message: error.message
       });
