@@ -11,6 +11,7 @@ import friendRoutes from './routes/friend.route.js';
 import workoutRoutes from "./routes/workout.route.js";
 import mealPlanRoutes from "./routes/mealPlan.route.js";
 import exerciseTrackingRoutes from "./routes/exerciseTracking.route.js";
+import weightTrackingRoutes from './routes/weightTracking.routes.js';
 
 // Load environment variables
 dotenv.config();
@@ -44,6 +45,7 @@ app.use("/api/friend", friendRoutes);
 app.use("/api/workouts", workoutRoutes);
 app.use("/api/meal-plans", mealPlanRoutes);
 app.use("/api/exercise-tracking", exerciseTrackingRoutes);
+app.use('/api/weight-tracking', weightTrackingRoutes);
 
 // Health & test routes
 app.get('/health', (req, res) => {
