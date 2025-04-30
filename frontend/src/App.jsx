@@ -17,6 +17,7 @@ import WorkoutDetailsPage from './pages/WorkoutDetailsPage'
 import AchievementNotifier from './components/AchievementNotifier';
 import MealDetailsPage from './pages/MealsDetailsPage';
 import UpdateProfilePage from './pages/UpdateProfilePage';
+import ForgotPasswordPage from './pages/ForgotPasswordPage';
 
 // ProtectedRoute component definition
 const ProtectedRoute = ({ element }) => {
@@ -96,6 +97,7 @@ function App() {
         {/* Auth routes - only accessible if NOT logged in */}
         <Route path="/signup" element={user ? <Navigate to="/" /> : <SignUpPage />} />
         <Route path="/login" element={user ? <Navigate to="/" /> : <LoginPage />} />
+        <Route path="/forgot-password" element={user ? <Navigate to="/" /> : <ForgotPasswordPage />} />
         
         {/* Catch-all route */}
         <Route path="*" element={<Navigate to="/" />} />

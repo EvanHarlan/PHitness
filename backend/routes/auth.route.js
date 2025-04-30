@@ -1,5 +1,5 @@
 import express from "express";
-import { login, logout, signup, refreshToken, getProfile, updateProfile, searchUsers, unlockAchievement, updateMaxLift, deleteAccount, updateUserProfile} from "../controllers/auth.controller.js";
+import { login, logout, signup, refreshToken, getProfile, updateProfile, searchUsers, unlockAchievement, updateMaxLift, deleteAccount, updateUserProfile, forgotPassword,} from "../controllers/auth.controller.js";
 import { protectRoute } from "../middleware/auth.middleware.js";
 
 const router = express.Router();
@@ -14,7 +14,9 @@ router.get('/search', protectRoute, searchUsers);
 router.post('/unlock-achievement', protectRoute, unlockAchievement);
 router.post("/max-lift", protectRoute, updateMaxLift);
 router.delete("/delete", protectRoute, deleteAccount);
- router.put("/account-credentials", protectRoute, updateUserProfile);
+router.put("/account-credentials", protectRoute, updateUserProfile);
+router.post("/forgot-password", forgotPassword)
+
 
 
 export default router;
