@@ -25,24 +25,6 @@ const HomePage = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  useEffect(() => {
-    if (!user) {
-      navigate('/login');
-    }
-  }, [user, navigate]);
-
-  if (!user) return null;
-
-  // Muscle groups data for radar chart
-  const muscleGroupsData = [
-    { group: 'Chest', value: user?.stats?.muscleGroups?.chest || 65 },
-    { group: 'Back', value: user?.stats?.muscleGroups?.back || 80 },
-    { group: 'Legs', value: user?.stats?.muscleGroups?.legs || 45 },
-    { group: 'Shoulders', value: user?.stats?.muscleGroups?.shoulders || 60 },
-    { group: 'Arms', value: user?.stats?.muscleGroups?.arms || 70 },
-    { group: 'Core', value: user?.stats?.muscleGroups?.core || 55 },
-  ];
-
   // Content for authenticated users (dashboard)
   const renderDashboard = () => {
     const quickActions = [
@@ -74,170 +56,33 @@ const HomePage = () => {
           <DashboardStats user={user} />
         </section>
 
-        {/* Muscle Groups Section */}
+        {/* Quick Actions */}
         <section className="mb-8 sm:mb-12 md:mb-16">
-          <h2 className="text-xl sm:text-2xl font-semibold mb-4 sm:mb-6 md:mb-8 flex items-center">
-            <span className="inline-block w-1 h-6 mr-3 rounded" style={{ backgroundColor: COLORS.NEON_GREEN }}></span>
-            Muscle Groups Targeted
-          </h2>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div className="p-6 rounded-xl" style={{ backgroundColor: COLORS.MEDIUM_GRAY, border: `1px solid ${COLORS.DARK_GRAY}` }}>
-              <div className="h-[300px]">
-                <MuscleGroupsRadarChart />
-              </div>
-            </div>
-            <div 
-              className="p-4 sm:p-6 rounded-lg sm:rounded-xl bg-gradient-to-br"
-              style={{ 
-                backgroundImage: `linear-gradient(135deg, rgba(30, 30, 30, 0.9), rgba(20, 20, 20, 0.8))`, 
-                boxShadow: `0 4px 20px rgba(0, 0, 0, 0.2), inset 0 0 0 1px rgba(255, 255, 255, 0.05)`
-              }}
-            >
-              <h3 className="text-base sm:text-lg font-medium mb-3 sm:mb-4">Training Recommendations</h3>
-              <ul className="space-y-3 sm:space-y-4">
-                <li className="flex items-start p-2 sm:p-3 rounded-lg" style={{ backgroundColor: 'rgba(0, 0, 0, 0.2)' }}>
-                  <div className="rounded-full p-1.5 sm:p-2 mr-3 sm:mr-4" style={{ backgroundColor: COLORS.NEON_GREEN }}>
-                    <span className="text-black font-bold text-xs">1</span>
-                  </div>
-                  <div>
-                    <p className="text-sm sm:text-base font-medium">Focus on Legs</p>
-                    <p className="text-xs sm:text-sm opacity-70">Your leg training frequency is lower than other muscle groups. Consider adding more leg-focused exercises.</p>
-                  </div>
-                </li>
-                <li className="flex items-start p-2 sm:p-3 rounded-lg" style={{ backgroundColor: 'rgba(0, 0, 0, 0.2)' }}>
-                  <div className="rounded-full p-1.5 sm:p-2 mr-3 sm:mr-4" style={{ backgroundColor: COLORS.NEON_GREEN }}>
-                    <span className="text-black font-bold text-xs">2</span>
-                  </div>
-                  <div>
-                    <p className="text-sm sm:text-base font-medium">Balance Upper Body</p>
-                    <p className="text-xs sm:text-sm opacity-70">Your upper body training is well-distributed. Maintain this balance for optimal muscle development.</p>
-                  </div>
-                </li>
-                <li className="flex items-start p-2 sm:p-3 rounded-lg" style={{ backgroundColor: 'rgba(0, 0, 0, 0.2)' }}>
-                  <div className="rounded-full p-1.5 sm:p-2 mr-3 sm:mr-4" style={{ backgroundColor: COLORS.NEON_GREEN }}>
-                    <span className="text-black font-bold text-xs">3</span>
-                  </div>
-                  <div>
-                    <p className="text-sm sm:text-base font-medium">Core Training</p>
-                    <p className="text-xs sm:text-sm opacity-70">Consider adding more core exercises to improve stability and overall strength.</p>
-                  </div>
-                </li>
-                <li className="mt-4 sm:mt-6">
-                  <Link 
-                    to="/workout"
-                    className="inline-block w-full py-2 sm:py-3 text-center rounded-lg text-xs sm:text-sm font-medium transition-all duration-300"
-                    style={{
-                      backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                      color: COLORS.WHITE,
-                      border: `1px solid rgba(255, 255, 255, 0.2)`,
-                    }}
-                  >
-                    View Workout Plans
-                  </Link>
-                </li>
-              </ul>
-            </div>
-          </div>
-        </section>
-
-        {/* Nutrition Insights */}
-        <section className="mb-8 sm:mb-12 md:mb-16">
-          <h2 className="text-xl sm:text-2xl font-semibold mb-4 sm:mb-6 md:mb-8 flex items-center">
-            <span className="inline-block w-1 h-6 mr-3 rounded" style={{ backgroundColor: COLORS.NEON_GREEN }}></span>
-            Nutrition Insights
-          </h2>
-          <div className="grid grid-cols-1 gap-4 sm:gap-6 md:gap-8 lg:grid-cols-2">
-            <MacronutrientPieChart />
-            <div 
-              className="p-4 sm:p-6 rounded-lg sm:rounded-xl bg-gradient-to-br"
-              style={{ 
-                backgroundImage: `linear-gradient(135deg, rgba(30, 30, 30, 0.9), rgba(20, 20, 20, 0.8))`, 
-                boxShadow: `0 4px 20px rgba(0, 0, 0, 0.2), inset 0 0 0 1px rgba(255, 255, 255, 0.05)`
-              }}
-            >
-              <h3 className="text-base sm:text-lg font-medium mb-3 sm:mb-4">Nutrition Tips</h3>
-              <ul className="space-y-3 sm:space-y-4">
-                <li className="flex items-start p-2 sm:p-3 rounded-lg" style={{ backgroundColor: 'rgba(0, 0, 0, 0.2)' }}>
-                  <div className="rounded-full p-1.5 sm:p-2 mr-3 sm:mr-4" style={{ backgroundColor: COLORS.NEON_GREEN }}>
-                    <span className="text-black font-bold text-xs">1</span>
-                  </div>
-                  <div>
-                    <p className="text-sm sm:text-base font-medium">Protein Intake</p>
-                    <p className="text-xs sm:text-sm opacity-70">Consider increasing your daily protein to support muscle recovery.</p>
-                  </div>
-                </li>
-                <li className="flex items-start p-2 sm:p-3 rounded-lg" style={{ backgroundColor: 'rgba(0, 0, 0, 0.2)' }}>
-                  <div className="rounded-full p-1.5 sm:p-2 mr-3 sm:mr-4" style={{ backgroundColor: COLORS.NEON_GREEN }}>
-                    <span className="text-black font-bold text-xs">2</span>
-                  </div>
-                  <div>
-                    <p className="text-sm sm:text-base font-medium">Meal Timing</p>
-                    <p className="text-xs sm:text-sm opacity-70">Try spacing your meals 3-4 hours apart for optimal energy.</p>
-                  </div>
-                </li>
-                <li className="flex items-start p-2 sm:p-3 rounded-lg" style={{ backgroundColor: 'rgba(0, 0, 0, 0.2)' }}>
-                  <div className="rounded-full p-1.5 sm:p-2 mr-3 sm:mr-4" style={{ backgroundColor: COLORS.NEON_GREEN }}>
-                    <span className="text-black font-bold text-xs">3</span>
-                  </div>
-                  <div>
-                    <p className="text-sm sm:text-base font-medium">Hydration</p>
-                    <p className="text-xs sm:text-sm opacity-70">Remember to drink plenty of water throughout the day.</p>
-                  </div>
-                </li>
-                <li className="mt-4 sm:mt-6">
-                  <Link 
-                    to="/nutrition"
-                    className="inline-block w-full py-2 sm:py-3 text-center rounded-lg text-xs sm:text-sm font-medium transition-all duration-300"
-                    style={{
-                      backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                      color: COLORS.WHITE,
-                      border: `1px solid rgba(255, 255, 255, 0.2)`,
-                    }}
-                  >
-                    View Full Nutrition Plan
-                  </Link>
-                </li>
-              </ul>
-            </div>
-          </div>
-        </section>
-
-        {/* Quick Actions Section */}
-        <section className="mb-4 sm:mb-6">
           <h2 className="text-xl sm:text-2xl font-semibold mb-4 sm:mb-6 md:mb-8 flex items-center">
             <span className="inline-block w-1 h-6 mr-3 rounded" style={{ backgroundColor: COLORS.NEON_GREEN }}></span>
             Quick Actions
           </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             {quickActions.map((action, index) => (
-              <div 
+              <motion.div
                 key={index}
-                className="p-4 sm:p-6 rounded-lg sm:rounded-xl transition-all duration-300 transform hover:translate-y-1"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className="p-4 sm:p-6 rounded-xl transition-all duration-200"
                 style={{
-                  backgroundColor: 'rgba(30, 30, 30, 0.6)',
-                  borderLeft: `3px solid ${COLORS.NEON_GREEN}`,
-                  boxShadow: `0 4px 20px rgba(0, 0, 0, 0.15), inset 0 0 0 1px rgba(255, 255, 255, 0.05)`
+                  backgroundColor: 'rgba(30, 30, 30, 0.8)',
+                  boxShadow: 'inset 0 0 0 1px rgba(255, 255, 255, 0.05)'
                 }}
               >
-                <div className="flex items-start mb-3 sm:mb-4">
-                  <span className="text-xl sm:text-2xl mr-2 sm:mr-3">{action.icon}</span>
-                  <h3 className="text-lg sm:text-xl font-medium" style={{ color: COLORS.NEON_GREEN }}>
+                <Link to={action.path} className="block">
+                  <h3 className="text-lg sm:text-xl font-semibold mb-2" style={{ color: COLORS.NEON_GREEN }}>
                     {action.title}
                   </h3>
-                </div>
-                <p className="mb-4 sm:mb-5 text-xs sm:text-sm opacity-80">{action.description}</p>
-                <Link 
-                  to={action.path}
-                  className="inline-block w-full py-2 sm:py-3 text-center rounded-lg font-medium transition-all duration-300 text-xs sm:text-sm"
-                  style={{
-                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                    color: COLORS.WHITE,
-                    border: `1px solid rgba(255, 255, 255, 0.2)`,
-                  }}
-                >
-                  {action.title}
+                  <p className="text-sm sm:text-base opacity-80">
+                    {action.description}
+                  </p>
                 </Link>
-              </div>
+              </motion.div>
             ))}
           </div>
         </section>
@@ -274,31 +119,33 @@ const HomePage = () => {
       scale: 1.03,
       boxShadow: `0 4px 20px rgba(${parseInt(COLORS.NEON_GREEN.slice(1, 3), 16)}, ${parseInt(COLORS.NEON_GREEN.slice(3, 5), 16)}, ${parseInt(COLORS.NEON_GREEN.slice(5, 7), 16)}, 0.3)`
     };
-  
+
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen">  
-        {/* Hero Section */}
-        <motion.header 
-          className="max-w-4xl mx-auto mb-8 sm:mb-12 md:mb-16 text-center pt-4 sm:pt-8 md:pt-12"
+      <div className="min-h-screen flex items-center justify-center">
+        <motion.header
           initial="hidden"
           animate="visible"
-          variants={fadeIn}
+          variants={staggerContainer}
+          className="text-center max-w-4xl mx-auto px-4 sm:px-6 md:px-8"
         >
           <motion.h1 
-            className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-4 sm:mb-6 tracking-tight"
+            variants={fadeIn}
+            className="text-4xl sm:text-5xl md:text-6xl font-bold mb-4 sm:mb-6 tracking-tight"
             style={{ color: COLORS.NEON_GREEN }}
           >
-            PHitness
+            Welcome to PHitness
           </motion.h1>
+          
           <motion.p 
-            className="text-sm sm:text-base md:text-xl mb-6 sm:mb-8 md:mb-12 font-light max-w-lg mx-auto"
             variants={fadeIn}
+            className="text-lg sm:text-xl md:text-2xl mb-8 sm:mb-12 opacity-90"
           >
-            Your personal AI-powered fitness & nutrition companion
+            Your personal AI-powered fitness companion
           </motion.p>
+          
           <motion.div 
-            className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4"
-            variants={staggerContainer}
+            variants={fadeIn}
+            className="flex flex-col sm:flex-row items-center justify-center gap-4"
           >
             <motion.div whileHover={buttonHover} whileTap={{ scale: 0.98 }}>
               <Link 
