@@ -8,7 +8,9 @@ const weightTrackingSchema = new mongoose.Schema({
   },
   weight: {
     type: Number,
-    required: true
+    required: true,
+    min: [0, 'Weight cannot be negative'],
+    max: [1000, 'Weight cannot exceed 1000 lbs']
   },
   date: {
     type: Date,
@@ -16,14 +18,14 @@ const weightTrackingSchema = new mongoose.Schema({
   },
   entryType: {
     type: String,
-    enum: ['daily', 'weekly'],
-    default: 'daily'
+    enum: ['weekly'],
+    default: 'weekly'
   }
 }, {
   timestamps: true
 });
 
-// Create a compound index to ensure only one weight entry per day per user
+// Create a compound index to ensure only one weight entry per week per user
 weightTrackingSchema.index({ user: 1, date: 1 }, { unique: true });
 
 const WeightTracking = mongoose.model('WeightTracking', weightTrackingSchema);
