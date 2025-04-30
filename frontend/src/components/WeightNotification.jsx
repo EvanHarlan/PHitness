@@ -1,14 +1,18 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import { format, addWeeks, startOfWeek, addDays } from 'date-fns';
 import COLORS from '../lib/constants';
 import { useUserStore } from '../stores/useUserStore';
+import { API_BASE_URL } from '../config';
 
 const WeightNotification = () => {
   const [showModal, setShowModal] = useState(false);
   const [weight, setWeight] = useState('');
   const [needsWeight, setNeedsWeight] = useState(false);
-  const [entryType, setEntryType] = useState('daily');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [nextCheckDate, setNextCheckDate] = useState(null);
   const { user } = useUserStore();
 
   useEffect(() => {
@@ -17,50 +21,59 @@ const WeightNotification = () => {
 
   const checkWeightStatus = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/weight-tracking/status', {
+      setIsLoading(true);
+      const response = await axios.get(`${API_BASE_URL}/api/weight-tracking/status`, {
         withCredentials: true
       });
-      setNeedsWeight(!response.data.hasSubmittedWeight);
+      setNeedsWeight(response.data.needsWeight);
+      setNextCheckDate(response.data.nextCheckDate);
     } catch (error) {
       console.error('Error checking weight status:', error);
+      setError('Failed to check weight status');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const validateWeight = (value) => {
+    const numValue = parseFloat(value);
+    if (isNaN(numValue)) return 'Please enter a valid number';
+    if (numValue <= 0) return 'Weight must be greater than 0';
+    if (numValue > 1000) return 'Weight cannot exceed 1000 lbs';
+    return null;
+  };
+
+  const handleWeightChange = (e) => {
+    const value = e.target.value;
+    // Only allow numbers and one decimal point
+    if (/^\d*\.?\d*$/.test(value)) {
+      setWeight(value);
+      setError(validateWeight(value));
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    const validationError = validateWeight(weight);
+    if (validationError) {
+      toast.error(validationError);
+      return;
+    }
+
     try {
-      // Format current date as YYYY-MM-DD
-      const today = new Date();
-      const formattedDate = today.toISOString().split('T')[0]; // YYYY-MM-DD format
-      
+      setIsLoading(true);
       const payload = {
         userId: user._id,
-        weight: parseFloat(weight),
-        entryType: 'weekly',
-        date: formattedDate
+        weight: parseFloat(weight)
       };
       
-      // Validate required fields
-      if (!payload.userId) {
-        console.error('Error: userId is missing');
-        toast.error('User ID is required');
-        return;
-      }
+      const response = await axios.post(`${API_BASE_URL}/api/weight-tracking/submit`, payload);
       
-      if (!payload.weight || isNaN(payload.weight)) {
-        console.error('Error: weight is missing or invalid');
-        toast.error('Please enter a valid weight');
-        return;
-      }
+      const currentWeekStart = startOfWeek(new Date());
+      const nextWeekDate = addDays(currentWeekStart, 7);
       
-      console.log('Submitting weight with payload:', payload);
-      
-      const response = await axios.post('http://localhost:5000/api/weight-tracking/submit', payload);
-      
-      // Show appropriate success message based on whether it was an update or new entry
-      const message = response.data.isUpdate 
-        ? `Updated your weight to ${weight} lbs for this week`
-        : `Recorded your weight as ${weight} lbs for this week`;
+      const message = `✅ Your weight has been logged for the week of ${format(currentWeekStart, 'MMMM d')}. You'll be able to submit again next week on ${format(nextWeekDate, 'MMMM d')}.`;
       
       toast.success(message, {
         style: {
@@ -73,6 +86,14 @@ const WeightNotification = () => {
       setShowModal(false);
       setNeedsWeight(false);
       setWeight('');
+      setError(null);
+      
+      // Update the next check date
+      const nextWeek = addWeeks(new Date(), 1);
+      setNextCheckDate(nextWeek);
+
+      // Reload the page to show updated graph
+      window.location.reload();
     } catch (error) {
       console.error('Error submitting weight:', error);
       const errorMessage = error.response?.data?.details || error.response?.data?.error || 'Failed to record weight';
@@ -83,6 +104,8 @@ const WeightNotification = () => {
           border: `1px solid ${COLORS.MEDIUM_GRAY}`,
         },
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -90,7 +113,6 @@ const WeightNotification = () => {
 
   return (
     <>
-      {/* Weight Notification Box */}
       <div 
         className="mx-auto mb-8 p-4 rounded-lg shadow-lg max-w-md"
         style={{
@@ -99,124 +121,51 @@ const WeightNotification = () => {
           boxShadow: `0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)`
         }}
       >
-        <div className="flex flex-col items-center space-y-4">
-          <div className="flex items-center space-x-2">
-            <span className="text-2xl animate-pulse">⚖️</span>
-            <p className="text-lg" style={{ color: COLORS.WHITE }}>
-              Don't forget to log your weight this week!
-            </p>
-          </div>
-          <button
-            onClick={() => setShowModal(true)}
-            className="px-4 py-2 rounded-lg font-medium transition-colors duration-200"
-            style={{
-              backgroundColor: COLORS.NEON_GREEN,
-              color: COLORS.BLACK,
-              boxShadow: `0 2px 4px rgba(0, 255, 0, 0.2)`
-            }}
-            onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#00ff80'}
-            onMouseOut={(e) => e.currentTarget.style.backgroundColor = COLORS.NEON_GREEN}
-          >
-            Record Weight
-          </button>
+        <h3 className="text-xl font-bold mb-4" style={{ color: COLORS.NEON_GREEN }}>
+          Weekly Weight Check
+        </h3>
+        <div className="mb-4 space-y-2">
+          <p className="text-sm" style={{ color: COLORS.LIGHT_GRAY }}>
+            Current check-in period: {format(startOfWeek(new Date()), 'MMMM d')} - {format(addDays(startOfWeek(new Date()), 6), 'MMMM d')}
+          </p>
+          <p className="text-sm" style={{ color: COLORS.LIGHT_GRAY }}>
+            Next check-in available: {format(addDays(startOfWeek(new Date()), 7), 'MMMM d')}
+          </p>
         </div>
+        <p className="mb-4" style={{ color: COLORS.WHITE }}>
+          Please enter your weight for this week
+        </p>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="flex space-x-2">
+            <input
+              type="text"
+              value={weight}
+              onChange={handleWeightChange}
+              placeholder="Enter weight in lbs"
+              className="flex-1 p-2 rounded bg-gray-800 text-white border border-gray-700 focus:border-neon-green focus:outline-none"
+              disabled={isLoading}
+            />
+            <button
+              type="submit"
+              disabled={isLoading || !!error}
+              className={`py-2 px-6 rounded font-bold ${
+                isLoading || error
+                  ? 'bg-gray-600 cursor-not-allowed'
+                  : 'bg-neon-green hover:bg-neon-green-dark'
+              }`}
+              style={{
+                color: COLORS.DARK_GRAY,
+                transition: 'background-color 0.2s'
+              }}
+            >
+              {isLoading ? 'Submitting...' : 'Enter'}
+            </button>
+          </div>
+          {error && (
+            <p className="text-red-500 text-sm mt-1">{error}</p>
+          )}
+        </form>
       </div>
-
-      {/* Modal */}
-      {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div 
-            className="p-6 rounded-lg w-96"
-            style={{
-              backgroundColor: COLORS.DARK_GRAY,
-              border: `1px solid ${COLORS.MEDIUM_GRAY}`,
-              boxShadow: `0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)`
-            }}
-          >
-            <h2 className="text-xl font-bold mb-4" style={{ color: COLORS.WHITE }}>
-              Record Your Weight
-            </h2>
-            <form onSubmit={handleSubmit}>
-              <div className="mb-4">
-                <label 
-                  className="block text-sm font-medium mb-2"
-                  style={{ color: COLORS.LIGHT_GRAY }}
-                >
-                  Weight (lbs)
-                </label>
-                <input
-                  type="number"
-                  step="0.1"
-                  value={weight}
-                  onChange={(e) => setWeight(e.target.value)}
-                  className="w-full p-2 rounded border"
-                  style={{
-                    backgroundColor: COLORS.MEDIUM_GRAY,
-                    borderColor: COLORS.LIGHT_GRAY,
-                    color: COLORS.WHITE
-                  }}
-                  required
-                />
-              </div>
-              
-              <div className="mb-4">
-                <label 
-                  className="block text-sm font-medium mb-2"
-                  style={{ color: COLORS.LIGHT_GRAY }}
-                >
-                  Entry Type
-                </label>
-                <div className="flex space-x-4">
-                  <label className="flex items-center">
-                    <input
-                      type="radio"
-                      value="daily"
-                      checked={entryType === 'daily'}
-                      onChange={(e) => setEntryType(e.target.value)}
-                      className="mr-2"
-                    />
-                    <span style={{ color: COLORS.WHITE }}>Daily</span>
-                  </label>
-                  <label className="flex items-center">
-                    <input
-                      type="radio"
-                      value="weekly"
-                      checked={entryType === 'weekly'}
-                      onChange={(e) => setEntryType(e.target.value)}
-                      className="mr-2"
-                    />
-                    <span style={{ color: COLORS.WHITE }}>Weekly</span>
-                  </label>
-                </div>
-              </div>
-
-              <div className="flex justify-end space-x-2">
-                <button
-                  type="button"
-                  onClick={() => setShowModal(false)}
-                  className="px-4 py-2 rounded"
-                  style={{
-                    backgroundColor: COLORS.MEDIUM_GRAY,
-                    color: COLORS.WHITE
-                  }}
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 rounded"
-                  style={{
-                    backgroundColor: COLORS.NEON_GREEN,
-                    color: COLORS.BLACK
-                  }}
-                >
-                  Submit
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
     </>
   );
 };
