@@ -231,14 +231,9 @@ const NutritionPage = () => {
     {
         fetchProfileData();
     }
-<<<<<<< HEAD
-}, [autoFillEnabled]);
-
-=======
   }, [autoFillEnabled]);
 
   // Log user from store (for debugging)
->>>>>>> 3c33d62565f0167cc10d59c22c610155cb7ec115
   useEffect(() => {
     console.log("🧍 User from store:", user);
   }, [user]);
@@ -259,7 +254,6 @@ const NutritionPage = () => {
     fetchMealCount();
   }, []);
 
-<<<<<<< HEAD
   // Fetch last meal plan generation time on component mount
   useEffect(() => {
     const fetchLastMealPlanGeneration = async () => {
@@ -327,9 +321,6 @@ const NutritionPage = () => {
     return () => clearInterval(timer);
   }, [nextGenerationTime]);
 
-=======
-  // Generate meal plan function
->>>>>>> 3c33d62565f0167cc10d59c22c610155cb7ec115
   const generateMealPlan = async () => {
     if (!canGenerateMealPlan) {
       toast.error("You can only generate one meal plan per day. Please try again tomorrow.", {
@@ -525,10 +516,6 @@ const NutritionPage = () => {
                 />
               </div>
 
-<<<<<<< HEAD
-=======
-              {/* Nutrition Questionnaire */}
->>>>>>> 3c33d62565f0167cc10d59c22c610155cb7ec115
               <NutritionQuestionnaire
                 userParams={userParams}
                 setUserParams={setUserParams}
