@@ -1,14 +1,16 @@
 import { useUserStore } from '../stores/useUserStore';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { COLORS } from '../lib/constants';
 import DashboardStats from '../components/DashboardStats';
 import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
 import MuscleGroupsRadarChart from '../components/MuscleGroupsRadarChart';
 import MacronutrientPieChart from '../components/MacronutrientPieChart';
+import WeightNotification from '../components/WeightNotification';
 
 const HomePage = () => {
   const { user } = useUserStore();
+  const navigate = useNavigate();
   const [isMobile, setIsMobile] = useState(false);
 
   // Detect mobile devices
@@ -22,6 +24,24 @@ const HomePage = () => {
     
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+
+  useEffect(() => {
+    if (!user) {
+      navigate('/login');
+    }
+  }, [user, navigate]);
+
+  if (!user) return null;
+
+  // Muscle groups data for radar chart
+  const muscleGroupsData = [
+    { group: 'Chest', value: user?.stats?.muscleGroups?.chest || 65 },
+    { group: 'Back', value: user?.stats?.muscleGroups?.back || 80 },
+    { group: 'Legs', value: user?.stats?.muscleGroups?.legs || 45 },
+    { group: 'Shoulders', value: user?.stats?.muscleGroups?.shoulders || 60 },
+    { group: 'Arms', value: user?.stats?.muscleGroups?.arms || 70 },
+    { group: 'Core', value: user?.stats?.muscleGroups?.core || 55 },
+  ];
 
   // Content for authenticated users (dashboard)
   const renderDashboard = () => {
@@ -221,6 +241,9 @@ const HomePage = () => {
             ))}
           </div>
         </section>
+
+        {/* Add WeightNotification component */}
+        <WeightNotification />
       </>
     );
   };

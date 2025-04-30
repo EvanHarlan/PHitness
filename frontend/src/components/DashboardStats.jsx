@@ -1,11 +1,23 @@
 import { useState, useEffect } from 'react';
 import StatsDisplay, { CHART_TYPES } from './StatsDisplay';
 import NutritionIntakeChart from './NutritionIntakeChart';
+import WeightNotification from './WeightNotification';
 import { COLORS } from '../lib/constants';
 import axios from 'axios';
+import {
+  ResponsiveContainer,
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend
+} from 'recharts';
 
 const DashboardStats = ({ user }) => {
   const [workoutData, setWorkoutData] = useState([]);
+  const [weightData, setWeightData] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -44,6 +56,10 @@ const DashboardStats = ({ user }) => {
     fetchWorkoutData();
   }, []);
 
+  useEffect(() => {
+    fetchWeightData();
+  }, []);
+
   const processWorkoutData = (workouts) => {
     // Create an array for all days of the week
     const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -79,6 +95,45 @@ const DashboardStats = ({ user }) => {
     return processedData;
   };
 
+  const formatDate = (date) => {
+    const d = new Date(date);
+    return d.toISOString(); // Ensure full ISO string with timezone
+  };
+
+  const fetchWeightData = async () => {
+    try {
+      const response = await axios.get('http://localhost:5000/api/weight-tracking/history', {
+        withCredentials: true
+      });
+      
+      // Transform the data for the chart, ensuring all values are properly formatted
+      const formattedData = response.data
+        .map(entry => ({
+          // Convert date to timestamp for sorting
+          timestamp: new Date(entry.date).getTime(),
+          // Format date for display
+          formattedDate: formatDate(entry.date),
+          // Ensure weight is a number
+          weight: Number(entry.weight),
+          // Keep entry type as string
+          entryType: entry.entryType
+        }))
+        .sort((a, b) => a.timestamp - b.timestamp)
+        .map(entry => ({
+          // Remove timestamp and use formatted date for display
+          date: entry.formattedDate,
+          weight: entry.weight,
+          entryType: entry.entryType
+        }));
+      
+      setWeightData(formattedData);
+    } catch (error) {
+      console.error('Error fetching weight data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -87,35 +142,117 @@ const DashboardStats = ({ user }) => {
     );
   }
 
+  // Custom tooltip component with properly formatted data
+  const CustomTooltip = ({ active, payload, label }) => {
+    if (active && payload && payload.length) {
+      return (
+        <div className="p-3 rounded-md shadow-lg" style={{ 
+          backgroundColor: COLORS.DARK_GRAY,
+          border: `1px solid ${COLORS.MEDIUM_GRAY}`,
+          color: COLORS.WHITE
+        }}>
+          <p className="font-medium">
+            {new Date(label).toLocaleDateString("en-US", {
+              month: "short",
+              day: "numeric",
+              year: "numeric"
+            })}
+          </p>
+          <p style={{ color: COLORS.NEON_GREEN }}>
+            Weight: {payload[0].value} lbs
+          </p>
+          <p className="text-sm opacity-75">
+            {payload[0].payload.entryType === 'weekly' ? 'Weekly Entry' : 'Daily Entry'}
+          </p>
+        </div>
+      );
+    }
+    return null;
+  };
+
+  // Custom dot component to handle entry type styling
+  const CustomDot = (props) => {
+    const { cx, cy, payload } = props;
+    const isWeekly = payload.entryType === 'weekly';
+    
+    return (
+      <circle
+        cx={cx}
+        cy={cy}
+        r={isWeekly ? 4 : 2}
+        fill={isWeekly ? COLORS.NEON_GREEN : 'transparent'}
+        stroke={COLORS.NEON_GREEN}
+        strokeWidth={2}
+      />
+    );
+  };
+
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-      {/* Workout Activity Chart */}
-      <StatsDisplay 
-        title="Workout Activity" 
-        description="Your workout duration and calories burned over the past week"
-        chartType={CHART_TYPES.LINE}
-        dataKey="workout"
-        yAxisKey="minutes"
-        secondaryKey="calories"
-        data={workoutData}
-        yAxisLabel="Minutes"
-        secondaryYAxisLabel="Calories"
-      />
+    <div className="space-y-8">
+      <WeightNotification />
       
-      {/* Weight Progress Chart */}
-      <StatsDisplay 
-        title="Weight Progress" 
-        description="Your weight progress over time"
-        chartType={CHART_TYPES.LINE}
-        dataKey="progress"
-        xAxisKey="month"
-        yAxisKey="weight"
-      />
-      
-      {/* Nutrition Intake Chart */}
-      <NutritionIntakeChart />
-      
-      {/* Add more charts as needed */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Workout Activity Chart */}
+        <StatsDisplay 
+          title="Workout Activity" 
+          description="Your workout duration and calories burned over the past week"
+          chartType={CHART_TYPES.LINE}
+          dataKey="workout"
+          yAxisKey="minutes"
+          secondaryKey="calories"
+          data={workoutData}
+          yAxisLabel="Minutes"
+          secondaryYAxisLabel="Calories"
+        />
+        
+        {/* Weight Progress Chart */}
+        <div className="p-4 rounded-lg" style={{ backgroundColor: COLORS.DARK_GRAY }}>
+          <h3 className="text-lg font-semibold mb-4" style={{ color: COLORS.WHITE }}>
+            Weight Progress
+          </h3>
+          <div className="h-64">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={weightData}>
+                <CartesianGrid strokeDasharray="3 3" stroke={COLORS.MEDIUM_GRAY} />
+                <XAxis 
+                  dataKey="date"
+                  stroke={COLORS.LIGHT_GRAY}
+                  tick={{ fill: COLORS.WHITE }}
+                  tickFormatter={(date) => new Date(date).toLocaleDateString("en-US", {
+                    month: "short",
+                    day: "numeric",
+                    year: "numeric"
+                  })}
+                />
+                <YAxis 
+                  stroke={COLORS.LIGHT_GRAY}
+                  tick={{ fill: COLORS.WHITE }}
+                  label={{ 
+                    value: 'Weight (lbs)', 
+                    angle: -90, 
+                    position: 'insideLeft',
+                    style: { fill: COLORS.WHITE }
+                  }}
+                />
+                <Tooltip content={<CustomTooltip />} />
+                <Legend />
+                <Line
+                  type="monotone"
+                  dataKey="weight"
+                  stroke={COLORS.NEON_GREEN}
+                  strokeWidth={2}
+                  dot={<CustomDot />}
+                  activeDot={{ r: 6 }}
+                  isAnimationActive={true}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+        
+        {/* Nutrition Intake Chart */}
+        <NutritionIntakeChart />
+      </div>
     </div>
   );
 };
