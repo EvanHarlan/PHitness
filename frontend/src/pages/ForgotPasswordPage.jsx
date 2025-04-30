@@ -1,16 +1,19 @@
 import { COLORS } from '../lib/constants';
 import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { LogIn, Mail, Lock, ArrowRight, Loader } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { LogIn, Mail, Loader } from "lucide-react";
 import { motion } from "framer-motion";
-import { useUserStore } from "../stores/useUserStore";
+import { toast } from 'react-hot-toast';
+import axios from '../lib/axios'; 
 
-const LoginPage = () => {
+
+const ForgotPasswordPage = () => {
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [errors, setError] = useState({});
   const [isMobile, setIsMobile] = useState(false);
-  const { login, loading } = useUserStore();
+  const [loading, setLoading] = useState(false);
+
+
   const navigate = useNavigate();
 
   // Detect mobile devices
@@ -25,23 +28,19 @@ const LoginPage = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setError({}); // Reset error messages on form submission
-    login(email, password)
-      .then((success) => {
-        if (success) {
-          navigate("/profile"); // Redirect to profile page after successful login
-        } else {
-          // Set error message if login fails
-          setError({ general: "Invalid email or password. Please try again." });
-        }
-      })
-      .catch(() => {
-        // Handle unexpected errors (e.g., network issues)
-        setError({ general: "Something went wrong. Please try again later." });
-      });
+    setLoading(true);
+    try {
+      const response = await axios.post('/auth/forgot-password', { email });
+      toast.success('Password reset email sent successfully!');
+    } catch (error) {
+      toast.error('Error sending forgot password request');
+    } finally {
+      setLoading(false);
+    }
   };
+
 
   // Adjust animation settings for mobile
   const animationSettings = {
@@ -69,10 +68,10 @@ const LoginPage = () => {
               transition={{ duration: animationSettings.duration }}
             >
               <h2 className="text-2xl sm:text-3xl font-bold text-white text-center">
-                Welcome Back
+                Forgot Password?
               </h2>
               <p className="text-sm sm:text-base text-white text-center mt-2">
-                Enter your credentials to access your account
+                If you have a registered account then enter your email so we can send a recovery email
               </p>
             </motion.div>
           </div>
@@ -94,9 +93,7 @@ const LoginPage = () => {
                       <Mail className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400" />
                     </div>
                     <input
-                      id="email"
                       type="email"
-                      required
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       className="block w-full pl-10 px-3 py-3 rounded-lg sm:rounded-xl 
@@ -104,7 +101,9 @@ const LoginPage = () => {
                       focus:outline-none 
                       focus:border-transparent transition duration-200
                       text-sm sm:text-base"
-                      placeholder="you@example.com"
+                      placeholder="Enter your email"
+                      required
+
                       style={{
                         borderColor: COLORS.NEON_GREEN,
                         borderWidth: '1px'
@@ -114,35 +113,7 @@ const LoginPage = () => {
                   </div>
                 </div>
 
-                <div className="space-y-1.5">
-                  <label htmlFor="password" className="text-xs sm:text-sm font-medium text-gray-300">
-                    Password
-                  </label>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <Lock className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400" />
-                    </div>
-                    <input
-                      id="password"
-                      type="password"
-                      required
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      className="block w-full pl-10 px-3 py-3 border border-gray-600 rounded-lg sm:rounded-xl 
-                      bg-[#0a0a0a]/90 text-gray-100 placeholder-gray-400 
-                      focus:outline-none focus:ring-2 focus:ring-gray-500 
-                      focus:border-transparent transition duration-200
-                      text-sm sm:text-base"
-                      placeholder="••••••••"
-                      style={{
-                        borderColor: COLORS.NEON_GREEN,
-                        borderWidth: '1px'
-                      }}
-                    />
-                  </div>
-                  {errors.password && <p className="text-red-500 text-xs sm:text-sm mt-1">{errors.password}</p>}
-                </div>
-
+                
                 {errors.general && <p className="text-red-500 text-xs sm:text-sm text-center">{errors.general}</p>}
 
                 <button
@@ -159,41 +130,20 @@ const LoginPage = () => {
                   {loading ? (
                     <>
                       <Loader className="mr-2 h-4 w-4 sm:h-5 sm:w-5 animate-spin" />
-                      <span className="text-xs sm:text-sm">Signing in...</span>
+                      <span className="text-xs sm:text-sm">Sending...</span>
                     </>
                   ) : (
                     <>
                       <LogIn className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
-                      <span className="text-xs sm:text-sm">Sign in to your account</span>
+                      <span className="text-xs sm:text-sm">Email Sent</span>
                     </>
                   )}
                 </button>
               </form>
 
-              <div className="mt-7 text-center">
-                <p className="text-xs sm:text-sm text-gray-400">
-                  Don't have an account?{" "}
-                  <Link
-                    to="/signup"
-                    className="font-medium text-gray-400 hover:text-green-300 
-                    inline-flex items-center transition duration-200"
-                    style={{
-                      backgroundColor: COLORS.MEDIUM_GRAY,
-                    }}> 
-                    Create one now
-                    <ArrowRight className="ml-1 h-3 w-3 sm:h-4 sm:w-4" />
-                  </Link>
-                </p>
-              </div>
+             
 
-              <div className="mt-4 text-center">
-                <Link
-                  to="/forgot-password"
-                  className="text-xs sm:text-sm text-gray-400 hover:text-green-300 items-center transition duration-200"
-                  >
-                  Forgot your password?
-                </Link>
-              </div>
+              
             </div>
           </motion.div>
         </div>
@@ -201,5 +151,4 @@ const LoginPage = () => {
     </div>
   );
 };
-
-export default LoginPage;
+export default ForgotPasswordPage;
