@@ -29,6 +29,28 @@ const NutritionPage = () => {
   const firstLoad = useRef(true);
   const [nextGenerationTime, setNextGenerationTime] = useState(null);
 
+  // Form state for user parameters
+  const [userParams, setUserParams] = useState({
+    dietaryRestrictions: [], // Array for multiple selections
+    targetCalories: "", 
+    mealType: "balanced",
+    ingredientsToInclude: "",
+    ingredientsToExclude: "",
+    height: "", 
+    weight: '',
+    age: '',
+    gender: '',
+    goal: '',
+    activityLevel: '',
+    mealFrequency: '',
+    snackPreference: '',
+    hydrationPreference: '',
+    cookingSkill: '',
+    timePerMeal: '',
+    budget: '',
+    healthConditions: [] // Array for multiple selections
+  });
+
   // Function to calculate time until next generation
   const calculateNextGenerationTime = () => {
     const now = new Date();
@@ -74,28 +96,6 @@ const NutritionPage = () => {
     
     return () => window.removeEventListener('resize', handleResize);
   }, []);
-
-  // Form state for user parameters
-  const [userParams, setUserParams] = useState({
-    dietaryRestrictions: "none",
-    targetCalories: "", // Changed from calorieGoal to targetCalories
-    mealType: "balanced",
-    ingredientsToInclude: "",
-    ingredientsToExclude: "",
-    height: ``, // Initialize as empty strings to avoid potential issues
-    weight: '',
-    age: '',
-    gender: '',
-    goal: '', // Changed from nutritionGoal to goal
-    activityLevel: '',
-    mealFrequency: '',
-    snackPreference: '',
-    hydrationPreference: '',
-    cookingSkill: '',
-    timePerMeal: '',
-    budget: '',
-    healthConditions: ''
-  });
 
   // Custom theme for tooltips to match the website
   const tooltipTheme = createTheme({
@@ -150,6 +150,7 @@ const NutritionPage = () => {
     </Tooltip>
   );
 
+  // Fetch profile data for auto-filling
   const fetchProfileData = async (silent = false) =>
   {
       try
@@ -184,6 +185,7 @@ const NutritionPage = () => {
       }
   };
 
+  // Auto-fill on initial load if enabled
   useEffect(() => {
       if (autoFillEnabled)
       {
@@ -191,6 +193,7 @@ const NutritionPage = () => {
       }
   }, []);
 
+  // Handle changes to auto-fill state
   useEffect(() => {
     if (firstLoad.current) 
     {
@@ -202,16 +205,14 @@ const NutritionPage = () => {
     {
         fetchProfileData();
     }
-}, [autoFillEnabled]);
+  }, [autoFillEnabled]);
 
-
-
-
-
+  // Log user from store (for debugging)
   useEffect(() => {
     console.log("🧍 User from store:", user);
   }, [user]);
 
+  // Fetch meal count
   useEffect(() => {
     const fetchMealCount = async () => {
       try {
@@ -227,22 +228,36 @@ const NutritionPage = () => {
     fetchMealCount();
   }, []);
 
+  // Generate meal plan function
   const generateMealPlan = async () => {
     setLoading(true);
     try {
+      // Convert height from imperial to metric if needed for the API
+      let heightInCm = null;
+      if (userParams.heightInInches) {
+        heightInCm = Math.round(userParams.heightInInches * 2.54);
+      }
+      
+      // Convert weight from pounds to kg if needed for the API
+      let weightInKg = null;
+      if (userParams.weight) {
+        weightInKg = Math.round(userParams.weight / 2.2046);
+      }
+      
       // Create a properly formatted payload with all required fields
       const payload = {
         goal: userParams.goal,
-        weight: Number(userParams.weight),
-        height: userParams.height,
+        weight: weightInKg || Number(userParams.weight),
+        height: heightInCm || userParams.height,
         age: Number(userParams.age),
         gender: userParams.gender,
         activityLevel: userParams.activityLevel || 'moderate',
-        dietaryRestrictions: userParams.dietaryRestrictions || [],
+        dietaryRestrictions: userParams.dietaryRestrictions.length > 0 ? userParams.dietaryRestrictions : [],
         mealFrequency: userParams.mealFrequency || 3,
         snackPreference: userParams.snackPreference || 'no',
         dailyWaterIntake: userParams.hydrationPreference || 'moderate',
-        cookingSkillLevel: userParams.cookingSkill || 'Intermediate'
+        cookingSkillLevel: userParams.cookingSkill || 'Intermediate',
+        healthConditions: userParams.healthConditions.length > 0 ? userParams.healthConditions : []
       };
 
       // Log the payload for debugging
@@ -329,6 +344,7 @@ const NutritionPage = () => {
     }
   };
 
+  // Loading state
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen p-4" style={{ backgroundColor: COLORS.BLACK }}>
@@ -394,7 +410,7 @@ const NutritionPage = () => {
                 <label htmlFor="autofill-toggle" className="text-sm font-medium" style={{ color: COLORS.WHITE }}>
                     Autofill From Profile
                 </label>
-               <input
+                <input
                    id="autofill-toggle"
                    type="checkbox"
                    checked={autoFillEnabled}
@@ -408,7 +424,7 @@ const NutritionPage = () => {
                 />
               </div>
 
-
+              {/* Nutrition Questionnaire */}
               <NutritionQuestionnaire
                 userParams={userParams}
                 setUserParams={setUserParams}
