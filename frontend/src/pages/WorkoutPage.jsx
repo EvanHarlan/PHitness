@@ -14,10 +14,13 @@ import WorkoutStreak from "../components/WorkoutStreak";
 
 const WorkoutPage = () =>
 {
-    // State variables (unchanged)
+    // State variables
     const [workoutAmount, setWorkoutAmount] = useState(0);
     const [loading, setLoading] = useState(false);
     const [showSavedWorkouts, setShowSavedWorkouts] = useState(true);
+    const [workoutData, setWorkoutData] = useState(null);
+    const [savedWorkout, setSavedWorkout] = useState(null);
+    const [nextGenerationTime, setNextGenerationTime] = useState(null);
     const navigate = useNavigate();
     const [fetchWorkoutCountError, setFetchWorkoutCountError] = useState(null);
     const { user, setUnlockedAchievement } = useUserStore();
@@ -203,6 +206,40 @@ const WorkoutPage = () =>
   }, []);
 
  
+  // Function to calculate time until next generation
+  const calculateNextGenerationTime = () => {
+    const now = new Date();
+    const tomorrow = new Date(now);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    tomorrow.setHours(0, 0, 0, 0);
+    return tomorrow;
+  };
+
+  // Function to format time remaining
+  const formatTimeRemaining = (nextTime) => {
+    const now = new Date();
+    const diff = nextTime - now;
+    
+    if (diff <= 0) return "Available now!";
+    
+    const hours = Math.floor(diff / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    
+    return `${hours}h ${minutes}m remaining`;
+  };
+
+  // Update next generation time every minute
+  useEffect(() => {
+    const updateTimer = () => {
+      setNextGenerationTime(calculateNextGenerationTime());
+    };
+
+    updateTimer();
+    const interval = setInterval(updateTimer, 60000); // Update every minute
+
+    return () => clearInterval(interval);
+  }, []);
+
   const generateWorkoutPlan = async () => {
     // Validate required fields
     if (!userParams.height || !userParams.weight || !userParams.fitnessGoal) {
@@ -222,6 +259,13 @@ const WorkoutPage = () =>
     }
 
     setLoading(true);
+    const loadingToast = toast.loading("Generating your workout plan...", {
+      style: {
+        background: COLORS.DARK_GRAY,
+        color: COLORS.WHITE,
+        border: `1px solid ${COLORS.MEDIUM_GRAY}`
+      }
+    });
 
     try {
       const response = await axios.post(
@@ -230,10 +274,13 @@ const WorkoutPage = () =>
         { withCredentials: true }
       );
 
-      if (response.status >= 200 && response.status < 300) {
+      console.log("Server Response:", response.data);
+
+      if (response.data.workoutPlan) {
+        toast.dismiss(loadingToast);
         setWorkoutData(response.data.workoutPlan);
         setSavedWorkout(response.data.savedWorkout);
-        toast.dismiss();
+        setNextGenerationTime(calculateNextGenerationTime());
 
         toast.success("Workout generated and saved successfully!", {
           duration: 2000,
@@ -245,24 +292,51 @@ const WorkoutPage = () =>
           }
         });
 
-        // Navigate to the details page of the newly saved workout
         if (response.data.savedWorkout && response.data.savedWorkout._id) {
           navigate(`/workouts/${response.data.savedWorkout._id}`);
         } else {
-          // Automatically scroll to results if navigation fails or isn't desired
           setTimeout(() => {
             document.getElementById('workout-result')?.scrollIntoView({ behavior: 'smooth' });
           }, 200);
         }
       } else {
-        toast.dismiss();
-        console.error("Error generating workout:", response);
-        toast.error(`Failed to generate workout. Server responded with status ${response.status}. Please try again later.`);
+        console.error("Invalid response format:", response.data);
+        throw new Error("Invalid response format from server");
       }
     } catch (error) {
-      toast.dismiss();
+      toast.dismiss(loadingToast);
       console.error("Error generating workout:", error);
-      toast.error("Failed to generate workout. Please check your network connection and try again later.");
+      console.error("Error response:", error.response?.data);
+      
+      if (error.response?.status === 429) {
+        setNextGenerationTime(calculateNextGenerationTime());
+        toast.error(error.response.data.error, {
+          duration: 4000,
+          style: {
+            background: COLORS.DARK_GRAY,
+            color: COLORS.WHITE,
+            border: `1px solid ${COLORS.MEDIUM_GRAY}`
+          }
+        });
+      } else if (error.response?.data?.error) {
+        toast.error(error.response.data.error, {
+          duration: 4000,
+          style: {
+            background: COLORS.DARK_GRAY,
+            color: COLORS.WHITE,
+            border: `1px solid ${COLORS.MEDIUM_GRAY}`
+          }
+        });
+      } else {
+        toast.error("Failed to generate workout. Please check your network connection and try again later.", {
+          duration: 4000,
+          style: {
+            background: COLORS.DARK_GRAY,
+            color: COLORS.WHITE,
+            border: `1px solid ${COLORS.MEDIUM_GRAY}`
+          }
+        });
+      }
     } finally {
       setLoading(false);
     }
@@ -364,6 +438,27 @@ const WorkoutPage = () =>
                 <InfoTooltip title="Fill out the questions to get a personalized workout plan based on your specific goals and information." />
               </h2>
               
+              {/* Next Generation Time Indicator */}
+              {nextGenerationTime && (
+                <div className="mb-4 p-3 rounded-lg" style={{ 
+                  backgroundColor: `${COLORS.BLACK}80`,
+                  border: `1px solid ${COLORS.MEDIUM_GRAY}`
+                }}>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm" style={{ color: COLORS.WHITE }}>
+                      Next workout generation available:
+                    </span>
+                    <span className="text-sm font-medium" style={{ 
+                      color: formatTimeRemaining(nextGenerationTime) === "Available now!" 
+                        ? COLORS.NEON_GREEN 
+                        : COLORS.WHITE 
+                    }}>
+                      {formatTimeRemaining(nextGenerationTime)}
+                    </span>
+                  </div>
+                </div>
+              )}
+              
               <div className="mb-4 flex items-center gap-3">
                 <label htmlFor="autofill-toggle" className="text-sm font-medium" style={{ color: COLORS.WHITE }}>
                   Autofill From Profile
@@ -402,45 +497,35 @@ const WorkoutPage = () =>
               <div className="p-4 border rounded-lg mb-4" style={{ borderColor: COLORS.MEDIUM_GRAY, backgroundColor: COLORS.DARK_GRAY }}>
                 <h3 className="font-medium" style={{ color: COLORS.WHITE }}>
                   Completed Workouts
-                  <InfoTooltip title="This shows the total number of workouts you've logged as completed" />
+                  <InfoTooltip title="This shows the total number of workouts you've completed" />
                 </h3>
                 <p className="text-2xl font-bold mb-3" style={{ color: COLORS.NEON_GREEN }}>{workoutAmount !== null ? workoutAmount : 'N/A'}</p>
               </div>
 
               <WorkoutStreak onWorkoutLogged={() => setWorkoutAmount(prev => prev + 1)} />
 
+              <div className="p-4 border rounded-lg" style={{ borderColor: COLORS.MEDIUM_GRAY, backgroundColor: COLORS.DARK_GRAY }}>
+                <p className="text-sm" style={{ color: COLORS.LIGHT_GRAY }}>
+                  Complete your daily workout to increase your count. Visit your workout and complete each exercise to mark workout as complete.
+                </p>
+              </div>
 
-              <div className="flex flex-col space-y-3">
+              <div className="flex flex-col space-y-3 mt-4">
                 <button
-                  className="px-4 py-2 rounded-lg transition font-medium flex items-center hover:opacity-90"
-                  style={{ backgroundColor: COLORS.NEON_GREEN, color: COLORS.BLACK }}
-                  onClick={addWorkout}
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clipRule="evenodd" />
-                  </svg>
-                  Log Completed Workout
-                  <InfoTooltip title="Click here to record that you've completed a workout session" />
-                </button>
-
-                <button
-                  className="px-4 py-2 rounded-lg transition font-medium flex items-center"
+                  className="px-3 sm:px-4 py-2 rounded-lg transition font-medium flex items-center justify-center 
+                             hover:opacity-90 active:opacity-80 min-h-[44px]"
                   style={{ backgroundColor: COLORS.MEDIUM_GRAY, color: COLORS.WHITE }}
                   onClick={() => setShowSavedWorkouts(!showSavedWorkouts)}
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-                    <path d="M7 3a1 1 0 000 2h6a1 1 0 100-2H7zM4 7a1 1 0 011-1h10a1 1 0 110 2H5a1 1 0 01-1-1zM2 11a2 2 0 012-2h12a2 2 0 012 2v4a2 2 0 01-2 2H4a2 2 0 01-2-2v-4z" />
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 sm:h-5 sm:w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M7 3a1 1 0 000 2h6a1 1 0 010-2H7zM4 7a1 1 0 011-1h10a1 1 0 011 1H5a1 1 0 01-1-1zM2 11a2 2 0 012-2h12a2 2 0 012 2v4a2 2 0 01-2 2H4a2 2 0 01-2-2v-4z" />
                   </svg>
-                  {showSavedWorkouts ? 'Hide Saved Workouts' : 'View Saved Workouts'}
+                  <span className="text-xs sm:text-sm">
+                    {showSavedWorkouts ? 'Hide Saved Workouts' : 'View Saved Workouts'}
+                  </span>
                   <InfoTooltip title="Toggle the display of your saved workout plans" />
                 </button>
               </div>
-              {fetchWorkoutCountError && (
-                <p className="mt-2 text-sm text-red-500">
-                  Failed to load workout count
-                  <InfoTooltip title="There was a network error loading your workout count. Try refreshing the page or check your connection." />
-                </p>
-              )}
             </div>
           </div>
 

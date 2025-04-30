@@ -198,6 +198,7 @@ const NutritionQuestionnaire = ({ userParams, setUserParams, onSubmit, loading }
           {getFormField("Gender", "gender", "select", genderOptions)}
           {getFormField("Primary Goal", "goal", "select", goalOptions, true)}
           {getFormField("Typical Activity Level", "activityLevel", "select", activityLevelOptions)}
+          {getFormField("Relevant Health Conditions", "healthConditions", "select", healthConditionsOptions)}
         </div>
 
         {/* Dietary Preferences - Right Column */}
@@ -209,7 +210,6 @@ const NutritionQuestionnaire = ({ userParams, setUserParams, onSubmit, loading }
           {getFormField("Cooking Skill Level", "cookingSkill", "select", cookingSkillOptions)}
           {getFormField("Typical Meal Prep Time", "timePerMeal", "select", timePerMealOptions)}
           {getFormField("Grocery Budget", "budget", "select", budgetOptions)}
-          {getFormField("Relevant Health Conditions", "healthConditions", "select", healthConditionsOptions)}
         </div>
       </div>
 

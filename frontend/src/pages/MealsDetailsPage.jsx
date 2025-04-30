@@ -58,6 +58,36 @@ const MealDetailsPage = () => {
     fetchMealDetails();
   }, [id, navigate]);
 
+  const handleCompleteMealPlan = async () => {
+    try {
+      const response = await axios.patch(
+        `http://localhost:5000/api/meal-plans/${mealPlan._id}/complete`,
+        {},
+        { withCredentials: true }
+      );
+
+      if (response.status === 200) {
+        setMealPlan(response.data);
+        toast.success('Meal plan completed!', {
+          style: {
+            background: COLORS.DARK_GRAY,
+            color: COLORS.NEON_GREEN,
+            border: `1px solid ${COLORS.MEDIUM_GRAY}`
+          }
+        });
+      }
+    } catch (error) {
+      console.error('Error completing meal plan:', error);
+      toast.error('Failed to complete meal plan', {
+        style: {
+          background: COLORS.DARK_GRAY,
+          color: COLORS.WHITE,
+          border: `1px solid ${COLORS.MEDIUM_GRAY}`
+        }
+      });
+    }
+  };
+
   // Formatted nutrition component with progress bars
   const NutritionStat = ({ label, value, total, color, unit }) => {
     const percentage = (value / total) * 100;
@@ -365,12 +395,22 @@ const MealDetailsPage = () => {
               <h1 className="text-xl sm:text-2xl md:text-3xl font-bold" style={{ color: COLORS.NEON_GREEN }}>
                 {mealPlan.title || 'Your Custom Meal Plan'}
               </h1>
-              <p className="text-xs sm:text-sm opacity-75">Created {new Date(mealPlan.createdAt).toLocaleDateString()}</p>
+              <p className="text-xs sm:text-sm opacity-75">
+                Created {new Date(mealPlan.createdAt).toLocaleDateString()}
+                {mealPlan.completed && (
+                  <span className="ml-2 inline-flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor" style={{ color: COLORS.NEON_GREEN }}>
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                    </svg>
+                    Completed {new Date(mealPlan.completedAt).toLocaleDateString()}
+                  </span>
+                )}
+              </p>
             </div>
-            <div className="flex items-center">
+            <div className="flex items-center gap-2">
               <button 
                 onClick={() => navigate('/nutrition')} 
-                className="px-2 sm:px-4 py-1 sm:py-2 rounded-lg text-xs sm:text-sm font-medium flex items-center gap-1 sm:gap-2"
+                className="px-2 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium flex items-center gap-1 sm:gap-2"
                 style={{ backgroundColor: COLORS.DARK_GRAY, color: COLORS.WHITE, border: `1px solid ${COLORS.MEDIUM_GRAY}` }}
               >
                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -498,6 +538,26 @@ const MealDetailsPage = () => {
           ) : (
             <div className="p-6 sm:p-10 text-center rounded-lg sm:rounded-xl" style={{ backgroundColor: COLORS.DARK_GRAY }}>
               <p className="text-sm sm:text-base">No meals found for this filter.</p>
+            </div>
+          )}
+
+          {/* Complete Plan Button */}
+          {!mealPlan.completed && (
+            <div className="mt-8 sm:mt-12 flex justify-center">
+              <button 
+                onClick={handleCompleteMealPlan}
+                className="px-6 sm:px-8 py-3 sm:py-4 rounded-lg text-sm sm:text-base font-medium flex items-center gap-2 transition-transform hover:scale-105"
+                style={{ 
+                  backgroundColor: COLORS.NEON_GREEN, 
+                  color: COLORS.BLACK,
+                  boxShadow: `0 0 20px ${COLORS.NEON_GREEN}40`
+                }}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                </svg>
+                Complete Meal Plan
+              </button>
             </div>
           )}
         </div>

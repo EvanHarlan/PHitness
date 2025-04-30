@@ -10,7 +10,7 @@ import COLORS from '../lib/constants';
 const SavedMealsList = () => {
   const [meals, setMeals] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [viewMode, setViewMode] = useState('all'); // 'all' or 'favorites'
+  const [viewMode, setViewMode] = useState('all'); // 'all', 'favorites', or 'completed'
 
   useEffect(() => {
     fetchMeals();
@@ -19,7 +19,7 @@ const SavedMealsList = () => {
   const fetchMeals = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('http://localhost:5000/api/meal-plans', { withCredentials: true }); // Corrected endpoint
+      const response = await axios.get('http://localhost:5000/api/meal-plans', { withCredentials: true });
       setMeals(response.data);
     } catch (error) {
       console.error('Error fetching meals:', error);
@@ -97,6 +97,8 @@ const SavedMealsList = () => {
   // Filter meals based on current view mode
   const filteredMeals = viewMode === 'favorites'
     ? meals.filter(meal => meal.isFavorite)
+    : viewMode === 'completed'
+    ? meals.filter(meal => meal.completed)
     : meals;
 
   if (!meals.length) {
@@ -107,7 +109,7 @@ const SavedMealsList = () => {
     );
   }
 
-  if (viewMode === 'favorites' && !filteredMeals.length) {
+  if ((viewMode === 'favorites' || viewMode === 'completed') && !filteredMeals.length) {
     return (
       <div>
         <div className="flex justify-center mb-4 gap-2">
@@ -134,9 +136,24 @@ const SavedMealsList = () => {
             </svg>
             Favorites
           </button>
+          <button
+            onClick={() => setViewMode('completed')}
+            className="px-4 py-2 rounded-lg text-sm transition flex items-center"
+            style={{
+              backgroundColor: viewMode === 'completed' ? COLORS.NEON_GREEN : COLORS.MEDIUM_GRAY,
+              color: viewMode === 'completed' ? COLORS.BLACK : COLORS.WHITE
+            }}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+            </svg>
+            Completed
+          </button>
         </div>
         <div className="text-center py-4" style={{ color: COLORS.LIGHT_GRAY }}>
-          No favorite meals yet. Star meals to add them to favorites!
+          {viewMode === 'favorites' 
+            ? 'No favorite meals yet. Star meals to add them to favorites!'
+            : 'No completed meals yet. Complete a meal plan to see it here!'}
         </div>
       </div>
     );
@@ -167,6 +184,19 @@ const SavedMealsList = () => {
             <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-.118l-2.8-2.034c-.783-.57-.38-1.81.588-.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
           </svg>
           Favorites
+        </button>
+        <button
+          onClick={() => setViewMode('completed')}
+          className="px-4 py-2 rounded-lg text-sm transition flex items-center"
+          style={{
+            backgroundColor: viewMode === 'completed' ? COLORS.NEON_GREEN : COLORS.MEDIUM_GRAY,
+            color: viewMode === 'completed' ? COLORS.BLACK : COLORS.WHITE
+          }}
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+          </svg>
+          Completed
         </button>
       </div>
       <div className="grid gap-3">
