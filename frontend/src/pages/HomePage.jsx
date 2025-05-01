@@ -56,6 +56,68 @@ const HomePage = () => {
           <DashboardStats user={user} />
         </section>
 
+        {/* Training Insights */}
+        <section className="mb-8 sm:mb-12 md:mb-16">
+          <h2 className="text-xl sm:text-2xl font-semibold mb-4 sm:mb-6 md:mb-8 flex items-center">
+            <span className="inline-block w-1 h-6 mr-3 rounded" style={{ backgroundColor: COLORS.NEON_GREEN }}></span>
+            Training Insights
+          </h2>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="p-4 sm:p-6 rounded-xl" style={{ backgroundColor: 'rgba(30, 30, 30, 0.8)', boxShadow: 'inset 0 0 0 1px rgba(255, 255, 255, 0.05)' }}>
+              <h3 className="text-lg sm:text-xl font-semibold mb-4" style={{ color: COLORS.NEON_GREEN }}>Muscle Groups Trained</h3>
+              <MuscleGroupsRadarChart />
+            </div>
+            <div className="p-4 sm:p-6 rounded-xl" style={{ backgroundColor: 'rgba(30, 30, 30, 0.8)', boxShadow: 'inset 0 0 0 1px rgba(255, 255, 255, 0.05)' }}>
+              <h3 className="text-lg sm:text-xl font-semibold mb-4" style={{ color: COLORS.NEON_GREEN }}>Training Analysis</h3>
+              <div className="space-y-4">
+                <div className="p-4 rounded-lg" style={{ backgroundColor: 'rgba(0, 0, 0, 0.2)' }}>
+                  <h4 className="text-sm font-medium mb-2" style={{ color: COLORS.NEON_GREEN }}>Muscle Balance</h4>
+                  <p className="text-sm opacity-80">Your radar chart shows which muscle groups you've been focusing on. Aim for balanced development across all major muscle groups to prevent imbalances and reduce injury risk.</p>
+                </div>
+                <div className="p-4 rounded-lg" style={{ backgroundColor: 'rgba(0, 0, 0, 0.2)' }}>
+                  <h4 className="text-sm font-medium mb-2" style={{ color: COLORS.NEON_GREEN }}>Training Frequency</h4>
+                  <p className="text-sm opacity-80">Each point represents how often you've trained a specific muscle group. Consider adjusting your routine if certain areas are being neglected.</p>
+                </div>
+                <div className="p-4 rounded-lg" style={{ backgroundColor: 'rgba(0, 0, 0, 0.2)' }}>
+                  <h4 className="text-sm font-medium mb-2" style={{ color: COLORS.NEON_GREEN }}>Recovery Tips</h4>
+                  <p className="text-sm opacity-80">Ensure adequate rest between training sessions for the same muscle groups. Most muscles need 48-72 hours to recover fully.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Nutrition Insights */}
+        <section className="mb-8 sm:mb-12 md:mb-16">
+          <h2 className="text-xl sm:text-2xl font-semibold mb-4 sm:mb-6 md:mb-8 flex items-center">
+            <span className="inline-block w-1 h-6 mr-3 rounded" style={{ backgroundColor: COLORS.NEON_GREEN }}></span>
+            Nutrition Insights
+          </h2>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="p-4 sm:p-6 rounded-xl" style={{ backgroundColor: 'rgba(30, 30, 30, 0.8)', boxShadow: 'inset 0 0 0 1px rgba(255, 255, 255, 0.05)' }}>
+              <h3 className="text-lg sm:text-xl font-semibold mb-4" style={{ color: COLORS.NEON_GREEN }}>Nutrition Breakdown</h3>
+              <MacronutrientPieChart />
+            </div>
+            <div className="p-4 sm:p-6 rounded-xl" style={{ backgroundColor: 'rgba(30, 30, 30, 0.8)', boxShadow: 'inset 0 0 0 1px rgba(255, 255, 255, 0.05)' }}>
+              <h3 className="text-lg sm:text-xl font-semibold mb-4" style={{ color: COLORS.NEON_GREEN }}>Nutrition Analysis</h3>
+              <div className="space-y-4">
+                <div className="p-4 rounded-lg" style={{ backgroundColor: 'rgba(0, 0, 0, 0.2)' }}>
+                  <h4 className="text-sm font-medium mb-2" style={{ color: COLORS.NEON_GREEN }}>Macronutrient Balance</h4>
+                  <p className="text-sm opacity-80">Your pie chart shows the distribution of protein, carbs, and fats in your diet. A balanced ratio supports optimal performance and recovery.</p>
+                </div>
+                <div className="p-4 rounded-lg" style={{ backgroundColor: 'rgba(0, 0, 0, 0.2)' }}>
+                  <h4 className="text-sm font-medium mb-2" style={{ color: COLORS.NEON_GREEN }}>Protein Intake</h4>
+                  <p className="text-sm opacity-80">Protein is crucial for muscle repair and growth. Aim for 0.8-1.2g of protein per pound of body weight, depending on your goals.</p>
+                </div>
+                <div className="p-4 rounded-lg" style={{ backgroundColor: 'rgba(0, 0, 0, 0.2)' }}>
+                  <h4 className="text-sm font-medium mb-2" style={{ color: COLORS.NEON_GREEN }}>Carb & Fat Distribution</h4>
+                  <p className="text-sm opacity-80">Carbs provide energy for workouts, while healthy fats support hormone production and overall health. Adjust these based on your activity level and goals.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* Quick Actions */}
         <section className="mb-8 sm:mb-12 md:mb-16">
           <h2 className="text-xl sm:text-2xl font-semibold mb-4 sm:mb-6 md:mb-8 flex items-center">
