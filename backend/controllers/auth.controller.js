@@ -6,13 +6,16 @@ import Workout from "../models/workout.model.js";
 import sendEmail from '../lib/sendEmail.js';
 import crypto from 'crypto';
 
+// CONTROLLER FILE FOR HANDLING ALL USER AUTHENTICATION AND ROUTING LOGIC
 
-
+// function for generating access tokens using json web tokens (jwt)
 const generateTokens = (userId) => {
+	// 15 minute access token to keep users signed in (15 minute life span)
 	const accessToken = jwt.sign({ userId }, process.env.ACCESS_TOKEN_SECRET, {
 		expiresIn: "15m",
 	});
-
+	
+	// refresh token with a 7 day lifespan
 	const refreshToken = jwt.sign({ userId }, process.env.REFRESH_TOKEN_SECRET, {
 		expiresIn: "7d",
 	});
@@ -20,10 +23,12 @@ const generateTokens = (userId) => {
 	return { accessToken, refreshToken };
 };
 
+// function for storing the refresh token for 7 days in the redis (quick store/cache)
 const storeRefreshToken = async (userId, refreshToken) => {
 	await redis.set(`refresh_token:${userId}`, refreshToken, "EX", 7 * 24 * 60 * 60); // 7days
 };
 
+// function for setting user cookies
 const setCookies = (res, accessToken, refreshToken) => {
 	res.cookie("accessToken", accessToken, {
 		httpOnly: true, // prevent XSS attacks, cross site scripting attack
@@ -39,6 +44,7 @@ const setCookies = (res, accessToken, refreshToken) => {
 	});
 };
 
+// function for handling signup
 export const signup = async (req, res) => {
 	const { email, password, name, username, termsAccepted, age, height, weight, gender, experienceLevel, healthConditions, fitnessGoal } = req.body;
 	try {
@@ -70,6 +76,7 @@ export const signup = async (req, res) => {
 	}
 };
 
+// function for handling login
 export const login = async (req, res) => {
 	try {
 		const { email, password } = req.body;
@@ -97,6 +104,7 @@ export const login = async (req, res) => {
 	}
 };
 
+// function for handling logout functionality
 export const logout = async (req, res) => {
 	try {
 		const refreshToken = req.cookies.refreshToken;
@@ -146,6 +154,7 @@ export const refreshToken = async (req, res) => {
 	}
 };
 
+// function for getting a users profile details
 export const getProfile = async (req, res) =>
 {
 	try
@@ -156,7 +165,7 @@ export const getProfile = async (req, res) =>
 		{
 			return res.status(404).json({ message: "User not found" });
 		}
-
+		// return user parameters
 		res.status(200).json({
 			_id: user._id,
 			name: user.name,
@@ -184,8 +193,7 @@ export const getProfile = async (req, res) =>
 	}
 };
 
-
-
+// Function for handling profile updates
 export const updateProfile = async (req, res) => {
 	try {
 	  const user = await User.findById(req.user._id); 
@@ -211,6 +219,7 @@ export const updateProfile = async (req, res) => {
 	}
   };
 
+  // function for handling achievement unlocking capabilities
 export const unlockAchievement = async (req, res) =>
 {
 	try
@@ -243,6 +252,7 @@ export const unlockAchievement = async (req, res) =>
 	}
 };
 
+// function for udating a user max lift
 export const updateMaxLift = async (req, res) => {
   try {
 	  const { maxLift } = req.body;
@@ -274,9 +284,7 @@ export const updateMaxLift = async (req, res) => {
   }
 };
 
-
-
-
+// functionality for handling user search capabilities on the friends page
 export const searchUsers = async (req, res) => {
 	try {
 	  const { q } = req.query;
@@ -316,6 +324,8 @@ export const searchUsers = async (req, res) => {
 	  res.status(500).json({ message: error.message });
 	}
   };
+
+  // functionality for handling account deletion requesets
   export const deleteAccount = async (req, res) => {
 	try {
 		const userId = req.user.id;
@@ -338,6 +348,7 @@ export const searchUsers = async (req, res) => {
 	}
 };
 
+// function for handling profile update requests
 export const updateUserProfile = async (req, res) => {
 	const { newEmail, newPassword } = req.body; 
   
@@ -361,8 +372,7 @@ export const updateUserProfile = async (req, res) => {
 	}
 };
 
-
-
+// functionality for forgot password capabilities (sends users emails)
 export const forgotPassword = async (req, res) => {
 	const { email } = req.body;
   

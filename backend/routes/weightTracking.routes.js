@@ -2,6 +2,8 @@ import express from 'express';
 import { submitWeight, getWeightHistory, checkWeeklyWeightStatus } from '../controllers/weightTracking.controller.js';
 import { protectRoute } from '../middleware/auth.middleware.js';
 
+// PROTECTROUTE IS THE AUTHENTICATION MIDDLEWARE TO ENSURE THESE ROUTES CAN ONLY BE ACCESSED IF A USER IS AUTHENTICATED
+
 const router = express.Router();
 
 // All routes require authentication

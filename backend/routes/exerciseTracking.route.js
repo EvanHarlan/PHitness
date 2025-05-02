@@ -4,6 +4,8 @@ import { trackExercise, getExerciseHistory, getWorkoutExerciseHistory } from '..
 
 const router = express.Router();
 
+// PROTECTROUTE IS THE AUTHENTICATION MIDDLEWARE TO ENSURE THESE ROUTES CAN ONLY BE ACCESSED IF A USER IS AUTHENTICATED
+
 // Track a new exercise
 router.post('/track', protectRoute, trackExercise);
 

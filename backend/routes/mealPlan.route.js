@@ -1,8 +1,6 @@
 import express from 'express';
 import { protectRoute } from '../middleware/auth.middleware.js'; // Ensure this middleware correctly attaches req.user
-import MealPlan from '../models/mealPlan.model.js';
 
-// Import all necessary controller functions
 import {
     generateMealPlan,       // Generates AND saves
     saveMealPlan,           // Explicit save (review necessity)
@@ -16,31 +14,24 @@ import {
 
 const router = express.Router();
 
-// --- Meal Plan Routes ---
+// PROTECTROUTE IS THE AUTHENTICATION MIDDLEWARE TO ENSURE THESE ROUTES CAN ONLY BE ACCESSED IF A USER IS AUTHENTICATED
 
 // Generate AND Save a new meal plan
-// POST /api/meal-plans/generate
 router.post('/generate', protectRoute, generateMealPlan);
 
 // Explicitly Save a meal plan (if generation doesn't autosave or for edits)
-// POST /api/meal-plans/save
 router.post('/save', protectRoute, saveMealPlan);
 
 // Get all meal plans for the logged-in user (History & Favorites Filtering)
-// GET /api/meal-plans?favoritesOnly=true
-// GET /api/meal-plans
 router.get('/', protectRoute, getUserMealPlans);
 
 // Get a single meal plan by its ID
-// GET /api/meal-plans/:id
 router.get('/:id', protectRoute, getMealPlanById);
 
 // Toggle the favorite status of a specific meal plan
-// PATCH /api/meal-plans/:id/favorite
 router.patch('/:id/favorite', protectRoute, toggleFavoriteMealPlan);
 
 // Delete a specific meal plan
-// DELETE /api/meal-plans/:id
 router.delete('/:id', protectRoute, deleteMealPlan);
 
 // Complete a meal
@@ -49,4 +40,4 @@ router.patch('/:mealPlanId/meals/:mealIndex/complete', protectRoute, completeMea
 // Mark meal plan as completed
 router.patch('/:id/complete', protectRoute, completeMealPlan);
 
-export default router; // Export the configured router
+export default router;
