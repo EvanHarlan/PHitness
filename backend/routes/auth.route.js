@@ -4,6 +4,9 @@ import { protectRoute } from "../middleware/auth.middleware.js";
 
 const router = express.Router();
 
+// PROTECTROUTE IS THE AUTHENTICATION MIDDLEWARE TO ENSURE THESE ROUTES CAN ONLY BE ACCESSED IF A USER IS AUTHENTICATED
+
+// THIS PAGE IS USED TO DEFINE ALL API ROUTES FOR AUTHENTICATING USERS AND HANDLING ACCOUNT FUNCTIONALITY
 router.post("/signup", signup);
 router.post("/login", login);
 router.post("/logout", logout);

@@ -6,6 +6,8 @@ import asyncHandler from "express-async-handler"; // Handles async errors gracef
 
 const router = express.Router();
 
+// PROTECTROUTE IS THE AUTHENTICATION MIDDLEWARE TO ENSURE THESE ROUTES CAN ONLY BE ACCESSED IF A USER IS AUTHENTICATED
+
 // Generate a new workout
 router.post("/generate", protectRoute, workoutController);
 

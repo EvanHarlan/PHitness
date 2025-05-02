@@ -1,6 +1,8 @@
 import ExerciseTracking from '../models/exerciseTracking.model.js';
 import Workout from '../models/workout.model.js';
 
+// THIS PAGE IS USED TO HANDLE ALL FUNCTIONALITY USED IN WORKOUT RELATED API ROUTES
+
 export const trackExercise = async (req, res) => {
   try {
     console.log('Received tracking data:', req.body);

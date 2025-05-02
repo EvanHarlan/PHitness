@@ -13,6 +13,8 @@ import {
      getNudges,
      deleteNudge
 } from '../controllers/friend.controller.js';
+
+// PROTECTROUTE IS THE AUTHENTICATION MIDDLEWARE TO ENSURE THESE ROUTES CAN ONLY BE ACCESSED IF A USER IS AUTHENTICATED
 import { protectRoute } from '../middleware/auth.middleware.js';
 
 const router = express.Router();
@@ -31,7 +33,6 @@ router.post('/nudge', nudgeFriend);
 router.get('/listenForNudges', listenForNudges);
 router.get('/nudges', getNudges);
 router.post('/delete-nudge', deleteNudge);
-// --- NEW ROUTE ---
 // Route to get a specific friend's profile details (using friendId in URL)
 router.get('/profile/:friendId', getFriendProfile);
 

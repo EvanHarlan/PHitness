@@ -15,6 +15,7 @@
     "@mui/icons-material": "^7.0.2",
     "@mui/material": "^7.0.2",
     "axios": "^1.8.2",
+    "crypto": "^1.0.1",
     "framer-motion": "^12.4.10",
     "frontend": "file:",
     "lucide-react": "^0.477.0",
