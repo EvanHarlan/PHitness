@@ -77,6 +77,10 @@ app.use((err, req, res, next) => {
 
 // Start the server
 app.listen(PORT, () => {
+  console.log(`=======================================`);
+  console.log(`Server is running on http://localhost:${PORT}`);
+  console.log(`Test the API: http://localhost:${PORT}/test`);
+  console.log(`=======================================`);
   
   // Connect to MongoDB
   connectDB();
