@@ -63,7 +63,6 @@ export const useUserStore = create((set, get) => ({
         set({ user: null, checkingAuth: false });
       }
     } catch (error) {
-      console.log("Auth check failed:", error.message);
       set({ checkingAuth: false, user: null });
     }
   },

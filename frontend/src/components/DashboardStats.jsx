@@ -30,7 +30,6 @@ const DashboardStats = ({ user }) => {
         const endOfWeek = new Date(startOfWeek);
         endOfWeek.setDate(startOfWeek.getDate() + 6); // End of current week
 
-        console.log('Fetching workouts between:', startOfWeek.toISOString(), 'and', endOfWeek.toISOString());
 
         const response = await axios.get('http://localhost:5000/api/workouts/by-date', {
           params: {
@@ -40,14 +39,11 @@ const DashboardStats = ({ user }) => {
           withCredentials: true
         });
 
-        console.log('Received workout data:', response.data);
 
         // Process the data to match the chart format
         const processedData = processWorkoutData(response.data);
-        console.log('Processed data for chart:', processedData);
         setWorkoutData(processedData);
       } catch (error) {
-        console.error('Error fetching workout data:', error);
       } finally {
         setLoading(false);
       }
@@ -91,7 +87,6 @@ const DashboardStats = ({ user }) => {
       }
     });
 
-    console.log('Processed data:', processedData);
     return processedData;
   };
 
@@ -128,7 +123,6 @@ const DashboardStats = ({ user }) => {
       
       setWeightData(formattedData);
     } catch (error) {
-      console.error('Error fetching weight data:', error);
     } finally {
       setLoading(false);
     }

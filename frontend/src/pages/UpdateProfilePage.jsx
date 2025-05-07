@@ -22,7 +22,6 @@ import { COLORS } from '../lib/constants';
        setMessage("Credentials updated successfully!");
      } catch (error) {
        setMessage("Failed to update credentials.");
-       console.error(error);
      } finally {
        setLoading(false);
      }

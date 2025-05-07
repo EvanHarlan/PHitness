@@ -46,7 +46,6 @@ const WorkoutDetailsPage = () => {
       setShowDescription(descVisibility);
       setError('');
     } catch (err) {
-      console.error('Error fetching workout details:', err);
       setError('Failed to load workout details.');
       toast.error('Failed to load workout details', {
         style: {
@@ -78,7 +77,6 @@ const WorkoutDetailsPage = () => {
         setExerciseTrackingData(trackingByExercise);
       }
     } catch (error) {
-      console.error('Error fetching logged exercises:', error);
     }
   };
 
@@ -97,7 +95,6 @@ const WorkoutDetailsPage = () => {
         });
         navigate('/workouts');
       } catch (error) {
-        console.error('Error deleting workout:', error);
         toast.error('Failed to delete workout.', {
           style: {
             background: COLORS.DARK_GRAY,
@@ -188,7 +185,6 @@ const WorkoutDetailsPage = () => {
         });
       }
     } catch (error) {
-      console.error('Error saving exercise progress:', error);
       toast.error('Failed to save exercise progress', {
         style: {
           background: COLORS.DARK_GRAY,
@@ -225,7 +221,6 @@ const WorkoutDetailsPage = () => {
         navigate('/workouts');
       }
     } catch (error) {
-      console.error('Error completing workout:', error);
       toast.error('Failed to complete workout', {
         style: {
           background: COLORS.DARK_GRAY,

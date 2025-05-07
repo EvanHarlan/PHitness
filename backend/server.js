@@ -34,7 +34,6 @@ app.use(cookieParser());
 
 // Request logging middleware
 app.use((req, res, next) => {
-  console.log(`${new Date().toISOString()} - ${req.method} ${req.url}`);
   next();
 });
 
@@ -54,7 +53,6 @@ app.get('/health', (req, res) => {
 
 // Question route for AI
 app.post('/question', (req, res) => {
-  console.log('Question route hit with body:', req.body);
   return questionHandler(req, res);
 });
 
@@ -68,22 +66,17 @@ if (process.env.NODE_ENV === "production") {
 
 // Route not found handler
 app.use((req, res) => {
-  console.log(`Route not found: ${req.method} ${req.url}`);
   res.status(404).json({ error: 'Route not found' });
 });
 
 // Error handler
 app.use((err, req, res, next) => {
-  console.error('Server error:', err);
+
   res.status(500).json({ error: 'Server error', message: err.message });
 });
 
 // Start the server
 app.listen(PORT, () => {
-  console.log(`=======================================`);
-  console.log(`Server is running on http://localhost:${PORT}`);
-  console.log(`Test the API: http://localhost:${PORT}/test`);
-  console.log(`=======================================`);
   
   // Connect to MongoDB
   connectDB();

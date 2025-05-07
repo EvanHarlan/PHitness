@@ -91,7 +91,6 @@ const ExerciseTrackingModal = ({ exercise, workoutId, onClose }) => {
         onClose();
       }
     } catch (error) {
-      console.error('Error saving exercise progress:', error);
       const errorMessage = error.response?.data?.error || 'Failed to save exercise progress';
       toast.error(errorMessage, {
         style: {

@@ -27,7 +27,6 @@ const SavedWorkoutCard = ({ workout, onDeleteWorkout, onToggleFavorite }) => {
         setLoggedExercises(loggedIds);
       }
     } catch (error) {
-      console.error('Error fetching logged exercises:', error);
     }
   };
 

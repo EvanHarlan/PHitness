@@ -11,20 +11,17 @@ const lastPlanCache = new Map();
 
 // Helper to generate a hash of a meal plan (Optional: Review if still needed)
 const hashMealPlan = (mealPlan) => {
-    if (!mealPlan || !Array.isArray(mealPlan.meals)) {
-        console.warn("Attempted to hash an invalid or incomplete meal plan structure.");
-        return crypto.createHash('md5').update(Date.now().toString()).digest('hex');
-    }
-    const mealSignatures = mealPlan.meals.map(m =>
-        `${m.name}-${m.time}-${m.calories}-${m.protein}-${m.carbs}-${m.fats}`
-    ).join('|');
+        if (!mealPlan || !Array.isArray(mealPlan.meals)) {
+            return crypto.createHash('md5').update(Date.now().toString()).digest('hex');
+        }
+        const mealSignatures = mealPlan.meals.map(m =>
+            `${m.name}-${m.time}-${m.calories}-${m.protein}-${m.carbs}-${m.fats}`
+         ).join('|');
 
-    return crypto.createHash('md5').update(mealSignatures).digest('hex');
+        return crypto.createHash('md5').update(mealSignatures).digest('hex');
 };
 
-// @desc    Get all meal plans for a user (supports favorite and completed filtering)
-// @route   GET /api/meal-plans
-// @access  Private
+
 export const getUserMealPlans = asyncHandler(async (req, res) => {
     const filter = { user: req.user._id };
     
@@ -42,25 +39,20 @@ export const getUserMealPlans = asyncHandler(async (req, res) => {
     res.json(mealPlans);
 });
 
-// @desc    Get a single meal plan by ID
-// @route   GET /api/meal-plans/:id
-// @access  Private
+
 export const getMealPlanById = asyncHandler(async (req, res) => {
-    const mealPlan = await MealPlan.findById(req.params.id);
-    if (!mealPlan) {
-        res.status(404);
-        throw new Error('Meal plan not found');
-    }
-    if (mealPlan.user.toString() !== req.user._id.toString()) {
-        res.status(401);
-        throw new Error('Not authorized to access this meal plan');
-    }
-    res.json(mealPlan);
+        const mealPlan = await MealPlan.findById(req.params.id);
+        if (!mealPlan) {
+            res.status(404);
+            throw new Error('Meal plan not found');
+        }
+        if (mealPlan.user.toString() !== req.user._id.toString()) {
+            res.status(401);
+            throw new Error('Not authorized to access this meal plan');
+     }
+        res.json(mealPlan);
 });
 
-// @desc    Toggle favorite status of a meal plan
-// @route   PATCH /api/meal-plans/:id/favorite
-// @access  Private
 export const toggleFavoriteMealPlan = asyncHandler(async (req, res) => {
     const mealPlan = await MealPlan.findById(req.params.id);
     if (!mealPlan) {
@@ -73,85 +65,81 @@ export const toggleFavoriteMealPlan = asyncHandler(async (req, res) => {
     }
     mealPlan.isFavorite = !mealPlan.isFavorite;
     const updatedMealPlan = await mealPlan.save();
-    console.log(`✅ Toggled favorite status for plan ${mealPlan._id} to ${mealPlan.isFavorite}`);
     res.json(updatedMealPlan);
 });
 
-// @desc    Delete a meal plan
-// @route   DELETE /api/meal-plans/:id
-// @access  Private
+
 export const deleteMealPlan = asyncHandler(async (req, res) => {
-    const mealPlan = await MealPlan.findById(req.params.id);
-    if (!mealPlan) {
-        res.status(404);
-        throw new Error('Meal plan not found');
-    }
-    if (mealPlan.user.toString() !== req.user._id.toString()) {
-        res.status(401);
-        throw new Error('Not authorized to delete this meal plan');
-    }
-    await mealPlan.deleteOne();
-    console.log(`🗑️ Deleted meal plan ${req.params.id}`);
-    res.json({ message: 'Meal plan removed' });
+        const mealPlan = await MealPlan.findById(req.params.id);
+        if (!mealPlan) {
+            res.status(404);
+            throw new Error('Meal plan not found');
+        }
+        if (mealPlan.user.toString() !== req.user._id.toString()) {
+            res.status(401);
+            throw new Error('Not authorized to delete this meal plan');
+        }
+        await mealPlan.deleteOne();
+        res.json({ message: 'Meal plan removed' });
 });
 
 // Function to calculate target calories using Mifflin-St Jeor equation
 const calculateTargetCalories = (userData) => {
-    const { weight, height, age, gender, activityLevel, goal } = userData;
+    const { weight, height, age, gender, activityLevel, goal } = userData;
 
-    // Convert weight to kg and height to cm
-    const weightKg = weight * 0.453592;
-    const heightCm = parseFloat(height.split("'")[0]) * 30.48 + parseFloat(height.split("'")[1].replace('"', '')) * 2.54;
+     // Convert weight to kg and height to cm
+     const weightKg = weight * 0.453592;
+     const heightCm = parseFloat(height.split("'")[0]) * 30.48 + parseFloat(height.split("'")[1].replace('"', '')) * 2.54;
 
-    // Calculate BMR
-    let bmr;
-    if (gender === 'male') {
-        bmr = (10 * weightKg) + (6.25 * heightCm) - (5 * age) + 5;
-    } else if (gender === 'female') {
-        bmr = (10 * weightKg) + (6.25 * heightCm) - (5 * age) - 161;
-    } else {
-        // Default to male calculation if gender is other or not specified
-        bmr = (10 * weightKg) + (6.25 * heightCm) - (5 * age) + 5;
-    }
+     // Calculate BMR
+let bmr;
+if (gender === 'male') {
+    bmr = (10 * weightKg) + (6.25 * heightCm) - (5 * age) + 5;
+} else if (gender === 'female') {
+    bmr = (10 * weightKg) + (6.25 * heightCm) - (5 * age) - 161;
+} else {
+         // Default to male calculation if gender is other or not specified
+    bmr = (10 * weightKg) + (6.25 * heightCm) - (5 * age) + 5;
+}
 
-    // Adjust for activity level
-    let activityMultiplier;
-    switch (activityLevel) {
-        case 'sedentary':
-            activityMultiplier = 1.2;
-            break;
-        case 'lightly-active':
-            activityMultiplier = 1.375;
-            break;
-        case 'moderately-active':
-            activityMultiplier = 1.55;
-            break;
-        case 'very-active':
-            activityMultiplier = 1.725;
-            break;
-        case 'extra-active':
-            activityMultiplier = 1.9;
-            break;
-        default:
-            activityMultiplier = 1.2; // Default to sedentary
-    }
+    // Adjust for activity level
+let activityMultiplier;
+switch (activityLevel) {
+    case 'sedentary':
+        activityMultiplier = 1.2;
+    break;
+    case 'lightly-active':
+        activityMultiplier = 1.375;
+    break;
+    case 'moderately-active':
+        activityMultiplier = 1.55;
+    break;
+    case 'very-active':
+        activityMultiplier = 1.725;
+    break;
+    case 'extra-active':
+        activityMultiplier = 1.9;
+    break;
+    default:
+        activityMultiplier = 1.2; // Default to sedentary
+ }
 
-    let targetCalories = bmr * activityMultiplier;
+let targetCalories = bmr * activityMultiplier;
 
-    // Adjust for goal
-    switch (goal) {
-        case 'weight-loss':
-            targetCalories *= 0.85; // Reduce by 15% for weight loss
-            break;
-        case 'muscle-gain':
-            targetCalories *= 1.1; // Increase by 10% for muscle gain
-            break;
-        // For other goals (healthy-eating, increase-energy, etc.), we can keep the calculated TDEE
-        default:
-            break;
-    }
+ // Adjust for goal
+ switch (goal) {
+    case 'weight-loss':
+        targetCalories *= 0.85; // Reduce by 15% for weight loss
+    break;
+    case 'muscle-gain':
+        targetCalories *= 1.1; // Increase by 10% for muscle gain
+    break;
+     // For other goals (healthy-eating, increase-energy, etc.), we can keep the calculated TDEE
+    default:
+    break;
+ }
 
-    return Math.round(targetCalories);
+return Math.round(targetCalories);
 };
 
 // Helper function to generate a descriptive title for the meal plan
@@ -201,9 +189,6 @@ const generateMealPlanTitle = (userData) => {
 // @access  Private
 export const generateMealPlan = asyncHandler(async (req, res) => {
     try {
-        console.log("🚀 Starting meal plan generation request for user:", req.user?._id);
-        console.log("Request Body:", req.body);
-
         // Check if user has already generated a meal plan today
         const today = new Date();
         today.setHours(0, 0, 0, 0);
@@ -233,7 +218,6 @@ export const generateMealPlan = asyncHandler(async (req, res) => {
         ];
         const missingFields = requiredFields.filter(field => req.body[field] === undefined || req.body[field] === null || req.body[field] === '');
         if (missingFields.length > 0) {
-            console.error("❌ Request rejected: Missing required fields in req.body", missingFields);
             return res.status(400).json({ message: `Missing required fields: ${missingFields.join(', ')}` });
         }
 
@@ -265,9 +249,7 @@ export const generateMealPlan = asyncHandler(async (req, res) => {
         // Calculate target calories
         try {
             normalizedBody.targetCalories = calculateTargetCalories(normalizedBody);
-            console.log("🎯 Calculated target calories:", normalizedBody.targetCalories);
         } catch (calorieError) {
-            console.error("❌ Error during target calorie calculation:", calorieError);
             return res.status(400).json({ message: `Failed to calculate target calories: ${calorieError.message}` });
         }
 
@@ -283,21 +265,15 @@ export const generateMealPlan = asyncHandler(async (req, res) => {
             return !Number.isFinite(value) || value <= 0;
         });
         if (invalidNumeric.length > 0) {
-            console.error("❌ Request rejected: Invalid numeric values after calculation/normalization", invalidNumeric);
             return res.status(400).json({ message: `Invalid or non-positive numeric values for: ${invalidNumeric.join(', ')}` });
         }
 
         let macroLimits;
         try {
             macroLimits = calculateMacroLimits(normalizedBody);
-            console.log("📊 Calculated macro limits:", macroLimits);
         } catch (helperError) {
-            console.error("❌ Error during macro helper calculation:", helperError);
             return res.status(400).json({ message: `Failed to calculate macros: ${helperError.message}` });
         }
-
-        console.log("✅ Validation passed. Generating meal plan with GPT...");
-        console.log("🔍 Passing this normalizedBody to GPT service:", JSON.stringify(normalizedBody, null, 2));
 
         let generatedPlanData;
         let newPlan;
@@ -307,11 +283,10 @@ export const generateMealPlan = asyncHandler(async (req, res) => {
 
             // Check GPT Output: Now only check for the meals array
             if (!generatedPlanData || !Array.isArray(generatedPlanData.meals) || generatedPlanData.meals.length === 0) {
-                console.error("❌ GPT generation failed or returned invalid structure:", generatedPlanData);
                 return res.status(502).json({ message: 'AI service failed to generate a valid meal plan structure (missing meals).' });
             }
 
-            console.log("🤖 GPT generation successful. Saving the plan to database...");
+            
 
             // Calculate total nutrition from the generated meals
             let totalNutrition = { calories: 0, protein: 0, carbs: 0, fats: 0 };
@@ -322,7 +297,7 @@ export const generateMealPlan = asyncHandler(async (req, res) => {
                 totalNutrition.fats += meal.fats;
             });
 
-            console.log("✅ Successfully generated meal plan:", {
+            ({
                 mealsCount: generatedPlanData.meals.length,
                 totalCalories: totalNutrition.calories,
                 totalProtein: totalNutrition.protein,
@@ -353,7 +328,6 @@ export const generateMealPlan = asyncHandler(async (req, res) => {
                 });
             }
 
-            console.log(`💾 Meal plan saved successfully with ID: ${newPlan._id} for user: ${req.user._id}`);
 
             // Send the newly SAVED plan back to the client
             res.status(201).json({ 
@@ -362,12 +336,10 @@ export const generateMealPlan = asyncHandler(async (req, res) => {
             });
 
         } catch (gptOrDbError) {
-            console.error("❌ Error during GPT call or Database save:", gptOrDbError);
             if (gptOrDbError.message.includes("Missing required parameters")) {
                 return res.status(500).json({ message: "Internal configuration error: Service is missing required parameters.", details: gptOrDbError.message });
             }
             if (gptOrDbError.name === 'ValidationError') {
-                console.error("❌ Mongoose Validation Error:", gptOrDbError.errors);
                 return res.status(400).json({ message: "Failed to save meal plan due to invalid data.", errors: gptOrDbError.errors });
             }
             throw gptOrDbError;
@@ -375,7 +347,6 @@ export const generateMealPlan = asyncHandler(async (req, res) => {
 
     } catch (error) {
         // Catch errors from validation, helper calls, or re-thrown from inner block
-        console.error("❌ Error in generateMealPlan controller (outer catch):", error);
         const statusCode = error.status || (error.name === 'ValidationError' ? 400 : 500); // Determine status code
         res.status(statusCode).json({
             message: error.message || "Failed to generate meal plan due to an internal server error.",
@@ -385,53 +356,46 @@ export const generateMealPlan = asyncHandler(async (req, res) => {
     }
 });
 
-// @desc    Explicitly save a meal plan (May be redundant - review necessity)
-// @route   POST /api/meal-plans/save
-// @access  Private
+
 export const saveMealPlan = asyncHandler(async (req, res) => {
-    console.warn("⚠️ Explicit /api/meal-plans/save endpoint called. Ensure this is intended behavior.");
-    try {
-        console.log("Starting explicit save meal plan process for user:", req.user?._id);
+try {
 
-        // --- Start Validation ---
-        if (!req.body.meals || !Array.isArray(req.body.meals) || req.body.meals.length === 0) {
-            return res.status(400).json({ message: "Valid meals array is required" });
-        }
-        if (!req.body.totalNutrition || typeof req.body.totalNutrition !== 'object') {
-            return res.status(400).json({ message: "Total nutrition object is required" });
-        }
-        // Add more detailed validation if needed...
-        // --- End Validation ---
+     // --- Start Validation ---
+     if (!req.body.meals || !Array.isArray(req.body.meals) || req.body.meals.length === 0) {
+         return res.status(400).json({ message: "Valid meals array is required" });
+     }
+     if (!req.body.totalNutrition || typeof req.body.totalNutrition !== 'object') {
+         return res.status(400).json({ message: "Total nutrition object is required" });
+     }
+     // Add more detailed validation if needed...
+     // --- End Validation ---
 
-        console.log("Attempting to explicitly save meal plan...");
-        const newPlan = await MealPlan.create({
-            user: req.user._id,
-            meals: req.body.meals,
-            totalNutrition: req.body.totalNutrition,
-            isFavorite: req.body.isFavorite === true
-        });
 
-        console.log("✅ Successfully saved meal plan explicitly:", { id: newPlan._id });
-        res.status(201).json({
-            message: "Meal plan saved successfully (explicit save)",
-            savedPlan: newPlan
-        });
+    const newPlan = await MealPlan.create({
+     user: req.user._id,
+    meals: req.body.meals,
+    totalNutrition: req.body.totalNutrition,
+    isFavorite: req.body.isFavorite === true
+     });
 
-    } catch (error) {
-        console.error("❌ Failed to explicitly save meal plan:", error);
-        const statusCode = error.name === 'ValidationError' ? 400 : 500;
-        res.status(statusCode).json({
-            message: "Failed to save meal plan",
-            error: error.message,
-            ...(process.env.NODE_ENV === 'development' && { stack: error.stack }),
-            validationErrors: error.errors
-        });
-    }
+
+    res.status(201).json({
+     message: "Meal plan saved successfully (explicit save)",
+     savedPlan: newPlan
+     });
+
+ } catch (error) {
+
+    const statusCode = error.name === 'ValidationError' ? 400 : 500;
+     res.status(statusCode).json({
+        message: "Failed to save meal plan",
+        error: error.message,
+         ...(process.env.NODE_ENV === 'development' && { stack: error.stack }),
+         validationErrors: error.errors
+     });
+ }
 });
 
-// @desc    Mark a meal as completed
-// @route   PATCH /api/meal-plans/:mealPlanId/meals/:mealIndex/complete
-// @access  Private
 export const completeMeal = asyncHandler(async (req, res) => {
   const { mealPlanId, mealIndex } = req.params;
 
@@ -475,7 +439,6 @@ export const completeMealPlan = async (req, res) => {
 
     res.json(mealPlan);
   } catch (error) {
-    console.error('Error completing meal plan:', error);
     res.status(500).json({ message: 'Server error' });
   }
 };

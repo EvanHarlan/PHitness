@@ -1,6 +1,7 @@
+import COLORS from '../lib/constants';
 const LoadingSpinner = () => {
 	return (
-		<div className='flex items-center justify-center min-h-screen bg-gray-900'
+		<div style={{ backgroundColor: COLORS.DARK_GRAY }}className='flex items-center justify-center min-h-screen'
 		>
 			<div className='relative'>
 				<div className='w-20 h-20 border-green-200 border-2 rounded-full' />
