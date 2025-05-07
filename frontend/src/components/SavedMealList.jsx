@@ -22,7 +22,6 @@ const SavedMealsList = () => {
       const response = await axios.get('http://localhost:5000/api/meal-plans', { withCredentials: true });
       setMeals(response.data);
     } catch (error) {
-      console.error('Error fetching meals:', error);
       toast.error('Failed to load your meals', {
         style: {
           background: COLORS.DARK_GRAY,
@@ -54,7 +53,6 @@ const SavedMealsList = () => {
         }
       });
     } catch (error) {
-      console.error('Error deleting meal plan:', error);
       toast.error('Failed to delete meal plan', {
         style: {
           background: COLORS.DARK_GRAY,
@@ -80,7 +78,6 @@ const SavedMealsList = () => {
           : meal
       ));
     } catch (error) {
-      console.error("Error updating favorite status:", error);
       toast.error("Failed to update favorite status. Please try again.", {
         style: {
           background: COLORS.DARK_GRAY,

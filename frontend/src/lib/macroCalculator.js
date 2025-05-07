@@ -1,6 +1,6 @@
 export const calculateMacros = (height, weight, age, gender, activityLevel, nutritionGoal) => {
   // Log raw input parameters for debugging
-  console.log("📊 Raw input parameters:", {
+( {
     height,
     weight,
     age,
@@ -21,7 +21,6 @@ export const calculateMacros = (height, weight, age, gender, activityLevel, nutr
   // Helper function to parse height from string format
   const parseHeightToCm = (height) => {
     if (!height) {
-      console.error("❌ Height is missing");
       return 0;
     }
 
@@ -32,7 +31,6 @@ export const calculateMacros = (height, weight, age, gender, activityLevel, nutr
 
     // Ensure height is a string before using .match()
     if (typeof height !== 'string') {
-      console.error("❌ Height is not a valid string:", height);
       return 0;
     }
 
@@ -50,7 +48,6 @@ export const calculateMacros = (height, weight, age, gender, activityLevel, nutr
       return Math.round(Number(inchesMatch[1]) * 2.54);
     }
 
-    console.error("❌ Invalid height format:", height);
     return 0;
   };
 
@@ -60,7 +57,7 @@ export const calculateMacros = (height, weight, age, gender, activityLevel, nutr
   const parsedHeight = parseHeightToCm(height);
 
   if (!parsedWeight || !parsedAge || !parsedHeight) {
-    console.error("❌ Invalid numeric inputs:", {
+    ( {
       weight: parsedWeight,
       age: parsedAge,
       height: parsedHeight
@@ -75,7 +72,7 @@ export const calculateMacros = (height, weight, age, gender, activityLevel, nutr
 
   // Validate required string inputs
   if (!gender || !activityLevel || !nutritionGoal) {
-    console.error("❌ Missing required string inputs:", {
+    ( {
       gender,
       activityLevel,
       nutritionGoal
@@ -90,7 +87,6 @@ export const calculateMacros = (height, weight, age, gender, activityLevel, nutr
 
   // Normalize goal string
   const normalizedGoal = normalizeGoal(nutritionGoal);
-  console.log("🎯 Normalized goal:", normalizedGoal);
 
   // Calculate BMR using Mifflin-St Jeor Equation
   let bmr;
@@ -180,7 +176,7 @@ export const calculateMacros = (height, weight, age, gender, activityLevel, nutr
   const targetFats = Math.round((adjustedRemainingCalories * fatRatio) / 9);
 
   // Log final macro calculations with sanity checks
-  console.log("✅ Adjusted macros:", {
+  ( {
     targetCalories: totalCalories,
     clampedProtein,
     targetCarbs,

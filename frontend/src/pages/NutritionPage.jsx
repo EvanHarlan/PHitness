@@ -206,7 +206,6 @@ const NutritionPage = () => {
           }
       } catch (error)
       {
-          console.error("Error autofilling nutrition profile:", error);
           toast.error("Failed to autofill nutrition form. Please try again.");
       }
   };
@@ -235,7 +234,6 @@ const NutritionPage = () => {
 
   // Log user from store (for debugging)
   useEffect(() => {
-    console.log("🧍 User from store:", user);
   }, [user]);
 
   // Fetch meal count
@@ -246,7 +244,6 @@ const NutritionPage = () => {
         setMealAmount(response.data.mealCount || 0);
         setFetchMealCountError(null); // Clear any previous error
       } catch (error) {
-        console.error("Error fetching meal count:", error);
         setFetchMealCountError(error);
       }
     };
@@ -285,7 +282,6 @@ const NutritionPage = () => {
           setNextGenerationTime(new Date());
         }
       } catch (error) {
-        console.error("Error fetching meal plan tracker:", error);
         // Default to allowing generation if there's an error
         setCanGenerateMealPlan(true);
         setNextGenerationTime(new Date());
@@ -406,7 +402,6 @@ const NutritionPage = () => {
         }
       }
     } catch (error) {
-      console.error("Error generating meal plan:", error);
       
       if (error.response?.status === 429) {
         // Update the last generation time from the error response if available

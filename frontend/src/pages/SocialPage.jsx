@@ -101,7 +101,6 @@ const SocialPage = () => {
                 setError(null);
                 await Promise.all([fetchFriends(), fetchFriendRequests()]);
             } catch (err) {
-                console.error("Error loading initial data:", err);
                 setError("Failed to load your social data. Please try again later.");
             } finally {
                 setLoading(false);
@@ -116,7 +115,6 @@ const SocialPage = () => {
             const response = await axios.get('/api/friend/list');
             setFriends(response.data.friends || []);
         } catch (error) {
-            console.error('Error fetching friends:', error.response?.data || error.message);
             setFriends([]);
             throw error;
         }
@@ -127,7 +125,6 @@ const SocialPage = () => {
             const response = await axios.get('/api/friend/requests');
             setFriendRequests(response.data.friendRequests || []);
         } catch (error) {
-            console.error('Error fetching friend requests:', error.response?.data || error.message);
             setFriendRequests([]);
             throw error;
         }
@@ -140,14 +137,11 @@ const SocialPage = () => {
              return;
         };
         setHasSearched(true);
-        console.log(`Searching for users matching: "${searchTerm}"`);
         try {
             const response = await axios.get(`/api/auth/search?q=${searchTerm}`);
-            console.log('Search response:', response.data);
             setSearchResults(response.data.users || []);
             setError(null);
         } catch (error) {
-            console.error('Error searching users:', error.response?.data || error.message);
             setSearchResults([]);
             setError("Failed to search users. Please try again.");
         }
@@ -162,7 +156,6 @@ const SocialPage = () => {
                 )
             );
         } catch (error) {
-            console.error('Error sending friend request:', error.response?.data || error.message);
             setError(error.response?.data?.message || "Failed to send friend request.");
         }
     };
@@ -172,7 +165,6 @@ const SocialPage = () => {
             await axios.post('/api/friend/accept-request', { friendId: userId });
             await Promise.all([fetchFriendRequests(), fetchFriends()]);
         } catch (error) {
-            console.error('Error accepting friend request:', error.response?.data || error.message);
             setError("Failed to accept friend request.");
         }
     };
@@ -182,7 +174,6 @@ const SocialPage = () => {
             await axios.post('/api/friend/reject-request', { friendId: userId });
             await fetchFriendRequests();
         } catch (error) {
-            console.error('Error rejecting friend request:', error.response?.data || error.message);
             setError("Failed to reject friend request.");
         }
     };
@@ -192,7 +183,6 @@ const SocialPage = () => {
             await axios.post('/api/friend/remove', { friendId: userId });
             await fetchFriends();
         } catch (error) {
-            console.error('Error removing friend:', error.response?.data || error.message);
             setError("Failed to remove friend.");
         }
     };
@@ -208,7 +198,6 @@ const SocialPage = () => {
             const response = await axios.get(`/api/friend/profile/${friendId}`);
             setSelectedFriendProfile(response.data); // Set the data
         } catch (error) {
-            console.error('Error fetching friend profile:', error.response?.data || error.message);
             setProfileError(error.response?.data?.message || 'Failed to load profile.');
         } finally {
             setIsProfileLoading(false);
@@ -229,7 +218,6 @@ const SocialPage = () => {
           const response = await axios.post('http://localhost:5000/api/friend/nudge', { friendId },{ withCredentials: true });
           alert(response.data.message || 'Nudge sent!');
         } catch (error) {
-          console.error('Error sending nudge:', error);
           setError("Failed to send nudge. Please try again.");
         }
     };

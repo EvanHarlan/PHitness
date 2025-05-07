@@ -211,7 +211,6 @@ export const getFriendProfile = async (req, res) => {
       res.status(200).json(profileData);
 
   } catch (error) {
-      console.error("Error fetching friend profile:", error);
       res.status(500).json({ message: 'Server error fetching profile' });
   }
 };
@@ -270,7 +269,6 @@ const activeConnections = {};
 
     res.status(200).json({ nudges });
   } catch (error) {
-    console.error('Error fetching nudges:', error);
     res.status(500).json({ message: 'Error fetching nudges' });
   }
 };
@@ -288,7 +286,6 @@ export const deleteNudge = async (req, res) => {
 
     res.status(200).json({ message: 'Nudge deleted successfully' });
   } catch (error) {
-    console.error('Error deleting nudge:', error);
     res.status(500).json({ message: 'Error deleting nudge' });
   }
 };

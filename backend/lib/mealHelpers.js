@@ -54,7 +54,6 @@ export const rotateMealType = (mealCount) => {
     ...mealTypes[type]
   }));
 
-  console.log("🍽️ Rotated meal types:", meals);
 
   return meals;
 };

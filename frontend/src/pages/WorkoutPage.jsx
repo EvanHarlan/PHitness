@@ -257,7 +257,6 @@ const WorkoutPage = () => {
         });
       }
     } catch (error) {
-      console.error("Error autofilling from profile:", error);
       toast.error("Failed to autofill. Please try again.", {
         duration: 3000,
         style: {
@@ -301,7 +300,6 @@ const WorkoutPage = () => {
           });
         }
       } catch (err) {
-        console.error("Error checking max lift:", err);
       }
     };
 
@@ -319,7 +317,6 @@ const WorkoutPage = () => {
         setWorkoutAmount(response.data.workoutCount || 0);
         setFetchWorkoutCountError(null);
       } catch (error) {
-        console.error("Error fetching workout count:", error);
         setFetchWorkoutCountError(error);
       }
     };
@@ -337,7 +334,6 @@ const WorkoutPage = () => {
           setLastWorkoutGeneration(tracker.lastWorkoutGenerationDate);
         }
       } catch (error) {
-        console.error("Error fetching last workout generation:", error);
       }
     };
 
@@ -446,7 +442,6 @@ const WorkoutPage = () => {
         }
       }
     } catch (error) {
-      console.error("Error generating workout:", error);
       toast.error("Failed to generate workout. Please try again.", {
         duration: 4000,
         style: {

@@ -18,7 +18,6 @@ const parseHeightToCm = (heightStr) => {
     // Match feet and inches using regex
     const match = heightStr.match(/^(\d+)'(\d+)"?$/);
     if (!match) {
-      console.log("⚠️ Invalid height format:", heightStr);
       return 0;
     }
 
@@ -27,7 +26,6 @@ const parseHeightToCm = (heightStr) => {
     const totalInches = (feet * 12) + inches;
     return Math.round(totalInches * 2.54); // Convert to cm
   } catch (error) {
-    console.log("⚠️ Error parsing height:", error);
     return 0;
   }
 };
@@ -74,8 +72,6 @@ export const calculateMacroLimits = (userParams) => {
     tdee: Math.round(tdee)
   };
 
-  // Log calculated limits for debugging
-  console.log("📊 Calculated macro limits:", limits);
 
   return limits;
 };
@@ -99,7 +95,7 @@ export const getMacroRatio = (goal) => {
   // Get ratios for the goal or default to maintenance
   const ratios = macroRatios[normalizedGoal] || macroRatios.maintenance;
 
-  console.log("📊 Macro ratios for goal:", {
+  ({
     goal,
     normalizedGoal,
     ratios

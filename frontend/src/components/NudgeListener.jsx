@@ -10,7 +10,6 @@ const NudgeListener = () => {
         const response = await axios.get('http://localhost:5000/api/friend/nudges', { withCredentials: true });
         setNotifications(response.data.nudges);
       } catch (error) {
-        console.error('Error fetching nudges:', error);
       }
     };
 
@@ -42,7 +41,6 @@ const NudgeListener = () => {
       // Remove nudge from local state
       setNotifications((prev) => prev.filter((_, i) => i !== index));
     } catch (error) {
-      console.error('Error deleting nudge:', error);
     }
   };
 

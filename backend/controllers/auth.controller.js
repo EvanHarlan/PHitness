@@ -71,7 +71,6 @@ export const signup = async (req, res) => {
 			role: user.role,
 		});
 	} catch (error) {
-		console.log("Error in signup controller", error.message);
 		res.status(500).json({ message: error.message });
 	}
 };
@@ -99,7 +98,6 @@ export const login = async (req, res) => {
 			res.status(400).json({ message: "Invalid email or password" });
 		}
 	} catch (error) {
-		console.log("Error in login controller", error.message);
 		res.status(500).json({ message: error.message });
 	}
 };
@@ -117,7 +115,6 @@ export const logout = async (req, res) => {
 		res.clearCookie("refreshToken");
 		res.json({ message: "Logged out successfully" });
 	} catch (error) {
-		console.log("Error in logout controller", error.message);
 		res.status(500).json({ message: "Server error", error: error.message });
 	}
 };
@@ -149,7 +146,6 @@ export const refreshToken = async (req, res) => {
 
 		res.json({ message: "Token refreshed successfully" });
 	} catch (error) {
-		console.log("Error in refreshToken controller", error.message);
 		res.status(500).json({ message: "Server error", error: error.message });
 	}
 };
@@ -247,7 +243,6 @@ export const unlockAchievement = async (req, res) =>
 		res.status(200).json({ message: "Achievement unlocked" });
 	} catch (error)
 	{
-		console.error("Unlock achievement error:", error);
 		res.status(500).json({ message: "Server error" });
 	}
 };
@@ -256,9 +251,6 @@ export const unlockAchievement = async (req, res) =>
 export const updateMaxLift = async (req, res) => {
   try {
 	  const { maxLift } = req.body;
-
-	  console.log("Incoming maxLift value:", maxLift);
-	  console.log("Type of maxLift:", typeof maxLift);
 
     if (typeof maxLift !== 'number' || isNaN(maxLift)) {
       return res.status(400).json({ message: "Invalid lift value" });
@@ -279,7 +271,6 @@ export const updateMaxLift = async (req, res) => {
 
     res.status(200).json(user);
   } catch (error) {
-    console.error("Error updating max lift:", error);
     res.status(500).json({ message: "Server error" });
   }
 };
@@ -290,7 +281,6 @@ export const searchUsers = async (req, res) => {
 	  const { q } = req.query;
 	  const userId = req.user._id;
 	  
-	  console.log(`Searching for users matching: "${q}"`);
 	  
 	  // Find users whose name or email matches the query
 	  const users = await User.find({
@@ -305,7 +295,6 @@ export const searchUsers = async (req, res) => {
 		]
 	  }).select('name email');
 	  
-	  console.log(`Found ${users.length} users matching search criteria`);
 	  
 	  // Get user's friends and sent requests to check status
 	  const currentUser = await User.findById(userId);
@@ -320,7 +309,6 @@ export const searchUsers = async (req, res) => {
 	  
 	  res.status(200).json({ users: usersWithStatus });
 	} catch (error) {
-	  console.error('Error searching users:', error);
 	  res.status(500).json({ message: error.message });
 	}
   };
@@ -329,7 +317,6 @@ export const searchUsers = async (req, res) => {
   export const deleteAccount = async (req, res) => {
 	try {
 		const userId = req.user.id;
-		console.log(`Deleting account for user with ID: ${userId}`);
 
 	
 		await MealPlan.deleteMany({ user: userId });
@@ -339,11 +326,8 @@ export const searchUsers = async (req, res) => {
 		
 		await User.findByIdAndDelete(userId);
 
-		console.log(`User with ID ${userId} and all related data deleted successfully`);
-
 		res.status(200).json({ message: "Account and related data deleted successfully" });
 	} catch (err) {
-		console.error("Error deleting account:", err);
 		res.status(500).json({ message: "Error deleting account" });
 	}
 };
@@ -367,7 +351,7 @@ export const updateUserProfile = async (req, res) => {
   
 	  res.status(200).json({ message: "Credentials updated successfully", user });
 	} catch (error) {
-	  console.error("Error updating credentials:", error);
+	  
 	  res.status(500).json({ message: "An error occurred while updating credentials" });
 	}
 };
@@ -401,8 +385,8 @@ export const forgotPassword = async (req, res) => {
   
 	  res.status(200).json({ message: "Temporary password sent to your email." });
 	} catch (err) {
-	  console.error("Error in forgotPassword:", err);
 	  res.status(500).json({ message: "Server error during password reset." });
 	}
   };
+  
   

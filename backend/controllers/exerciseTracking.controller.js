@@ -5,11 +5,9 @@ import Workout from '../models/workout.model.js';
 
 export const trackExercise = async (req, res) => {
   try {
-    console.log('Received tracking data:', req.body);
     const { workoutId, exerciseId, weight, reps, timeSpent } = req.body;
     
     if (!workoutId || !exerciseId || !reps || !timeSpent) {
-      console.log('Missing required fields:', { workoutId, exerciseId, reps, timeSpent });
       return res.status(400).json({ error: 'Missing required fields' });
     }
 
@@ -20,7 +18,6 @@ export const trackExercise = async (req, res) => {
     });
 
     if (!workout) {
-      console.log('Workout not found:', workoutId);
       return res.status(404).json({ error: 'Exercise not found in workout' });
     }
 
@@ -81,7 +78,6 @@ export const trackExercise = async (req, res) => {
     );
 
     if (!updatedWorkout) {
-      console.log('Failed to update workout exercise');
       return res.status(500).json({ error: 'Failed to update workout exercise' });
     }
     
@@ -94,7 +90,6 @@ export const trackExercise = async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Error tracking exercise:', error);
     res.status(500).json({ error: 'Server error', details: error.message });
   }
 };
@@ -111,7 +106,6 @@ export const getExerciseHistory = async (req, res) => {
       data: exerciseHistory
     });
   } catch (error) {
-    console.error('Error getting exercise history:', error);
     res.status(500).json({ error: 'Server error', details: error.message });
   }
 };
@@ -146,7 +140,6 @@ export const getWorkoutExerciseHistory = async (req, res) => {
       data: historyWithExerciseNames
     });
   } catch (error) {
-    console.error('Error getting workout history:', error);
     res.status(500).json({ error: 'Server error', details: error.message });
   }
 }; 
