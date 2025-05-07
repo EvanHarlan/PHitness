@@ -25,7 +25,6 @@ export const generateMealPlanWithGPT = async (userParams) => {
 
         const missingParams = requiredParams.filter(param => !userParams[param]);
         if (missingParams.length > 0) {
-            console.error("❌ Missing required parameters:", missingParams);
             throw new Error(`Missing required parameters: ${missingParams.join(', ')}`);
         }
 
@@ -40,7 +39,6 @@ export const generateMealPlanWithGPT = async (userParams) => {
 
         // Validate macro limits
         if (!limits || typeof limits.maxProtein === "undefined") {
-            console.error("❌ macroLimits.limits is undefined or malformed:", limits);
             throw new Error("Missing macro limits. Cannot generate meal plan.");
         }
 
@@ -50,7 +48,7 @@ export const generateMealPlanWithGPT = async (userParams) => {
         // Validate destructured values
         if (!Number.isFinite(maxProtein) || !Number.isFinite(perMealProteinCap) ||
             !Number.isFinite(macroFlex) || !Number.isFinite(maxCalories) || !Number.isFinite(minCalories)) {
-            console.error("❌ Invalid macro limit values:", {
+            ( {
                 maxProtein,
                 perMealProteinCap,
                 macroFlex,
@@ -65,7 +63,6 @@ export const generateMealPlanWithGPT = async (userParams) => {
 
         // Validate macro ratios
         if (!macroRatios || typeof macroRatios.protein === "undefined") {
-            console.error("❌ macroRatios is undefined or malformed:", macroRatios);
             throw new Error("Missing macro ratios. Cannot generate meal plan.");
         }
 
@@ -85,8 +82,6 @@ export const generateMealPlanWithGPT = async (userParams) => {
         // Prepare the prompt with validated parameters
         const prompt = `You are a professional nutritionist and chef.\n\nReturn ONLY a valid JSON object. No extra commentary. No markdown. No code blocks.\n\nGenerate a meal plan with the following specs:\n{\n  \"goal\": \"${userParams.goal}\",\n  \"targetCalories\": ${userParams.targetCalories},\n  \"targetProtein\": ${userParams.targetProtein},\n  \"targetCarbs\": ${userParams.targetCarbs},\n  \"targetFats\": ${userParams.targetFats},\n  \"maxProteinPerMeal\": ${perMealProteinCap},\n  \"macroRatios\": {\n    \"protein\": ${macroRatios.protein},\n    \"carbs\": ${macroRatios.carbs},\n    \"fats\": ${macroRatios.fats}\n  },\n  \"dietaryRestrictions\": ${JSON.stringify(userParams.dietaryRestrictions || [])},\n  \"preferences\": ${JSON.stringify(userParams.preferences || [])},\n  \"mealFrequency\": ${mealFrequency},\n  \"cookingSkillLevel\": \"${userParams.cookingSkillLevel || 'Intermediate'}\",\n  \"mealPrepTime\": \"${userParams.mealPrepTime || '15-30 minutes'}\",\n  \"groceryBudget\": \"${userParams.groceryBudget || 'Medium'}\"\n}\n\nRules:\n1. Return only a single JSON object with a \"meals\" array.\n2. Each meal must include: name, ingredients, instructions, calories, protein, carbs, fats, and **time** (e.g., "${mealTimes.join('", "')}").\n3. Do NOT include markdown, comments, explanations, or formatting.\n4. No extra text. Only the JSON.`;
 
-        // Log the prompt for debugging
-        console.log("🤖 Sending prompt to GPT:", prompt);
 
         // Make the API call to GPT
         const response = await openai.chat.completions.create({
@@ -108,7 +103,6 @@ export const generateMealPlanWithGPT = async (userParams) => {
         // Parse and validate the response
         const rawContent = response.choices?.[0]?.message?.content;
 
-        console.log(' Raw GPT content:', rawContent);
 
         // Clean up any markdown formatting or non-JSON junk
         let cleaned = rawContent?.trim();
@@ -123,13 +117,11 @@ export const generateMealPlanWithGPT = async (userParams) => {
         try {
             mealPlan = JSON.parse(cleaned);
         } catch (err) {
-            console.error('❌ Failed to parse GPT response as JSON. Cleaned content:\\n', cleaned);
             throw new Error('GPT returned invalid JSON, even after cleanup. Check formatting.');
         }
 
         // Validate meal plan structure
         if (!mealPlan || !Array.isArray(mealPlan.meals)) {
-            console.error("❌ Invalid meal plan structure:", mealPlan);
             throw new Error("Invalid meal plan structure received from GPT");
         }
 
@@ -141,7 +133,7 @@ export const generateMealPlanWithGPT = async (userParams) => {
         mealPlan.meals = mealsWithTime;
 
         // Log the generated meal plan
-        console.log("✅ Successfully generated meal plan:", {
+        ( {
             mealsCount: mealPlan.meals.length,
             totalCalories: mealPlan.meals.reduce((sum, meal) => sum + (meal.calories || 0), 0),
             totalProtein: mealPlan.meals.reduce((sum, meal) => sum + (meal.protein || 0), 0),
@@ -151,7 +143,6 @@ export const generateMealPlanWithGPT = async (userParams) => {
 
         return mealPlan;
     } catch (error) {
-        console.error("❌ Error in generateMealPlanWithGPT:", error);
         throw error;
     }
 };

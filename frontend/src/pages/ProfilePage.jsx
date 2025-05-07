@@ -34,7 +34,6 @@ import { useNavigate } from 'react-router-dom';
     
      window.location.href = '/LoginPage'; 
    } catch (err) {
-     console.error('Error deleting account:', err);
      alert('There was an error deleting your account.');
    }
  };
@@ -77,7 +76,6 @@ const ProfilePage = () => {
     ];
 
     const handleNavigateClick = () => {
-        console.log('Navigating to update profile...');
         navigate("/update-profile");   page
       };
 
@@ -131,7 +129,6 @@ const ProfilePage = () => {
                 setMaxLift(profileResponse.data.maxLift || 0);
             }
             catch (error) {
-                console.error("Error fetching profile:", error);
             }
             finally {
                 setLoading(false);
@@ -153,7 +150,6 @@ const ProfilePage = () => {
                 alert("Failed to save profile. Please try again.");
             }
         } catch (error) {
-            console.error("Error saving profile:", error);
             alert("Failed to save profile. Please try again.");
         }
     };
@@ -258,7 +254,6 @@ const ProfilePage = () => {
                             { withCredentials: true }
                         );
                     } catch (error) {
-                        console.error("Failed to save achievement:", error);
                     }
                 }
                 setUnlockedAchievement(achievement);

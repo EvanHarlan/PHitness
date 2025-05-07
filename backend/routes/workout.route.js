@@ -17,7 +17,6 @@ router.get("/", protectRoute, async (req, res) => {
     const workouts = await Workout.find({ user: req.user._id }).sort({ createdAt: -1 });
     res.json(workouts);
   } catch (error) {
-    console.error("Error fetching workouts:", error);
     res.status(500).json({ message: "Failed to fetch workouts" });
   }
 });
@@ -39,7 +38,7 @@ router.get("/by-date", protectRoute, async (req, res) => {
       }
     }).sort({ createdAt: 1 });
 
-    console.log('Found workouts:', workouts.map(w => ({
+    (workouts.map(w => ({
       createdAt: w.createdAt,
       totalTimeSpent: w.totalTimeSpent,
       estimatedCalories: w.estimatedCalories
@@ -47,7 +46,6 @@ router.get("/by-date", protectRoute, async (req, res) => {
 
     res.json(workouts);
   } catch (error) {
-    console.error("Error fetching workouts by date:", error);
     res.status(500).json({ message: "Failed to fetch workouts by date" });
   }
 });
@@ -61,7 +59,6 @@ router.get("/:id", protectRoute, async (req, res) => {
     }
     res.json(workout);
   } catch (error) {
-    console.error("Error fetching workout:", error);
     res.status(500).json({ message: "Failed to fetch workout" });
   }
 });
@@ -135,7 +132,6 @@ router.post("/:id/complete", protectRoute, async (req, res) => {
       workout 
     });
   } catch (error) {
-    console.error("Error completing workout:", error);
     res.status(500).json({ message: "Failed to complete workout" });
   }
 });

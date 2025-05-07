@@ -45,7 +45,7 @@ const NutritionIntakeChart = () => {
         const endOfWeek = new Date(startOfWeek);
         endOfWeek.setDate(startOfWeek.getDate() + 6); // End of current week
 
-        console.log('Fetching meal plans between:', startOfWeek.toISOString(), 'and', endOfWeek.toISOString());
+
 
         // Fetch meal plans for the date range
         const response = await axios.get('http://localhost:5000/api/meal-plans', {
@@ -56,16 +56,13 @@ const NutritionIntakeChart = () => {
           withCredentials: true
         });
 
-        console.log('Received meal plans:', response.data);
+
 
         // Process the data to get daily calories from completed meals
         const processedData = processNutritionData(response.data);
-        console.log('Processed nutrition data:', processedData);
         setNutritionData(processedData);
         setError(null);
       } catch (err) {
-        console.error('Error fetching nutrition data:', err);
-        console.error('Error response:', err.response?.data);
         setError(err.response?.data?.message || 'Failed to load nutrition data');
       } finally {
         setLoading(false);

@@ -45,7 +45,6 @@ export default async (req, res) => {
       }
     }
 
-    console.log("OpenAI API Key:", process.env.OPENAI_API_KEY ? "Found (starts with " + process.env.OPENAI_API_KEY.substring(0, 5) + "...)" : "Not found");
     
     const openai = new OpenAI({
       apiKey: process.env.OPENAI_API_KEY
@@ -159,7 +158,6 @@ Provide this workout as structured JSON with exactly 5 exercises - NO HTML forma
       content = question;
     }
     
-    console.log(`Sending request to OpenAI with model: gpt-4o (${isStructuredRequest ? 'structured fitness plan' : 'free-form question'})`);
     
     const response = await openai.chat.completions.create({
       model: "gpt-4o",
@@ -225,7 +223,6 @@ Provide this workout as structured JSON with exactly 5 exercises - NO HTML forma
           savedWorkout: workout
         });
       } catch (error) {
-        console.error("Error parsing workout response:", error);
         return res.status(500).json({
           success: false,
           error: "Failed to process the workout data",
@@ -241,17 +238,14 @@ Provide this workout as structured JSON with exactly 5 exercises - NO HTML forma
       });
     }
   } catch (error) {
-    console.error("OpenAI API error details:", error);
     
     if (error.response) {
-      console.error("OpenAI API response error:", error.response.data);
       return res.status(500).json({
         success: false,
         error: "OpenAI API error",
         details: error.response.data
       });
     } else {
-      console.error("Error details:", error.message);
       return res.status(500).json({
         success: false,
         error: "Error fetching response from OpenAI",
@@ -287,7 +281,6 @@ export const toggleFavorite = async (req, res) => {
       message: workout.favorite ? "Workout added to favorites" : "Workout removed from favorites"
     });
   } catch (error) {
-    console.error("Error toggling favorite status:", error);
     res.status(500).json({ 
       success: false, 
       message: "Failed to update favorite status" 

@@ -52,7 +52,6 @@ const MuscleGroupsRadarChart = () => {
         setMuscleGroupsData(data);
         setLoading(false);
       } catch (err) {
-        console.error('Error fetching muscle groups data:', err);
         setError('Failed to load muscle groups data');
         setLoading(false);
       }

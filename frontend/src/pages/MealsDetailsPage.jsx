@@ -41,7 +41,6 @@ const MealDetailsPage = () => {
           navigate('/nutrition');
         }
       } catch (error) {
-        console.error('Error fetching meal plan details:', error);
         toast.error('Failed to fetch meal plan details. Please try again.', {
           style: {
             background: COLORS.DARK_GRAY,
@@ -77,7 +76,6 @@ const MealDetailsPage = () => {
         });
       }
     } catch (error) {
-      console.error('Error completing meal plan:', error);
       toast.error('Failed to complete meal plan', {
         style: {
           background: COLORS.DARK_GRAY,
@@ -133,7 +131,6 @@ const MealDetailsPage = () => {
           });
         }
       } catch (error) {
-        console.error('Error completing meal:', error);
         toast.error('Failed to complete meal. Please try again.', {
           style: {
             background: COLORS.DARK_GRAY,

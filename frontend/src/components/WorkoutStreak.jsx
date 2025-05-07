@@ -31,10 +31,6 @@ const WorkoutStreak = ({ onWorkoutLogged }) =>
             const diffTime = nowMidnight - lastMidnight;
             const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
 
-            console.log("[Streak] Last Date:", lastMidnight.toISOString());
-            console.log("[Streak] Now:", nowMidnight.toISOString());
-            console.log("[Streak] Diff Days:", diffDays);
-
             if (diffDays === 1)
             {
                 current += 1;
@@ -74,7 +70,6 @@ const WorkoutStreak = ({ onWorkoutLogged }) =>
                     });
                 } catch (err)
                 {
-                    console.error(`Failed to unlock ${milestone}-day streak`, err);
                 }
             }
         }
@@ -94,7 +89,6 @@ const WorkoutStreak = ({ onWorkoutLogged }) =>
                     localStorage.setItem(key, "true");
                 } catch (err)
                 {
-                    console.error(`Failed to unlock ${title}:`, err);
                 }
             }
         };

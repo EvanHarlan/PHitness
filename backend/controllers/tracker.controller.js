@@ -8,11 +8,9 @@ export const addTrackerEntry = async (req, res) =>
     try
     {
         const { type } = req.body;
-        console.log("Received API Request:", req.body);
 
         if (!req.user)
         {
-            console.log("Unauthorized - No user found");
             return res.status(401).json({message: "Unauthorized - No user found"})
         }
         if (!["workout", "meal"].includes(type))
@@ -20,7 +18,6 @@ export const addTrackerEntry = async (req, res) =>
             return res.status(400).json({ message: "Invalid tracker type" })
         }
 
-        console.log("User making request:", req.user);
 
         const entry = await Tracker.findOneAndUpdate(
             { user: req.user._id, type },
@@ -28,12 +25,10 @@ export const addTrackerEntry = async (req, res) =>
             { new: true, upsert: true }
         );
 
-        console.log("Tracker Entry Added:", entry);
         res.status(201).json(entry);
     }
     catch (error)
     {
-        console.error("Error adding tracker entry:", error);
         res.status(500).json({ message: "Server error" })
     }
 };
@@ -47,7 +42,6 @@ export const getAllTrackerEntries = async (req, res) =>
     }
     catch (error)
     {
-        console.error("Error fetching tracker entry:", error);
         res.status(500).json({ message: "Server error" })
     }
 }
@@ -71,7 +65,6 @@ export const getTrackerCounts = async (req, res) => {
             mealCount: completedMealPlans
         });
     } catch (error) {
-        console.error("Error counting tracker entries:", error);
         res.status(500).json({ message: "Server error" });
     }
 };
@@ -101,7 +94,6 @@ export const updateWorkoutStreak = async (req, res) => {
 
     return res.status(200).json({ streak: user.dailyStreak.current });
   } catch (err) {
-    console.error("Error updating workout streak:", err);
     res.status(500).json({ error: "Failed to update streak" });
   }
 };

@@ -28,7 +28,6 @@ const WeightNotification = () => {
       setNeedsWeight(response.data.needsWeight);
       setNextCheckDate(response.data.nextCheckDate);
     } catch (error) {
-      console.error('Error checking weight status:', error);
       setError('Failed to check weight status');
     } finally {
       setIsLoading(false);
@@ -95,7 +94,6 @@ const WeightNotification = () => {
       // Reload the page to show updated graph
       window.location.reload();
     } catch (error) {
-      console.error('Error submitting weight:', error);
       const errorMessage = error.response?.data?.details || error.response?.data?.error || 'Failed to record weight';
       toast.error(errorMessage, {
         style: {

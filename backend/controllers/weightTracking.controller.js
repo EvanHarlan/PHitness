@@ -71,7 +71,6 @@ export const submitWeight = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Error submitting weight:', error);
     res.status(500).json({
       error: 'Failed to submit weight',
       details: error.message
@@ -112,7 +111,6 @@ export const checkWeeklyWeightStatus = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Error checking weight status:', error);
     res.status(500).json({
       error: 'Failed to check weight status',
       details: error.message
@@ -138,7 +136,6 @@ export const getWeightHistory = async (req, res) => {
 
     res.json(weightHistory);
   } catch (error) {
-    console.error('Error fetching weight history:', error);
     res.status(500).json({
       error: 'Failed to fetch weight history',
       details: error.message

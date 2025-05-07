@@ -73,7 +73,6 @@ const MacronutrientPieChart = () => {
         const endOfWeek = new Date(startOfWeek);
         endOfWeek.setDate(startOfWeek.getDate() + 6); // End of current week
 
-        console.log('Fetching meal plans between:', startOfWeek.toISOString(), 'and', endOfWeek.toISOString());
 
         // Fetch meal plans for the date range
         const response = await axios.get('/api/meal-plans', {
@@ -87,16 +86,12 @@ const MacronutrientPieChart = () => {
           withCredentials: true
         });
 
-        console.log('Received meal plans:', response.data);
 
         // Process the data to get macronutrient totals from completed meals
         const processedData = processMacronutrientData(response.data);
-        console.log('Processed macronutrient data:', processedData);
         setMacronutrientData(processedData);
         setError(null);
       } catch (err) {
-        console.error('Error fetching macronutrient data:', err);
-        console.error('Error response:', err.response?.data);
         setError(err.response?.data?.message || 'Failed to load macronutrient data');
       } finally {
         setLoading(false);

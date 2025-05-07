@@ -22,7 +22,6 @@ const SavedWorkoutsList = () => {
       const response = await axios.get('http://localhost:5000/api/workouts', { withCredentials: true });
       setWorkouts(response.data);
     } catch (error) {
-      console.error('Error fetching workouts:', error);
       toast.error('Failed to load your workouts', {
         style: {
           background: COLORS.DARK_GRAY,
@@ -49,7 +48,6 @@ const SavedWorkoutsList = () => {
         }
       });
     } catch (error) {
-      console.error('Error deleting workout:', error);
       toast.error('Failed to delete workout', {
         style: {
           background: COLORS.DARK_GRAY,
@@ -72,7 +70,6 @@ const SavedWorkoutsList = () => {
         ));
       }
     } catch (error) {
-      console.error("Error updating favorite status:", error);
       toast.error("Failed to update favorite status", {
         style: {
           background: COLORS.DARK_GRAY,
