@@ -61,7 +61,7 @@ export default async (req, res) => {
 RESPONSE FORMAT:
 Provide a structured JSON response with the following fields (do not include HTML formatting or styling):
 {
-  "title": "Descriptive title including time, equipment, and goal",
+  "title": "Short title relative to the workout type and goal.",
   "exercises": [
     {
       "name": "Exercise Name",

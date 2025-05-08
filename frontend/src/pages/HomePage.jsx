@@ -1,5 +1,5 @@
 import { useUserStore } from '../stores/useUserStore';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom'; // Assuming useNavigate might be used elsewhere or was planned
 import { COLORS } from '../lib/constants';
 import DashboardStats from '../components/DashboardStats';
 import { motion } from 'framer-motion';
@@ -10,10 +10,10 @@ import WeightNotification from '../components/WeightNotification';
 
 const HomePage = () => {
   const { user } = useUserStore();
-  const navigate = useNavigate();
-  const [isMobile, setIsMobile] = useState(false);
+  const [isMobile, setIsMobile] = useState(false); 
 
-  // Detect mobile devices
+  // Detect mobile devices - This useEffect is not directly related to the scrolling issue
+  // but kept as it was in the original code.
   useEffect(() => {
     const handleResize = () => {
       setIsMobile(window.innerWidth < 768);
@@ -43,7 +43,7 @@ const HomePage = () => {
             Welcome back, {user?.name || 'Fitness Enthusiast'}
           </h1>
           <p className="text-sm sm:text-base md:text-lg opacity-80 font-light">
-            Your personal fitness dashboard • {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
+            Your personal PHitness dashboard • {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
           </p>
         </header>
 
@@ -183,76 +183,86 @@ const HomePage = () => {
     };
 
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <motion.header
-          initial="hidden"
-          animate="visible"
-          variants={staggerContainer}
-          className="text-center max-w-4xl mx-auto px-4 sm:px-6 md:px-8"
+      <motion.header
+        initial="hidden"
+        animate="visible"
+        variants={staggerContainer}
+        className="text-center max-w-4xl w-full px-4 sm:px-6 md:px-8"
+      >
+        <motion.h1 
+          variants={fadeIn}
+          className="text-4xl sm:text-5xl md:text-6xl font-bold mb-4 sm:mb-6 tracking-tight"
+          style={{ color: COLORS.NEON_GREEN }}
         >
-          <motion.h1 
-            variants={fadeIn}
-            className="text-4xl sm:text-5xl md:text-6xl font-bold mb-4 sm:mb-6 tracking-tight"
-            style={{ color: COLORS.NEON_GREEN }}
-          >
-            Welcome to PHitness
-          </motion.h1>
-          
-          <motion.p 
-            variants={fadeIn}
-            className="text-lg sm:text-xl md:text-2xl mb-8 sm:mb-12 opacity-90"
-          >
-            Your personal AI-powered fitness companion
-          </motion.p>
-          
-          <motion.div 
-            variants={fadeIn}
-            className="flex flex-col sm:flex-row items-center justify-center gap-4"
-          >
-            <motion.div whileHover={buttonHover} whileTap={{ scale: 0.98 }}>
-              <Link 
-                to="/signup"
-                className="w-full sm:w-auto px-6 sm:px-8 py-2 sm:py-3 rounded-md text-base sm:text-lg font-medium transition-all duration-200 inline-block"
-                style={{
-                  backgroundColor: COLORS.NEON_GREEN,
-                  color: COLORS.BLACK,
-                }}
-              >
-                Get Started
-              </Link>
-            </motion.div>
-            <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }}>
-              <Link 
-                to="/login"
-                className="w-full sm:w-auto px-6 sm:px-8 py-2 sm:py-3 rounded-md text-base sm:text-lg font-medium transition-all duration-200 inline-block mt-3 sm:mt-0"
-                style={{
-                  backgroundColor: 'transparent',
-                  color: COLORS.WHITE,
-                  border: '1px solid rgba(255, 255, 255, 0.2)'
-                }}
-              >
-                Login
-              </Link>
-            </motion.div>
+          Welcome to PHitness
+        </motion.h1>
+        
+        <motion.p 
+          variants={fadeIn}
+          className="text-lg sm:text-xl md:text-2xl mb-8 sm:mb-12 opacity-90"
+        >
+          Your personal AI-powered fitness companion
+        </motion.p>
+        
+        <motion.div 
+          variants={fadeIn}
+          className="flex flex-col sm:flex-row items-center justify-center gap-4"
+        >
+          <motion.div whileHover={buttonHover} whileTap={{ scale: 0.98 }}>
+            <Link 
+              to="/signup"
+              className="w-full sm:w-auto px-6 sm:px-8 py-2 sm:py-3 rounded-md text-base sm:text-lg font-medium transition-all duration-200 inline-block"
+              style={{
+                backgroundColor: COLORS.NEON_GREEN,
+                color: COLORS.BLACK,
+              }}
+            >
+              Get Started
+            </Link>
           </motion.div>
-        </motion.header>
-      </div>
+          <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }}>
+            <Link 
+              to="/login"
+              className="w-full sm:w-auto px-6 sm:px-8 py-2 sm:py-3 rounded-md text-base sm:text-lg font-medium transition-all duration-200 inline-block mt-3 sm:mt-0"
+              style={{
+                backgroundColor: 'transparent',
+                color: COLORS.WHITE,
+                border: '1px solid rgba(255, 255, 255, 0.2)'
+              }}
+            >
+              Login
+            </Link>
+          </motion.div>
+        </motion.div>
+      </motion.header>
     );
   };
 
+  // Define base classes and conditional classes for the main wrapper
+  const commonWrapperClasses = "px-4 sm:px-6 md:px-8 lg:px-12";
+  const authenticatedWrapperClasses = "min-h-screen overflow-y-auto py-6 sm:py-8 md:py-12";
+  const unauthenticatedWrapperClasses = "fixed inset-0 overflow-hidden flex items-center justify-center";
+
   return (
     <div 
-      className="min-h-screen px-4 sm:px-6 md:px-8 lg:px-12 py-6 sm:py-8 md:py-12"
+      className={`
+        ${commonWrapperClasses}
+        ${user ? authenticatedWrapperClasses : unauthenticatedWrapperClasses}
+      `}
       style={{ 
         backgroundColor: COLORS.BLACK, 
         color: COLORS.WHITE,
-        backgroundImage: 'radial-gradient(circle at 50% 10%, rgba(60, 60, 60, 0.15), transparent 800px)'
       }}
     >
-      <div className="container mx-auto">
-        {/* Conditionally render content based on authentication status */}
-        {user ? renderDashboard() : renderLandingPage()}
-      </div>
+      {user ? (
+        // Container for dashboard to manage max-width and centering within the scrollable area
+        <div className="container mx-auto">
+          {renderDashboard()}
+        </div>
+      ) : (
+        // Landing page is rendered directly; its content is centered by unauthenticatedWrapperClasses
+        renderLandingPage()
+      )}
     </div>
   );
 };
