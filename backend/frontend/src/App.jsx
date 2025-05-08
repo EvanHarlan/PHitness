@@ -8,7 +8,7 @@ import ProfilePage from './pages/ProfilePage';
 import SocialPage from './pages/SocialPage';
 import NutritionPage from './pages/NutritionPage';
 import WorkoutPage from './pages/WorkoutPage';
-import SignUpPage from "./pages/SignUpPage";
+import SignUpPage from "./pages/SignupPage";
 import LoginPage from "./pages/LoginPage";
 import LoadingSpinner from "./components/LoadingSpinner";
 import { useUserStore } from './stores/useUserStore';
