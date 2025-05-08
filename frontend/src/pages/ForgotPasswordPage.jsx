@@ -71,7 +71,7 @@ const ForgotPasswordPage = () => {
                 Forgot Password?
               </h2>
               <p className="text-sm sm:text-base text-white text-center mt-2">
-                If you have a registered account then enter your email so we can send a recovery email
+                If you have a registered account then enter your email so we can send a recovery email. Make sure to check your spam if you cant find it.
               </p>
             </motion.div>
           </div>
