@@ -11,7 +11,7 @@ const WorkoutStreak = ({ onWorkoutLogged }) =>
     const unlockedStreaks = useRef(new Set());
     const { setUnlockedAchievement } = useUserStore();
 
-
+    //Checks last date to update workout
     const updateWorkoutStreak = () =>
     {
         const lastDateRaw = localStorage.getItem("lastWorkoutDate");
@@ -46,7 +46,7 @@ const WorkoutStreak = ({ onWorkoutLogged }) =>
 
         return current;
     };
-
+    //Handles logic for logging workouts
     const handleWorkoutLogged = useCallback(async () =>
     {
         const newStreak = updateWorkoutStreak();
@@ -77,7 +77,7 @@ const WorkoutStreak = ({ onWorkoutLogged }) =>
         const now = new Date();
         const hour = now.getHours();
         const day = now.getDay();
-
+        //Logic for Unlocking acheivements
         const unlockIfNeeded = async (key, title, description) =>
         {
             if (!localStorage.getItem(key))
@@ -119,7 +119,7 @@ const WorkoutStreak = ({ onWorkoutLogged }) =>
                 localStorage.setItem("workoutStreak", "0");
             }
         };
-
+        // warns user if streak is about to be lost
         const checkWarning = () =>
         {
             const lastDate = localStorage.getItem("lastWorkoutDate");

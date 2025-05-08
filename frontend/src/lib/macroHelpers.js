@@ -12,7 +12,7 @@ export const calculateMacroLimits = (userParams) => {
     return isNaN(num) ? 0 : num;
   };
 
-  // Parse height from string format (e.g., "5'11"") to centimeters
+  // Parse height from string format to centimeters
   const parseHeightToCm = (heightStr) => {
     try {
       if (!heightStr) return 0;

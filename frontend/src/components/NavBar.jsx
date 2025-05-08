@@ -31,15 +31,15 @@ function Navbar() {
       setMenuVisible(false);
     };
   }, []);
-
+// opens menu
   const toggleMenu = () => {
     setIsMenuOpen(prevState => !prevState);
   };
-
+// closes menu
   const handleCloseMenu = () => {
     setIsMenuOpen(false);
   };
-
+// log out user
   const handleLogout = () => {
     logout();
     handleCloseMenu();

@@ -79,6 +79,7 @@ const WorkoutQuestionnaire = ({ userParams, setUserParams, onSubmit, loading, ca
 
   const fitnessGoalOptions = [
     { value: "", label: "Select a goal" },
+    { value: "weight-gain", label: "Weight Gain" },
     { value: "weight-loss", label: "Weight Loss" },
     { value: "muscle-gain", label: "Muscle Gain" },
     { value: "strength", label: "Strength" },

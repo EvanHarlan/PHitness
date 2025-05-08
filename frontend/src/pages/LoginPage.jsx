@@ -50,10 +50,10 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a]/90 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-[#121212] flex items-center justify-center p-4">
       <div className="w-full max-w-md mx-auto">
         <div 
-          className="bg-[#0a0a0a]/90 rounded-xl sm:rounded-2xl shadow-xl overflow-hidden"
+          className="bg-[#121212] rounded-xl sm:rounded-2xl shadow-xl overflow-hidden"
           style={{
             backgroundColor: COLORS.MEDIUM_GRAY,
             maxWidth: isMobile ? "95%" : "100%",
@@ -62,7 +62,7 @@ const LoginPage = () => {
           }}
         >
           {/* Header Section */}
-          <div className="bg-gradient-to-r from-green-600 to-gray-700 px-5 sm:px-8 py-8 sm:py-12">
+          <div className="bg-[#4CAF50] px-5 sm:px-8 py-8 sm:py-12">
             <motion.div
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -148,13 +148,11 @@ const LoginPage = () => {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full py-3 px-4 flex justify-center items-center bg-gradient-to-r 
-                  from-green-600 to-gray-700 hover:from-green-700 hover:to-gray-800 
+                  className="w-full py-3 px-4 flex justify-center items-center
                   text-white text-xs sm:text-sm font-semibold rounded-lg sm:rounded-xl shadow-lg hover:shadow-xl 
-                  transition duration-200 disabled:opacity-50
-                  active:from-green-800 active:to-gray-900"
-                  style={{
-                    backgroundColor: COLORS.DARK_GRAY,
+                  transition duration-200 disabled:opacity-90 hover:brightness-90"
+                  style={{ 
+                    backgroundColor: COLORS.BALANCED_GREEN
                   }}>
                   {loading ? (
                     <>

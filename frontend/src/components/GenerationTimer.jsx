@@ -1,6 +1,7 @@
 import React from 'react';
 import { COLORS } from '../lib/constants';
 
+//logic for setting up timer
 const GenerationTimer = ({ nextTime, type }) => {
   const formatTimeRemaining = (nextTime) => {
     if (!nextTime) return "No previous generation";
@@ -10,6 +11,7 @@ const GenerationTimer = ({ nextTime, type }) => {
     
     if (diff <= 0) return "Available now!";
     
+    //sets hours minutes and seconds for timer
     const hours = Math.floor(diff / (1000 * 60 * 60));
     const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
     const seconds = Math.floor((diff % (1000 * 60)) / 1000);

@@ -78,10 +78,10 @@ const SignUpPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a]/90 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-[#121212] flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <div 
-          className="bg-[#0a0a0a]/90 rounded-lg sm:rounded-2xl shadow-xl overflow-hidden"
+          className="bg-[#121212] rounded-lg sm:rounded-2xl shadow-xl overflow-hidden"
           style={{
             backgroundColor: COLORS.MEDIUM_GRAY,
             maxWidth: isMobile ? "95%" : "100%",
@@ -89,7 +89,7 @@ const SignUpPage = () => {
           }}
         >
           {/* Header Section */}
-          <div className="bg-gradient-to-r from-green-600 to-gray-700 px-5 sm:px-8 py-8 sm:py-12">
+          <div className="bg-[#4CAF50] px-5 sm:px-8 py-8 sm:py-12">
             <motion.div
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -230,7 +230,7 @@ const SignUpPage = () => {
                   </div>
                   {errors.confirmPassword && <p className="text-red-500 text-xs sm:text-sm mt-1">{errors.confirmPassword}</p>}
                 </div>
-
+                {/* TERMS & CONDITIONS SECTION */}
                 <div className="space-y-1.5 sm:space-y-2">
                   <label className="text-xs sm:text-sm font-medium text-gray-300">
                     Terms & Conditions
@@ -292,12 +292,12 @@ const SignUpPage = () => {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full py-3 px-4 flex justify-center items-center bg-gradient-to-r 
-                  from-green-600 to-gray-700 hover:from-green-700 hover:to-gray-800 
+                  className="w-full py-3 px-4 flex justify-center items-center
                   text-white text-xs sm:text-sm font-semibold rounded-lg sm:rounded-xl shadow-lg hover:shadow-xl 
-                  transition duration-200 disabled:opacity-50 min-h-[44px]
-                  active:from-green-800 active:to-gray-900"
-                >
+                  transition duration-200 disabled:opacity-90 hover:brightness-90"
+                  style={{ 
+                    backgroundColor: COLORS.BALANCED_GREEN
+                  }}>
                   {loading ? (
                     <>
                       <Loader className="mr-2 h-4 w-4 sm:h-5 sm:w-5 animate-spin" />
