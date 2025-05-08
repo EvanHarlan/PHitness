@@ -33,7 +33,7 @@ const SavedWorkoutsList = () => {
       setLoading(false);
     }
   };
-
+  //Warning for deleting workout
   const handleDeleteWorkout = async (workoutId) => {
     if (!window.confirm('Are you sure you want to delete this workout?')) return;
     
