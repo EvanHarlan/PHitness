@@ -1,5 +1,5 @@
 import COLORS from '../lib/constants';
-
+//WORKOUT QUESTIONNAIRE COMPONENT WHERE USER ENTERS IN THEIR PREFERENCES
 const WorkoutQuestionnaire = ({ userParams, setUserParams, onSubmit, loading, canGenerateWorkout }) => {
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -129,7 +129,6 @@ const WorkoutQuestionnaire = ({ userParams, setUserParams, onSubmit, loading, ca
   return (
     <form className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* Basic Stats - Left Column */}
         <div className="space-y-4">
           {getFormField("Height", "height", "select", heightOptions, true)}
           {getFormField("Weight (lbs)", "weight", "number", null, true)}
@@ -137,8 +136,6 @@ const WorkoutQuestionnaire = ({ userParams, setUserParams, onSubmit, loading, ca
           {getFormField("Gender", "gender", "select", genderOptions, true)}
           {getFormField("Fitness Goal", "fitnessGoal", "select", fitnessGoalOptions, true)}
         </div>
-        
-        {/* Training Preferences - Right Column */}
         <div className="space-y-4">
           {getFormField("Experience Level", "experienceLevel", "select", experienceOptions)}
           {getFormField("Available Equipment", "equipment", "select", equipmentOptions)}

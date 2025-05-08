@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { RadarChart, PolarGrid, PolarAngleAxis, Radar, ResponsiveContainer } from 'recharts';
 import axios from 'axios';
 import COLORS from '../lib/constants';
-
+//MUSCLE GROUP COMPONENT THAT DISPLAYS THE MUSCLES TARGETED
 const MuscleGroupsRadarChart = () => {
   const [muscleGroupsData, setMuscleGroupsData] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -37,7 +37,7 @@ const MuscleGroupsRadarChart = () => {
             if (exercise.targetMuscles && typeof exercise.targetMuscles === 'string') {
               const muscles = exercise.targetMuscles.split(',').map(m => m.trim());
               muscles.forEach(muscle => {
-                if (muscle) { // Only count non-empty muscle names
+                if (muscle) {
                   muscleGroupCounts[muscle] = (muscleGroupCounts[muscle] || 0) + 1;
                 }
               });

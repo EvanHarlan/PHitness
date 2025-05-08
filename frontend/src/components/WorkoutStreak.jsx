@@ -4,7 +4,7 @@ import toast from "react-hot-toast";
 import PropTypes from "prop-types";
 import COLORS from "../lib/constants";
 import { useUserStore } from "../stores/useUserStore";
-
+//WORKOUT STREAK COMPONENT
 const WorkoutStreak = ({ onWorkoutLogged }) =>
 {
     const [streak, setStreak] = useState(() => parseInt(localStorage.getItem("workoutStreak") || "0", 10));

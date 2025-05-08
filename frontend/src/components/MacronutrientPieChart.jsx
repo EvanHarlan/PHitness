@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+//MACRONUTRIENT PIE CHART COMPONENT THAT SHOWS THE PERCENTAGE OF MACRONUTRIENTS BASED ON TOTAL CALORIES
 import { 
   ResponsiveContainer, 
   PieChart, 

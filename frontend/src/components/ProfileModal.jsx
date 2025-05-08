@@ -1,6 +1,5 @@
-// src/components/ProfileModal.jsx
 import COLORS from '../lib/constants';
-
+//PROFILE COMPONENT THAT ALLOWS USER TO SAVE THEIR DATA, DELETE ACCOUNT ETC
 //define avatar mapping
 const avatarImages = {
   default: "../../public/profileIcon.png",
@@ -43,14 +42,13 @@ const ProfileModal = ({ isOpen, onClose, profileData, isLoading, error }) => {
   return (
     <div
       className="fixed inset-0 z-[100] flex items-center justify-center bg-black bg-opacity-80 backdrop-blur-sm p-4"
-      onClick={handleBackdropClick} // Use the specific handler for backdrop clicks
+      onClick={handleBackdropClick}
     >
       <div
         className="rounded-xl shadow-xl p-6 border w-full max-w-lg relative animate-fade-in"
         style={{ backgroundColor: COLORS.DARK_GRAY, borderColor: COLORS.MEDIUM_GRAY, color: COLORS.WHITE }}
         
       >
-        {/* Close Button */}
         <button
           onClick={onClose}
           className="absolute top-3 right-4 text-3xl font-light leading-none hover:text-red-500 transition-colors"
@@ -60,7 +58,6 @@ const ProfileModal = ({ isOpen, onClose, profileData, isLoading, error }) => {
           &times;
         </button>
 
-        {/* Modal Content */}
         <h2 className="text-2xl font-semibold mb-5 border-b pb-3" style={{ borderColor: COLORS.MEDIUM_GRAY, color: COLORS.NEON_GREEN }}>
           Profile View
         </h2>
@@ -78,7 +75,6 @@ const ProfileModal = ({ isOpen, onClose, profileData, isLoading, error }) => {
 
         {!isLoading && !error && profileData && (
           <div className="space-y-5">
-            {/* Header: Avatar + Names */}
             <div className="flex items-center space-x-4">
               <img
                 src={avatarImages[profileData.avatar] || avatarImages.default}
@@ -97,7 +93,6 @@ const ProfileModal = ({ isOpen, onClose, profileData, isLoading, error }) => {
               </div>
             </div>
 
-            {/* Bio */}
             {profileData.bio ? (
               <div>
                 <h4 className="font-semibold mb-1 text-sm uppercase tracking-wider" style={{ color: COLORS.NEON_GREEN }}>Bio</h4>
@@ -114,7 +109,6 @@ const ProfileModal = ({ isOpen, onClose, profileData, isLoading, error }) => {
               </div>
             )}
 
-            {/* Achievements */}
             {profileData.achievements && profileData.achievements.length > 0 ? (
               <div>
                 <h4 className="font-semibold mb-2 text-sm uppercase tracking-wider" style={{ color: COLORS.NEON_GREEN }}>Achievements</h4>
@@ -137,7 +131,6 @@ const ProfileModal = ({ isOpen, onClose, profileData, isLoading, error }) => {
             )}
           </div>
         )}
-        {/* Close button at the bottom */}
         <button
           onClick={onClose}
           className="mt-6 w-full px-4 py-2 rounded transition font-medium"

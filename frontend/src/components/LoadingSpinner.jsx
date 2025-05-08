@@ -1,4 +1,5 @@
 import COLORS from '../lib/constants';
+//LOADING SPINNER COMPONENT FOR LOADING
 const LoadingSpinner = () => {
 	return (
 		<div style={{ backgroundColor: COLORS.DARK_GRAY }}className='flex items-center justify-center min-h-screen'

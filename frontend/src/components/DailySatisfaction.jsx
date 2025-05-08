@@ -1,9 +1,9 @@
-/* eslint-disable no-shadow */
 import React, { PureComponent } from 'react';
 import { PieChart, Pie, Cell, Tooltip } from 'recharts';
 import { COLORS } from '../lib/constants';
 import axios from 'axios';
 
+//NEEDLE CHART COMPONENT THAT DISPLAYS PERCENT COMPLETION OF EXERCISES AND MEALS
 const RADIAN = Math.PI / 180;
 const data = [
   { name: 'Unsatisfactory', value: 33, color: '#ff4444' },
@@ -123,8 +123,7 @@ export default class DailySatisfaction extends PureComponent {
       const totalExercises = workoutsResponse.data.reduce((total, workout) => 
         total + workout.exercises.length, 0);
 
-      // Calculate satisfaction score (0-100)
-      // Weight: 50% meals, 50% workouts
+      // Calculate satisfaction score %
       const mealScore = totalMeals > 0 ? (completedMeals / totalMeals) * 50 : 0;
       const workoutScore = totalExercises > 0 ? (completedExercises.size / totalExercises) * 50 : 0;
       const satisfactionValue = Math.round(mealScore + workoutScore);

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import Confetti from "react-confetti";
 import { toast } from "react-hot-toast";
 import PropTypes from "prop-types";
-
+//ACHIEVEMENT NOTIFIER POPUP COMPONENT
 const AchievementNotifier = ({ unlockedAchievement }) =>
 {
     const [showConfetti, setShowConfetti] = useState(false);

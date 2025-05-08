@@ -1,5 +1,6 @@
+//MATH FUNCTION TO HELP CALCULATE NEEDED MACROS BASED ON PREFERENCES
 export const calculateMacros = (height, weight, age, gender, activityLevel, nutritionGoal) => {
-  // Log raw input parameters for debugging
+  // Log parameters
 ( {
     height,
     weight,
@@ -23,26 +24,18 @@ export const calculateMacros = (height, weight, age, gender, activityLevel, nutr
     if (!height) {
       return 0;
     }
-
-    // If it's already a number, assume it's in cm
     if (typeof height === 'number' && !isNaN(height)) {
       return Math.round(height);
     }
-
-    // Ensure height is a string before using .match()
     if (typeof height !== 'string') {
       return 0;
     }
-
-    // Try to parse feet'inches" format
     const match = height.match(/^(\d+)'(\d+)"?$/);
     if (match) {
       const feet = Number(match[1]);
       const inches = Number(match[2]);
       return Math.round((feet * 12 + inches) * 2.54);
     }
-    
-    // Try to parse inches format
     const inchesMatch = height.match(/^(\d+)"?$/);
     if (inchesMatch) {
       return Math.round(Number(inchesMatch[1]) * 2.54);
@@ -50,8 +43,6 @@ export const calculateMacros = (height, weight, age, gender, activityLevel, nutr
 
     return 0;
   };
-
-  // Parse and validate numeric inputs
   const parsedWeight = safeNumber(weight);
   const parsedAge = safeNumber(age);
   const parsedHeight = parseHeightToCm(height);
@@ -69,8 +60,6 @@ export const calculateMacros = (height, weight, age, gender, activityLevel, nutr
       targetFats: 0
     };
   }
-
-  // Validate required string inputs
   if (!gender || !activityLevel || !nutritionGoal) {
     ( {
       gender,
@@ -88,7 +77,7 @@ export const calculateMacros = (height, weight, age, gender, activityLevel, nutr
   // Normalize goal string
   const normalizedGoal = normalizeGoal(nutritionGoal);
 
-  // Calculate BMR using Mifflin-St Jeor Equation
+  // Calculate BMR 
   let bmr;
   if (gender.toLowerCase() === 'male') {
     bmr = 10 * parsedWeight + 6.25 * parsedHeight - 5 * parsedAge + 5;
@@ -96,7 +85,7 @@ export const calculateMacros = (height, weight, age, gender, activityLevel, nutr
     bmr = 10 * parsedWeight + 6.25 * parsedHeight - 5 * parsedAge - 161;
   }
 
-  // Calculate TDEE based on activity level
+  // Calculate Total daily energy expenditure
   const activityMultipliers = {
     sedentary: 1.2,
     light: 1.375,
@@ -112,10 +101,10 @@ export const calculateMacros = (height, weight, age, gender, activityLevel, nutr
   let totalCalories;
   switch (normalizedGoal) {
     case "weightloss":
-      totalCalories = Math.round(tdee - 500); // 500 calorie deficit
+      totalCalories = Math.round(tdee - 500);
       break;
     case "musclegain":
-      totalCalories = Math.round(tdee + 250); // 250 calorie surplus
+      totalCalories = Math.round(tdee + 250);
       break;
     case "healthy":
     case "healthyeating":
@@ -145,7 +134,6 @@ export const calculateMacros = (height, weight, age, gender, activityLevel, nutr
   // Calculate protein target
   const targetProtein = Math.round(proteinPerLb * parsedWeight);
   
-  // Clamp protein to prevent unrealistic values
   const maxProtein = Math.round(parsedWeight * 1.2);
   const clampedProtein = Math.min(targetProtein, maxProtein);
   const proteinCalories = clampedProtein * 4;
@@ -175,7 +163,6 @@ export const calculateMacros = (height, weight, age, gender, activityLevel, nutr
   const targetCarbs = Math.round((adjustedRemainingCalories * carbRatio) / 4);
   const targetFats = Math.round((adjustedRemainingCalories * fatRatio) / 9);
 
-  // Log final macro calculations with sanity checks
   ( {
     targetCalories: totalCalories,
     clampedProtein,

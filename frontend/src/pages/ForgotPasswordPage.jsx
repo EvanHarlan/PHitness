@@ -5,7 +5,7 @@ import { LogIn, Mail, Loader } from "lucide-react";
 import { motion } from "framer-motion";
 import { toast } from 'react-hot-toast';
 import axios from '../lib/axios'; 
-
+//FORGOT PASSWORD PAGE WHERE USER CAN GET A NEW PASSWORD
 
 const ForgotPasswordPage = () => {
   const [email, setEmail] = useState("");
@@ -22,7 +22,7 @@ const ForgotPasswordPage = () => {
       setIsMobile(window.innerWidth < 768);
     };
     
-    handleResize(); // Check on initial load
+    handleResize();
     window.addEventListener('resize', handleResize);
     
     return () => window.removeEventListener('resize', handleResize);
@@ -60,7 +60,6 @@ const ForgotPasswordPage = () => {
             boxShadow: "0 10px 25px rgba(0, 0, 0, 0.15)"
           }}
         >
-          {/* Header Section */}
           <div className="bg-gradient-to-r from-green-600 to-gray-700 px-5 sm:px-8 py-8 sm:py-12">
             <motion.div
               initial={{ opacity: 0, y: -20 }}
@@ -75,8 +74,6 @@ const ForgotPasswordPage = () => {
               </p>
             </motion.div>
           </div>
-
-          {/* Form Section */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}

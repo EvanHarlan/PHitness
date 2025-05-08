@@ -9,7 +9,7 @@ import NutritionQuestionnaire from "../components/NutritionQuestionnaire";
 import SavedMealsList from "../components/SavedMealList";
 import COLORS from '../lib/constants';
 import { useUserStore } from "../stores/useUserStore";
-
+//NUTRITION PAGE 
 const NutritionPage = () => {
   // State variables
   const [mealAmount, setMealAmount] = useState(0);
@@ -33,7 +33,7 @@ const NutritionPage = () => {
 
   // Form state for user parameters
   const [userParams, setUserParams] = useState({
-    dietaryRestrictions: [], // Array for multiple selections
+    dietaryRestrictions: [],
     targetCalories: "", 
     mealType: "balanced",
     ingredientsToInclude: "",
@@ -50,7 +50,7 @@ const NutritionPage = () => {
     cookingSkill: '',
     timePerMeal: '',
     budget: '',
-    healthConditions: [] // Array for multiple selections
+    healthConditions: []
   });
 
   // Function to calculate time until next generation
@@ -64,12 +64,10 @@ const NutritionPage = () => {
     const isToday = lastGen.toDateString() === now.toDateString();
     
     if (isToday) {
-      // If generated today, next generation is 24 hours from last generation
       const nextGen = new Date(lastGen);
       nextGen.setHours(nextGen.getHours() + 24);
       return nextGen;
     } else {
-      // If not generated today, can generate now
       return now;
     }
   };
@@ -95,8 +93,6 @@ const NutritionPage = () => {
     const updateTimer = () => {
       const nextTime = calculateNextGenerationTime();
       setNextGenerationTime(nextTime);
-      
-      // Update canGenerateMealPlan based on the next generation time
       if (nextTime) {
         const now = new Date();
         setCanGenerateMealPlan(now >= nextTime);
@@ -106,7 +102,7 @@ const NutritionPage = () => {
     };
 
     updateTimer();
-    const interval = setInterval(updateTimer, 1000); // Update every second
+    const interval = setInterval(updateTimer, 1000);
 
     return () => clearInterval(interval);
   }, [lastMealPlanGeneration]);
@@ -117,7 +113,7 @@ const NutritionPage = () => {
       setIsMobile(window.innerWidth < 768);
     };
     
-    handleResize(); // Check on initial load
+    handleResize();
     window.addEventListener('resize', handleResize);
     
     return () => window.removeEventListener('resize', handleResize);
@@ -169,7 +165,7 @@ const NutritionPage = () => {
           cursor: 'pointer',
           padding: isMobile ? '2px' : '0',
           '&:hover': {
-            color: COLORS.LIGHT_GRAY, // Slightly lighter on hover for feedback
+            color: COLORS.LIGHT_GRAY,
           }
         }}
       />
@@ -214,7 +210,7 @@ const NutritionPage = () => {
   useEffect(() => {
       if (autoFillEnabled)
       {
-          fetchProfileData(true); // silent to prevent double toast
+          fetchProfileData(true);
       }
   }, []);
 
@@ -232,7 +228,7 @@ const NutritionPage = () => {
     }
   }, [autoFillEnabled]);
 
-  // Log user from store (for debugging)
+  // Log user from store 
   useEffect(() => {
   }, [user]);
 
@@ -242,7 +238,7 @@ const NutritionPage = () => {
       try {
         const response = await axios.get("http://localhost:5000/api/tracker/counts", { withCredentials: true });
         setMealAmount(response.data.mealCount || 0);
-        setFetchMealCountError(null); // Clear any previous error
+        setFetchMealCountError(null); 
       } catch (error) {
         setFetchMealCountError(error);
       }
@@ -262,14 +258,11 @@ const NutritionPage = () => {
         if (tracker && tracker.lastGenerationDate) {
           const lastGenDate = new Date(tracker.lastGenerationDate);
           setLastMealPlanGeneration(lastGenDate);
-          
-          // Check if the last generation was today
           const now = new Date();
           const isToday = lastGenDate.toDateString() === now.toDateString();
           
           if (isToday) {
             setCanGenerateMealPlan(false);
-            // Calculate next generation time (24 hours from last generation)
             const nextGen = new Date(lastGenDate);
             nextGen.setHours(nextGen.getHours() + 24);
             setNextGenerationTime(nextGen);
@@ -282,7 +275,6 @@ const NutritionPage = () => {
           setNextGenerationTime(new Date());
         }
       } catch (error) {
-        // Default to allowing generation if there's an error
         setCanGenerateMealPlan(true);
         setNextGenerationTime(new Date());
       }
@@ -290,7 +282,6 @@ const NutritionPage = () => {
 
     fetchLastMealPlanGeneration();
 
-    // Add event listener for meal plan deletion
     const handleMealPlanDeleted = () => {
       fetchLastMealPlanGeneration();
     };
@@ -302,7 +293,6 @@ const NutritionPage = () => {
     };
   }, []);
 
-  // Update timer every second
   useEffect(() => {
     const timer = setInterval(() => {
       if (nextGenerationTime) {
@@ -332,13 +322,13 @@ const NutritionPage = () => {
 
     setLoading(true);
     try {
-      // Convert height from imperial to metric if needed for the API
+      // Convert height 
       let heightInCm = null;
       if (userParams.heightInInches) {
         heightInCm = Math.round(userParams.heightInInches * 2.54);
       }
       
-      // Convert weight from pounds to kg if needed for the API
+      // Convert weight 
       let weightInKg = null;
       if (userParams.weight) {
         weightInKg = Math.round(userParams.weight / 2.2046);
@@ -375,7 +365,6 @@ const NutritionPage = () => {
           const lastGenDate = new Date(response.data.lastGenerationDate);
           setLastMealPlanGeneration(lastGenDate);
           
-          // Calculate next generation time (24 hours from last generation)
           const nextGen = new Date(lastGenDate);
           nextGen.setHours(nextGen.getHours() + 24);
           setNextGenerationTime(nextGen);
@@ -404,7 +393,6 @@ const NutritionPage = () => {
     } catch (error) {
       
       if (error.response?.status === 429) {
-        // Update the last generation time from the error response if available
         const lastGenDate = error.response.data.lastGenerationDate;
         if (lastGenDate) {
           setLastMealPlanGeneration(new Date(lastGenDate));
@@ -450,7 +438,6 @@ const NutritionPage = () => {
   }
 
   return (
-    // Wrap the entire display within the themeprovider to have access to the theme for the tooltip styling
     <ThemeProvider theme={tooltipTheme}>
       <div className="min-h-screen p-4 sm:p-6" style={{ backgroundColor: COLORS.BLACK }}>
         <header className="mb-6 sm:mb-10">
@@ -465,7 +452,6 @@ const NutritionPage = () => {
         
         <div className="max-w-5xl mx-auto">
           <div className="grid gap-6 sm:gap-8">
-            {/* Nutrition Parameters Form */}
             <div className="rounded-lg sm:rounded-xl shadow-sm p-4 sm:p-6 border" 
                  style={{ 
                    backgroundColor: COLORS.DARK_GRAY, 
@@ -476,7 +462,6 @@ const NutritionPage = () => {
                 <InfoTooltip title="Answer questions to get personalized meal suggestions based on your dietary needs and goals." />
               </h2>
 
-              {/* Next Generation Time Indicator */}
               <div className="mb-4 p-3 rounded-lg" style={{ 
                 backgroundColor: `${COLORS.BLACK}80`,
                 border: `1px solid ${COLORS.MEDIUM_GRAY}`
@@ -521,7 +506,6 @@ const NutritionPage = () => {
               />
             </div>
 
-            {/* Nutrition Tracker */}
             <div className="rounded-lg sm:rounded-xl shadow-sm p-4 sm:p-6 border" 
                  style={{ 
                    backgroundColor: COLORS.DARK_GRAY, 
@@ -575,7 +559,6 @@ const NutritionPage = () => {
             </div>
           </div>
 
-          {/* Display saved meals */}
           {showSavedMeals && (
             <div className="mt-6 sm:mt-8 rounded-lg sm:rounded-xl shadow-sm p-4 sm:p-6 border" 
                  style={{ backgroundColor: COLORS.DARK_GRAY, borderColor: COLORS.MEDIUM_GRAY }}>
@@ -588,7 +571,6 @@ const NutritionPage = () => {
             </div>
           )}
           
-          {/* Add an element for meal plan results to scroll to */}
           {mealData && <div id="meal-result" className="pt-4"></div>}
         </div>
       </div>

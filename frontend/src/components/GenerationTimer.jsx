@@ -1,5 +1,6 @@
 import React from 'react';
 import { COLORS } from '../lib/constants';
+//GENERATION TIMER COMPONENT THAT DISPLAYS TIME LEFT TILL NUTRTIION AND WORKOUT GENERATION
 
 //logic for setting up timer
 const GenerationTimer = ({ nextTime, type }) => {

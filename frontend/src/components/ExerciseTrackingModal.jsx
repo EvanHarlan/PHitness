@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import COLORS from '../lib/constants';
-
+//EXERCISE TRACKING COMPONENT THAT ALLOWS USER TO TRACK, REPS, WEIGHT, AND TIME SPENT
 const ExerciseTrackingModal = ({ exercise, workoutId, onClose }) => {
   const [formData, setFormData] = useState({
     weight: '',
@@ -140,7 +140,6 @@ const ExerciseTrackingModal = ({ exercise, workoutId, onClose }) => {
         </div>
 
         <div className="space-y-4">
-          {/* Weight and Reps Input */}
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium mb-2" style={{ color: COLORS.LIGHT_GRAY }}>
@@ -180,8 +179,6 @@ const ExerciseTrackingModal = ({ exercise, workoutId, onClose }) => {
               )}
             </div>
           </div>
-
-          {/* Time Input */}
           <div>
             <label className="block text-sm font-medium mb-2" style={{ color: COLORS.LIGHT_GRAY }}>
               Time Spent (minutes) <span className="text-red-500">*</span>
@@ -200,8 +197,6 @@ const ExerciseTrackingModal = ({ exercise, workoutId, onClose }) => {
               <p className="mt-1 text-xs text-red-500">{errors.timeSpent}</p>
             )}
           </div>
-
-          {/* Save Button */}
           <button
             onClick={handleSave}
             className="w-full py-2 rounded font-medium transition-opacity"

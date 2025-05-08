@@ -1,32 +1,22 @@
-// Helper to calculate smart macro limits based on user parameters
+// HELPER TO CALCULATE SMART MACROS
 export const calculateMacroLimits = (userParams) => {
-  // Helper to normalize goal string
-  const normalizeGoal = (goal) => {
-    if (!goal) return '';
-    return goal.toLowerCase().replace(/[-\s]/g, '');
-  };
-
-  // Safe number conversion helper
   const safeNumber = (val) => {
     const num = Number(val);
     return isNaN(num) ? 0 : num;
   };
-
   // Parse height from string format to centimeters
   const parseHeightToCm = (heightStr) => {
     try {
       if (!heightStr) return 0;
       
-      // Match feet and inches using regex
       const match = heightStr.match(/^(\d+)'(\d+)"?$/);
       if (!match) {
         return 0;
       }
-
       const feet = parseInt(match[1]);
       const inches = parseInt(match[2]);
       const totalInches = (feet * 12) + inches;
-      return Math.round(totalInches * 2.54); // Convert to cm
+      return Math.round(totalInches * 2.54); 
     } catch (error) {
       return 0;
     }
@@ -42,7 +32,7 @@ export const calculateMacroLimits = (userParams) => {
   // Convert weight to pounds
   const weightInLbs = weight * 2.20462;
 
-  // Calculate BMR using Mifflin-St Jeor Equation
+  // Calculate BMR 
   let bmr;
   if (gender === 'male') {
     bmr = 10 * weight + 6.25 * heightInCm - 5 * age + 5;
@@ -59,7 +49,7 @@ export const calculateMacroLimits = (userParams) => {
     'extra-active': 1.9
   };
 
-  // Calculate TDEE
+  // Calculate total daily energy expenditure
   const tdee = bmr * (activityMultipliers[activityLevel] || 1.2);
 
   // Calculate macro limits
@@ -68,11 +58,11 @@ export const calculateMacroLimits = (userParams) => {
     minCalories: Math.round(tdee * 0.85),
     maxProtein: Math.round(weightInLbs * 1.6),
     perMealProteinCap: 60,
-    macroFlex: 0.1, // 10% margin allowed
+    macroFlex: 0.1, 
     tdee: Math.round(tdee)
   };
 
-  // Log calculated limits for debugging
+  // Log calculated limits
 
   return limits;
 };
@@ -93,7 +83,7 @@ export const getMacroRatio = (goal) => {
     'increaseenergy': { protein: 0.25, carbs: 0.50, fats: 0.25 }
   };
 
-  // Get ratios for the goal or default to maintenance
+  // Get ratios for the goal
   const ratios = macroRatios[normalizedGoal] || macroRatios.maintenance;
 
 ({

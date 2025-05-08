@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+//NUTRITION INTAKE COMPONENT THAT DISPLAYS CALORIES EATEN FOR THE DAY, FOR A WEEK PERIOD
 import {
   ResponsiveContainer,
   BarChart,
@@ -41,10 +42,9 @@ const NutritionIntakeChart = () => {
         // Get the start and end dates for the current week
         const now = new Date();
         const startOfWeek = new Date(now);
-        startOfWeek.setDate(now.getDate() - now.getDay()); // Start of current week
+        startOfWeek.setDate(now.getDate() - now.getDay());
         const endOfWeek = new Date(startOfWeek);
-        endOfWeek.setDate(startOfWeek.getDate() + 6); // End of current week
-
+        endOfWeek.setDate(startOfWeek.getDate() + 6);
 
 
         // Fetch meal plans for the date range
@@ -85,7 +85,7 @@ const NutritionIntakeChart = () => {
       plan.meals.forEach(meal => {
         if (meal.completed) {
           const mealDate = new Date(plan.createdAt);
-          const dayIndex = mealDate.getDay(); // 0 = Sunday, 1 = Monday, etc.
+          const dayIndex = mealDate.getDay();
           processedData[dayIndex].calories += meal.calories;
         }
       });

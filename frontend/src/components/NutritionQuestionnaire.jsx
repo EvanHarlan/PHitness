@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import COLORS from '../lib/constants';
-
+//NUTRITION QUESTIONNAIRE COMPONENT WHERE USER ENTERS IN THEIR PREFERENCES
 const NutritionQuestionnaire = ({ userParams, setUserParams, onSubmit, loading, canGenerateMealPlan, nextGenerationTime }) => {
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -10,10 +10,9 @@ const NutritionQuestionnaire = ({ userParams, setUserParams, onSubmit, loading, 
     }));
   };
 
-  // Toggle a selected option (for tag-based selection)
+  // Toggle a selected option
   const toggleSelection = (value, field) => {
     setUserParams(prev => {
-      // Handle "none" option specially - if selecting "none", clear other selections
       if (value === "none") {
         return {
           ...prev,
@@ -21,7 +20,6 @@ const NutritionQuestionnaire = ({ userParams, setUserParams, onSubmit, loading, 
         };
       }
 
-      // If a value other than "none" is selected, remove "none" from the array if present
       let updatedArray = prev[field].includes(value)
         ? prev[field].filter(item => item !== value)
         : [...prev[field].filter(item => item !== "none"), value];
@@ -151,7 +149,7 @@ const NutritionQuestionnaire = ({ userParams, setUserParams, onSubmit, loading, 
     );
   };
 
-  // Height options array
+  // Height, Age, Gender, goals etc options array
   const heightOptions = [
     { value: "", label: "Select your height" },
     ...[...Array(90 - 54 + 1)].map((_, i) => {
@@ -166,7 +164,7 @@ const NutritionQuestionnaire = ({ userParams, setUserParams, onSubmit, loading, 
 
   const ageOptions = [
     { value: "", label: "Select your age" },
-    ...Array.from({ length: 83 }, (_, i) => ({ // From 18 to 100
+    ...Array.from({ length: 83 }, (_, i) => ({
       value: 18 + i,
       label: `${18 + i} years`,
     })),
@@ -200,7 +198,7 @@ const NutritionQuestionnaire = ({ userParams, setUserParams, onSubmit, loading, 
     { value: "extra-active", label: "Extra Active (very intense training or physically demanding job)" },
   ];
 
-  // Dietary restrictions options for the tag-based selection
+  // Dietary restrictions options
   const dietaryRestrictionsOptions = [
     { value: "none", label: "No restrictions" },
     { value: "vegetarian", label: "Vegetarian" },
@@ -267,7 +265,7 @@ const NutritionQuestionnaire = ({ userParams, setUserParams, onSubmit, loading, 
     { value: "high", label: "High" },
   ];
 
-  // Health conditions options for the tag-based selection
+  // Health conditions options
   const healthConditionsOptions = [
     { value: "none", label: "No known conditions" },
     { value: "diabetes-type1", label: "Diabetes Type 1" },
@@ -305,7 +303,6 @@ const NutritionQuestionnaire = ({ userParams, setUserParams, onSubmit, loading, 
       onSubmit();
     }}>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* Basic Information - Left Column */}
         <div className="space-y-4">
           {getFormField("Height", "height", "select", heightOptions, true)}
           <div className="space-y-2">
@@ -331,7 +328,6 @@ const NutritionQuestionnaire = ({ userParams, setUserParams, onSubmit, loading, 
           {getFormField("Typical Activity Level", "activityLevel", "select", activityLevelOptions, true)}
         </div>
 
-        {/* Dietary Preferences - Right Column */}
         <div className="space-y-4">
           {getFormField("Preferred Meal Frequency", "mealFrequency", "select", mealFrequencyOptions)}
           {getFormField("Snack Preference", "snackPreference", "select", snackPreferenceOptions)}
@@ -342,7 +338,6 @@ const NutritionQuestionnaire = ({ userParams, setUserParams, onSubmit, loading, 
         </div>
       </div>
 
-      {/* Dietary Restrictions Tag Selection */}
       <div className="mb-6 pt-4">
         <label className="block text-sm font-medium mb-2" style={{ color: COLORS.LIGHT_GRAY }}>
           Dietary Restrictions
@@ -360,7 +355,6 @@ const NutritionQuestionnaire = ({ userParams, setUserParams, onSubmit, loading, 
         </div>
       </div>
 
-      {/* Health Conditions Tag Selection */}
       <div className="mb-6">
         <label className="block text-sm font-medium mb-2" style={{ color: COLORS.LIGHT_GRAY }}>
           Health Conditions

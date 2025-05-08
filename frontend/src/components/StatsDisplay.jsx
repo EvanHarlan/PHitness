@@ -1,4 +1,5 @@
 import { useState } from 'react';
+//STATS DISPLAY COMPONENT
 import {
   ResponsiveContainer,
   AreaChart,
@@ -17,32 +18,6 @@ import {
   Legend
 } from 'recharts';
 import { COLORS } from '../lib/constants';
-
-// Sample data for charts - replace with actual data from MongoDB later
-const PLACEHOLDER_DATA = {
-  
-  nutrition: [
-    { day: 'Mon', calories: 2100, protein: 120, carbs: 240, fat: 70 },
-    { day: 'Tue', calories: 1950, protein: 130, carbs: 200, fat: 65 },
-    { day: 'Wed', calories: 2200, protein: 140, carbs: 250, fat: 75 },
-    { day: 'Thu', calories: 1800, protein: 110, carbs: 190, fat: 60 },
-    { day: 'Fri', calories: 2050, protein: 125, carbs: 220, fat: 68 },
-    { day: 'Sat', calories: 2300, protein: 145, carbs: 260, fat: 78 },
-    { day: 'Sun', calories: 1900, protein: 115, carbs: 210, fat: 63 },
-  ],
-  macros: [
-    
-  ],
-  progress: [
-    { month: 'Jan', weight: 185 },
-    { month: 'Feb', weight: 183 },
-    { month: 'Mar', weight: 181 },
-    { month: 'Apr', weight: 179 },
-    { month: 'May', weight: 177 },
-    { month: 'Jun', weight: 176 },
-    { month: 'Jul', weight: 174 },
-  ]
-};
 
 // Custom tooltip for the charts
 const CustomTooltip = ({ active, payload, label }) => {
@@ -216,13 +191,11 @@ const StatsDisplay = ({
         <h3 className="text-xl font-semibold mb-1" style={{ color: COLORS.NEON_GREEN }}>{title}</h3>
         {description && <p className="text-sm text-[#B0B0B0]">{description}</p>}
       </div>
-      
-      {/* The actual chart */}
       {renderChart()}
     </div>
   );
 };
 
 export default StatsDisplay;
-// Export chart types for easier reference
-export { CHART_TYPES, PLACEHOLDER_DATA };
+
+export { CHART_TYPES};

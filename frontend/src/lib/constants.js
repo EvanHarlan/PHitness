@@ -1,4 +1,4 @@
-// Color Constants
+// COLOR CONSTANTS
 export const COLORS = {
     NEON_GREEN: '#32CD32',
     BALANCED_GREEN: '#4CAF50',

@@ -5,6 +5,7 @@ import GenerationTimer from './GenerationTimer';
 import DailySatisfaction from './DailySatisfaction';
 import { COLORS } from '../lib/constants';
 import axios from 'axios';
+//DASHBOARD STATS COMPONENT THAT IS DISPLAYED ON THE HOME PAGE, *CONTAINS, GENERATIONTIMER, NUTRITIONINTAKECHART, DAILYSATISFACTION, WEIGHT*
 import {
   ResponsiveContainer,
   LineChart,
@@ -97,9 +98,7 @@ const DashboardStats = ({ user }) => {
           },
           withCredentials: true
         });
-
-
-        // Process the data to match the chart format
+        // Process the data
         const processedData = processWorkoutData(response.data);
         setWorkoutData(processedData);
       } catch (error) {
@@ -116,7 +115,6 @@ const DashboardStats = ({ user }) => {
   }, []);
 
   const processWorkoutData = (workouts) => {
-    // Create an array for all days of the week
     const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
     const processedData = days.map(day => ({
       day,
@@ -151,7 +149,7 @@ const DashboardStats = ({ user }) => {
 
   const formatDate = (date) => {
     const d = new Date(date);
-    return d.toISOString(); // Ensure full ISO string with timezone
+    return d.toISOString();
   };
 
   const fetchWeightData = async () => {
@@ -258,7 +256,6 @@ const DashboardStats = ({ user }) => {
 
   return (
     <div className="space-y-8">
-      {/* Generation Timers */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <GenerationTimer 
           nextTime={nextGenerationTimes.nutrition} 
@@ -269,9 +266,7 @@ const DashboardStats = ({ user }) => {
           type="Workout" 
         />
       </div>
-      
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Workout Activity Chart */}
         <StatsDisplay 
           title="Workout Activity" 
           description="Your workout duration and calories burned over the past week"
@@ -283,8 +278,6 @@ const DashboardStats = ({ user }) => {
           yAxisLabel="Minutes"
           secondaryYAxisLabel="Calories"
         />
-        
-        {/* Weight Progress Chart */}
         <div className="p-4 rounded-lg" style={{ backgroundColor: COLORS.MEDIUM_GRAY, border: `1px solid ${COLORS.DARK_GRAY}` }}>
           <h3 className="text-lg font-semibold text-green-500 mb-1">Weight Progress</h3>
           <p className="text-sm text-gray-300 mb-4">
@@ -331,11 +324,7 @@ const DashboardStats = ({ user }) => {
             </ResponsiveContainer>
           </div>
         </div>
-        
-        {/* Nutrition Intake Chart */}
         <NutritionIntakeChart />
-        
-        {/* Daily Satisfaction Gauge */}
         <div className="p-4 rounded-lg" style={{ backgroundColor: COLORS.MEDIUM_GRAY, border: `1px solid ${COLORS.DARK_GRAY}` }}>
           <h3 className="text-lg font-semibold mb-4" style={{ color: COLORS.NEON_GREEN }}>
             Daily Satisfaction

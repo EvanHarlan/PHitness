@@ -5,7 +5,7 @@ import { format, addWeeks, startOfWeek, addDays } from 'date-fns';
 import COLORS from '../lib/constants';
 import { useUserStore } from '../stores/useUserStore';
 import { API_BASE_URL } from '../config';
-
+//WEIGHT NOTIFICATION POPUP COMPONENT
 const WeightNotification = () => {
   const [showModal, setShowModal] = useState(false);
   const [weight, setWeight] = useState('');
@@ -44,7 +44,6 @@ const WeightNotification = () => {
 
   const handleWeightChange = (e) => {
     const value = e.target.value;
-    // Only allow numbers and one decimal point
     if (/^\d*\.?\d*$/.test(value)) {
       setWeight(value);
       setError(validateWeight(value));

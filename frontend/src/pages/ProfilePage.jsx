@@ -76,7 +76,7 @@ const ProfilePage = () => {
     ];
 
     const handleNavigateClick = () => {
-        navigate("/update-profile");   page
+        navigate("/update-profile");  
       };
 
 
@@ -86,7 +86,7 @@ const ProfilePage = () => {
             setIsMobile(window.innerWidth < 768);
         };
         
-        handleResize(); // Check on initial load
+        handleResize();
         window.addEventListener('resize', handleResize);
         
         return () => window.removeEventListener('resize', handleResize);

@@ -1,5 +1,5 @@
 import { useUserStore } from '../stores/useUserStore';
-import { Link, useNavigate } from 'react-router-dom'; // Assuming useNavigate might be used elsewhere or was planned
+import { Link, useNavigate } from 'react-router-dom'; 
 import { COLORS } from '../lib/constants';
 import DashboardStats from '../components/DashboardStats';
 import { motion } from 'framer-motion';
@@ -7,25 +7,24 @@ import { useState, useEffect } from 'react';
 import MuscleGroupsRadarChart from '../components/MuscleGroupsRadarChart';
 import MacronutrientPieChart from '../components/MacronutrientPieChart';
 import WeightNotification from '../components/WeightNotification';
-
+//HOME PAGE FOR USER BASED ON AUTHENTICATION STATUS
 const HomePage = () => {
   const { user } = useUserStore();
   const [isMobile, setIsMobile] = useState(false); 
 
-  // Detect mobile devices - This useEffect is not directly related to the scrolling issue
-  // but kept as it was in the original code.
+  // Detect mobile devices 
   useEffect(() => {
     const handleResize = () => {
       setIsMobile(window.innerWidth < 768);
     };
     
-    handleResize(); // Check on initial load
+    handleResize(); 
     window.addEventListener('resize', handleResize);
     
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Content for authenticated users (dashboard)
+  // Content for authenticated users
   const renderDashboard = () => {
     const quickActions = [
       { title: 'Start Workout', description: 'Begin your daily exercise routine', path: '/workout'},
@@ -46,8 +45,6 @@ const HomePage = () => {
             Your personal PHitness dashboard • {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
           </p>
         </header>
-
-        {/* Statistics Dashboard */}
         <section className="mb-8 sm:mb-12 md:mb-16">
           <h2 className="text-xl sm:text-2xl font-semibold mb-4 sm:mb-6 md:mb-8 flex items-center">
             <span className="inline-block w-1 h-6 mr-3 rounded" style={{ backgroundColor: COLORS.NEON_GREEN }}></span>
@@ -56,8 +53,6 @@ const HomePage = () => {
           <WeightNotification />
           <DashboardStats user={user} />
         </section>
-
-        {/* Training Insights */}
         <section className="mb-8 sm:mb-12 md:mb-16">
           <h2 className="text-xl sm:text-2xl font-semibold mb-4 sm:mb-6 md:mb-8 flex items-center">
             <span className="inline-block w-1 h-6 mr-3 rounded" style={{ backgroundColor: COLORS.NEON_GREEN }}></span>
@@ -87,8 +82,6 @@ const HomePage = () => {
             </div>
           </div>
         </section>
-
-        {/* Nutrition Insights */}
         <section className="mb-8 sm:mb-12 md:mb-16">
           <h2 className="text-xl sm:text-2xl font-semibold mb-4 sm:mb-6 md:mb-8 flex items-center">
             <span className="inline-block w-1 h-6 mr-3 rounded" style={{ backgroundColor: COLORS.NEON_GREEN }}></span>
@@ -118,8 +111,6 @@ const HomePage = () => {
             </div>
           </div>
         </section>
-
-        {/* Quick Actions */}
         <section className="mb-8 sm:mb-12 md:mb-16">
           <h2 className="text-xl sm:text-2xl font-semibold mb-4 sm:mb-6 md:mb-8 flex items-center">
             <span className="inline-block w-1 h-6 mr-3 rounded" style={{ backgroundColor: COLORS.NEON_GREEN }}></span>
@@ -153,9 +144,8 @@ const HomePage = () => {
     );
   };
 
-  // Content for non-authenticated users (landing page)
+  // Content for non-authenticated users
   const renderLandingPage = () => {
-    // Framer motion variants
     const fadeIn = {
       hidden: { opacity: 0, y: 20 },
       visible: { 
@@ -236,7 +226,6 @@ const HomePage = () => {
     );
   };
 
-  // Define base classes and conditional classes for the main wrapper
   const commonWrapperClasses = "px-4 sm:px-6 md:px-8 lg:px-12";
   const authenticatedWrapperClasses = "min-h-screen overflow-y-auto py-6 sm:py-8 md:py-12";
   const unauthenticatedWrapperClasses = "fixed inset-0 overflow-hidden flex items-center justify-center";
@@ -253,12 +242,11 @@ const HomePage = () => {
       }}
     >
       {user ? (
-        // Container for dashboard to manage max-width and centering within the scrollable area
+        // Container for dashboard to manage max-width
         <div className="container mx-auto">
           {renderDashboard()}
         </div>
       ) : (
-        // Landing page is rendered directly; its content is centered by unauthenticatedWrapperClasses
         renderLandingPage()
       )}
     </div>

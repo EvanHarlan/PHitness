@@ -4,7 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { LogIn, Mail, Lock, ArrowRight, Loader } from "lucide-react";
 import { motion } from "framer-motion";
 import { useUserStore } from "../stores/useUserStore";
-
+//LOGIN PAGE WHERE USERS LOG IN
 const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -19,7 +19,7 @@ const LoginPage = () => {
       setIsMobile(window.innerWidth < 768);
     };
     
-    handleResize(); // Check on initial load
+    handleResize();
     window.addEventListener('resize', handleResize);
     
     return () => window.removeEventListener('resize', handleResize);
@@ -27,18 +27,17 @@ const LoginPage = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    setError({}); // Reset error messages on form submission
+    setError({});
     login(email, password)
       .then((success) => {
         if (success) {
-          navigate("/profile"); // Redirect to profile page after successful login
+          navigate("/profile");
         } else {
           // Set error message if login fails
           setError({ general: "Invalid email or password. Please try again." });
         }
       })
       .catch(() => {
-        // Handle unexpected errors (e.g., network issues)
         setError({ general: "Something went wrong. Please try again later." });
       });
   };
@@ -61,7 +60,6 @@ const LoginPage = () => {
             boxShadow: "0 10px 25px rgba(0, 0, 0, 0.15)"
           }}
         >
-          {/* Header Section */}
           <div className="bg-[#4CAF50] px-5 sm:px-8 py-8 sm:py-12">
             <motion.div
               initial={{ opacity: 0, y: -20 }}
@@ -76,8 +74,6 @@ const LoginPage = () => {
               </p>
             </motion.div>
           </div>
-
-          {/* Form Section */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}

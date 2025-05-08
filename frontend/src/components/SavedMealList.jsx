@@ -10,7 +10,7 @@ import COLORS from '../lib/constants';
 const SavedMealsList = () => {
   const [meals, setMeals] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [viewMode, setViewMode] = useState('all'); // 'all', 'favorites', or 'completed'
+  const [viewMode, setViewMode] = useState('all');
 
   useEffect(() => {
     fetchMeals();

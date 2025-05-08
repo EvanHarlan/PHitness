@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import { useUserStore } from '../stores/useUserStore';
 import { COLORS } from '../lib/constants';
 import { useState, useEffect } from 'react';
-
+//NAVBAR COMPONENT THAT HAS DIFFERENT SETTINGS BASED ON MOBILE,
 function Navbar() {
   const { user, logout } = useUserStore();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -16,7 +16,7 @@ function Navbar() {
     } else {
       timeout = setTimeout(() => {
         setMenuVisible(false);
-      }, 300); // Match this with your CSS transition duration
+      }, 300);
     }
     
     return () => {
@@ -54,7 +54,6 @@ function Navbar() {
     >
       <div className="container mx-auto px-4 py-3">
         <div className="flex justify-between items-center">
-          {/* Logo */}
           <Link 
             to="/" 
             className="text-2xl font-bold flex items-center transition-opacity duration-200 hover:opacity-80"
@@ -66,8 +65,6 @@ function Navbar() {
               className="h-12 mr-2" 
             />
           </Link>
-          
-          {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-6">
             <Link to="/" className="hover:text-green-400 transition-colors duration-200">
               Home
@@ -113,7 +110,6 @@ function Navbar() {
             )}
           </div>
           
-          {/* Mobile menu button with transition */}
           <button 
             onClick={toggleMenu}
             className="md:hidden outline-none p-2 transition-transform duration-200 active:scale-95"
@@ -142,7 +138,6 @@ function Navbar() {
           </button>
         </div>
         
-        {/* Mobile Navigation with smooth transitions */}
         <div 
           className={`md:hidden overflow-hidden transition-all duration-300 ease-in-out ${
             menuVisible ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'

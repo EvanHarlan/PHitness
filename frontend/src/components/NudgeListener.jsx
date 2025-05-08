@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
+//NUDGE COMPONENT THAT ALLOWS THE USER TO NUDGE OTHER USERS
 const NudgeListener = () => {
   const [notifications, setNotifications] = useState([]);
 
