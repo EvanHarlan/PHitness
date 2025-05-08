@@ -18,14 +18,13 @@ import AchievementNotifier from './components/AchievementNotifier';
 import MealDetailsPage from './pages/MealsDetailsPage';
 import UpdateProfilePage from './pages/UpdateProfilePage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
-
+//APP
 // ProtectedRoute component definition
 const ProtectedRoute = ({ element }) => {
   const { user } = useUserStore();
   const location = useLocation();
   
   if (!user) {
-    // Redirect to login but remember where the user was trying to go
     return <Navigate to="/login" state={{ from: location.pathname }} replace />;
   }
   
@@ -49,12 +48,11 @@ function App() {
   
   return (
     <div className="relative">
-      {/* Toast Provider with app-specific styling */}
       <Toaster 
         position="top-center"
         toastOptions={{
-          // Default options for all toasts
           style: {
+        
             background: COLORS.DARK_GRAY,
             color: COLORS.WHITE,
             border: `1px solid ${COLORS.MEDIUM_GRAY}`,
@@ -82,10 +80,8 @@ function App() {
       <Navbar />
       <main>
       <Routes>
-        {/* Home page is accessible to everyone */}
         <Route path="/" element={<HomePage />} />
-        
-        {/* Protected routes - only accessible if logged in */}
+    
         <Route path="/profile" element={<ProtectedRoute element={<ProfilePage />} />} />
         <Route path="/social" element={<ProtectedRoute element={<SocialPage />} />} />
         <Route path="/nutrition" element={<ProtectedRoute element={<NutritionPage />} />} />
@@ -94,12 +90,11 @@ function App() {
         <Route path="/meals/:id" element={<ProtectedRoute element={<MealDetailsPage />} />} /> 
         <Route path="/meals/:id" element={<ProtectedRoute element={<MealDetailsPage />} />} />     
          <Route path="/update-profile" element={<ProtectedRoute element={<UpdateProfilePage />} />} />          
-        {/* Auth routes - only accessible if NOT logged in */}
+        
         <Route path="/signup" element={user ? <Navigate to="/" /> : <SignUpPage />} />
         <Route path="/login" element={user ? <Navigate to="/" /> : <LoginPage />} />
         <Route path="/forgot-password" element={user ? <Navigate to="/" /> : <ForgotPasswordPage />} />
         
-        {/* Catch-all route */}
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
       </main>

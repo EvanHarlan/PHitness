@@ -5,10 +5,8 @@ import { Dumbbell, Utensils, Trophy } from "lucide-react";
 import { useUserStore } from "../stores/useUserStore"; 
 import { useMemo } from "react";
 import PropTypes from "prop-types";
-
 import { useNavigate } from 'react-router-dom';
- 
- 
+//PROFILE PAGE 
  
  const handleDeleteClick = () => {
    const confirmed = window.confirm(
@@ -232,7 +230,6 @@ const ProfilePage = () => {
             const isAccountCreated = achievement.title === "Account Created";
             const alreadyShownAccountCreated = localStorage.getItem("shownAccountCreated");
 
-            // If using backend tracking for other achievements:
             const alreadyUnlocked = user.achievements?.some(
                 (a) => a.title === achievement.title
             );
@@ -350,9 +347,9 @@ const ProfilePage = () => {
                             </div>
                         ) : (
                             <div className="flex flex-col sm:flex-row gap-6 w-full">
-                                {/* Left Column */}
+                             
                                 <div className="flex-1 space-y-3">
-                                {/* Name */}
+                            
                                 <div className="mb-2">
                                     <label className="block text-xs sm:text-sm" style={{ color: COLORS.NEON_GREEN }}>Name:</label>
                                     <input
@@ -364,7 +361,7 @@ const ProfilePage = () => {
                                         style={{ borderColor: COLORS.NEON_GREEN }}
                                     />
                                 </div>
-                                {/* Username */}
+
                                 <div className="mb-2">
                                     <label className="block text-xs sm:text-sm" style={{ color: COLORS.NEON_GREEN }}>Username:</label>
                                     <input
@@ -376,7 +373,7 @@ const ProfilePage = () => {
                                         style={{ borderColor: COLORS.NEON_GREEN }}
                                     />
                                 </div>
-                                {/* Age */}
+   
                                 <div className="mb-2">
                                     <label className="block text-xs sm:text-sm" style={{ color: COLORS.NEON_GREEN }}>Age:</label>
                                     <input
@@ -388,7 +385,7 @@ const ProfilePage = () => {
                                         style={{ borderColor: COLORS.NEON_GREEN }}
                                     />
                                 </div>
-                                {/* Bio */}
+                       
                                 <div className="mb-2">
                                     <label className="block text-xs sm:text-sm" style={{ color: COLORS.NEON_GREEN }}>Bio:</label>
                                     <textarea
@@ -402,9 +399,8 @@ const ProfilePage = () => {
                                   </div>
                                 </div>
 
-                                {/* Right Column */}
                                 <div className="flex-1 space-y-3">
-                                {/* Height */}
+
                                 <div className="mb-2">
                                     <label className="block text-xs sm:text-sm" style={{ color: COLORS.NEON_GREEN }}>Height:</label>
                                     <select
@@ -420,7 +416,7 @@ const ProfilePage = () => {
                                     </select>
                                 </div>
 
-                                {/* Weight */}
+
                                 <div className="mb-2">
                                     <label className="block text-xs sm:text-sm" style={{ color: COLORS.NEON_GREEN }}>Weight (lbs):</label>
                                     <input
@@ -433,7 +429,7 @@ const ProfilePage = () => {
                                     />
                                 </div>
 
-                                {/* Gender */}
+
                                 <div className="mb-2">
                                     <label className="block text-xs sm:text-sm" style={{ color: COLORS.NEON_GREEN }}>Gender:</label>
                                     <select
@@ -454,7 +450,7 @@ const ProfilePage = () => {
                                 <div className="mb-2">
                                     <label className="block text-xs sm:text-sm" style={{ color: COLORS.NEON_GREEN }}>Select Avatar:</label>
                                     <div className="mt-2">
-                                        {/* Current selected avatar display */}
+            
                                         <div className="flex items-center mb-2">
                                             <img 
                                                 src={avatarImages[editedProfile.avatar] || avatarImages.default} 
@@ -470,7 +466,7 @@ const ProfilePage = () => {
                                             </button>
                                         </div>
                                         
-                                        {/* Avatar selection modal */}
+                          
                                         <div id="avatarModal" className="hidden fixed inset-0 z-50 flex justify-center items-center bg-black bg-opacity-75">
                                             <div 
                                                 className="relative bg-gray-800 rounded-lg p-4 w-11/12 max-w-lg max-h-[80vh] overflow-y-auto"

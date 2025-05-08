@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import axios from "../lib/axios";
 import { toast } from "react-hot-toast";
-
+//USER STORE
 export const useUserStore = create((set, get) => ({
   user: null,
   loading: false,
@@ -84,8 +84,8 @@ export const useUserStore = create((set, get) => ({
   updateUserProfile: async (updatedData) => {
     set({ loading: true });
     try {
-      const res = await axios.put("/auth/profile", updatedData); // Make sure your API supports this route
-      set({ user: res.data, loading: false }); // Update the user store with the new profile data
+      const res = await axios.put("/auth/profile", updatedData); 
+      set({ user: res.data, loading: false }); 
       return true;
     } catch (error) {
       set({ loading: false });
@@ -108,20 +108,17 @@ axios.interceptors.response.use(
       originalRequest._retry = true;
 
       try {
-        // If a refresh is already in progress, wait for it to complete
         if (refreshPromise) {
           await refreshPromise;
           return axios(originalRequest);
         }
 
-        // Start a new refresh process
         refreshPromise = useUserStore.getState().refreshToken();
         await refreshPromise;
         refreshPromise = null;
 
         return axios(originalRequest);
       } catch (refreshError) {
-        // If refresh fails, redirect to login or handle as needed
         useUserStore.getState().logout();
         return Promise.reject(refreshError);
       }

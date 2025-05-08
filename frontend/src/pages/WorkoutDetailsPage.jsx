@@ -4,7 +4,7 @@ import axios from 'axios';
 import toast from 'react-hot-toast';
 import COLORS from '../lib/constants';
 import ExerciseTrackingModal from '../components/ExerciseTrackingModal';
-
+//WORKOUT DETAILS FROM THE AI 
 const WorkoutDetailsPage = () => {
   const { id: workoutId } = useParams();
   const navigate = useNavigate();
@@ -115,10 +115,10 @@ const WorkoutDetailsPage = () => {
 
   const getDifficultyColor = (difficulty) => {
     const difficultyNum = parseInt(difficulty);
-    if (difficultyNum <= 2) return '#4ade80'; // Easy - green
-    if (difficultyNum <= 3) return '#facc15'; // Medium - yellow
-    if (difficultyNum <= 4) return '#fb923c'; // Hard - orange
-    return '#ef4444'; // Very hard - red
+    if (difficultyNum <= 2) return '#4ade80';
+    if (difficultyNum <= 3) return '#facc15'; 
+    if (difficultyNum <= 4) return '#fb923c'; 
+    return '#ef4444'; 
   };
 
   const renderDifficultyIndicator = (difficulty) => {
@@ -204,7 +204,6 @@ const WorkoutDetailsPage = () => {
       );
 
       if (response.data.success) {
-        // Update workout count
         await axios.post(
           "http://localhost:5000/api/tracker",
           { type: "workout" },
@@ -284,7 +283,6 @@ const WorkoutDetailsPage = () => {
 
   return (
     <div className="min-h-screen pb-16" style={{ backgroundColor: COLORS.BLACK, color: COLORS.WHITE }}>
-      {/* Header with blurred backdrop */}
       <header className="border-b mb-8" 
               style={{ 
                 backgroundColor: `${COLORS.BLACK}E6`, 
@@ -326,7 +324,6 @@ const WorkoutDetailsPage = () => {
       </header>
 
       <div className="max-w-6xl mx-auto px-6">
-        {/* Summary card with workout stats */}
         <div className="mb-10 rounded-xl overflow-hidden shadow-lg" 
              style={{ backgroundColor: COLORS.DARK_GRAY, border: `1px solid ${COLORS.MEDIUM_GRAY}` }}>
           <div className="p-6">
@@ -334,7 +331,6 @@ const WorkoutDetailsPage = () => {
             <p className="text-sm opacity-70 mb-6">Complete breakdown of your workout plan</p>
             
             <div className="grid md:grid-cols-4 gap-6">
-              {/* Difficulty */}
               <div className="p-4 rounded-lg" style={{ backgroundColor: `${COLORS.BLACK}80` }}>
                 <div className="flex items-center mb-2">
                   <div className="h-3 w-3 rounded-full mr-2" style={{ backgroundColor: COLORS.NEON_GREEN }}></div>
@@ -345,7 +341,6 @@ const WorkoutDetailsPage = () => {
                 </div>
               </div>
               
-              {/* Calories */}
               <div className="p-4 rounded-lg" style={{ backgroundColor: `${COLORS.BLACK}80` }}>
                 <div className="flex justify-between items-center mb-2">
                   <div className="flex items-center">
@@ -356,7 +351,6 @@ const WorkoutDetailsPage = () => {
                 </div>
               </div>
               
-              {/* Rest Periods */}
               <div className="p-4 rounded-lg" style={{ backgroundColor: `${COLORS.BLACK}80` }}>
                 <div className="flex items-center mb-2">
                   <div className="h-3 w-3 rounded-full mr-2" style={{ backgroundColor: "#3498DB" }}></div>
@@ -365,7 +359,6 @@ const WorkoutDetailsPage = () => {
                 <p className="text-sm" style={{ color: COLORS.WHITE }}>{workout.restPeriods || '60-90 seconds'}</p>
               </div>
               
-              {/* Time Spent */}
               <div className="p-4 rounded-lg" style={{ backgroundColor: `${COLORS.BLACK}80` }}>
                 <div className="flex justify-between items-center mb-2">
                   <div className="flex items-center">
@@ -381,7 +374,6 @@ const WorkoutDetailsPage = () => {
           </div>
         </div>
 
-        {/* Tab navigation */}
         <div className="flex border-b mb-6" style={{ borderColor: COLORS.MEDIUM_GRAY }}>
           <button
             className={`px-4 py-2 font-medium ${activeTab === 'exercises' ? 'border-b-2' : ''}`}
@@ -415,7 +407,6 @@ const WorkoutDetailsPage = () => {
           </button>
         </div>
 
-        {/* Tab content */}
         {activeTab === 'exercises' && (
           <div className="space-y-6">
             {workout.exercises.map((exercise, index) => (
@@ -576,7 +567,6 @@ const WorkoutDetailsPage = () => {
 
         {activeTab === 'details' && (
           <div className="space-y-6">
-            {/* Notes Section */}
             <div className="rounded-xl overflow-hidden" style={{ backgroundColor: COLORS.DARK_GRAY, border: `1px solid ${COLORS.MEDIUM_GRAY}` }}>
               <div className="p-6">
                 <h3 className="text-xl font-semibold mb-3" style={{ color: COLORS.NEON_GREEN }}>
@@ -588,7 +578,6 @@ const WorkoutDetailsPage = () => {
               </div>
             </div>
 
-            {/* Progression Section */}
             <div className="rounded-xl overflow-hidden" style={{ backgroundColor: COLORS.DARK_GRAY, border: `1px solid ${COLORS.MEDIUM_GRAY}` }}>
               <div className="p-6">
                 <h3 className="text-xl font-semibold mb-3" style={{ color: COLORS.NEON_GREEN }}>
@@ -604,7 +593,6 @@ const WorkoutDetailsPage = () => {
 
         {activeTab === 'alternatives' && (
           <div className="space-y-6">
-            {/* Beginner Alternatives */}
             <div className="rounded-xl overflow-hidden" style={{ backgroundColor: COLORS.DARK_GRAY, border: `1px solid ${COLORS.MEDIUM_GRAY}` }}>
               <div className="p-6">
                 <h3 className="text-xl font-semibold mb-3" style={{ color: COLORS.NEON_GREEN }}>
@@ -618,7 +606,6 @@ const WorkoutDetailsPage = () => {
               </div>
             </div>
 
-            {/* Advanced Alternatives */}
             <div className="rounded-xl overflow-hidden" style={{ backgroundColor: COLORS.DARK_GRAY, border: `1px solid ${COLORS.MEDIUM_GRAY}` }}>
               <div className="p-6">
                 <h3 className="text-xl font-semibold mb-3" style={{ color: COLORS.NEON_GREEN }}>
@@ -632,7 +619,6 @@ const WorkoutDetailsPage = () => {
               </div>
             </div>
 
-            {/* Equipment Alternatives */}
             <div className="rounded-xl overflow-hidden" style={{ backgroundColor: COLORS.DARK_GRAY, border: `1px solid ${COLORS.MEDIUM_GRAY}` }}>
               <div className="p-6">
                 <h3 className="text-xl font-semibold mb-3" style={{ color: COLORS.NEON_GREEN }}>
@@ -649,7 +635,6 @@ const WorkoutDetailsPage = () => {
           </div>
         )}
 
-        {/* Start Workout Button */}
         <div className="mt-8 p-6 rounded-xl overflow-hidden flex items-center justify-center" 
              style={{ backgroundColor: COLORS.DARK_GRAY, border: `1px solid ${COLORS.MEDIUM_GRAY}` }}>
           <button

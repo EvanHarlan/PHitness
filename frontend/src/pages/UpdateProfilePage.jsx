@@ -3,7 +3,7 @@ import { COLORS } from '../lib/constants';
  import { Mail, Lock, Loader, RefreshCcw } from "lucide-react";
  import { motion } from "framer-motion";
  import axios from "axios";
- 
+ //UPDATE PROFILE PAGE
  const UpdateProfilePage = () => {
    const [newEmail, setNewEmail] = useState("");
    const [newPassword, setNewPassword] = useState("");

@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import { UserPlus, Mail, Lock, User, ArrowRight, Loader } from "lucide-react";
 import { motion } from "framer-motion";
 import { useUserStore } from "../stores/useUserStore";
-
+//SIGNUP PAGE
 const SignUpPage = () => {
   const [formData, setFormData] = useState({
     name: "",
@@ -31,7 +31,7 @@ const SignUpPage = () => {
       setIsMobile(window.innerWidth < 768);
     };
     
-    handleResize(); // Check on initial load
+    handleResize();
     window.addEventListener('resize', handleResize);
     
     return () => window.removeEventListener('resize', handleResize);
@@ -88,7 +88,6 @@ const SignUpPage = () => {
             margin: "0 auto",
           }}
         >
-          {/* Header Section */}
           <div className="bg-[#4CAF50] px-5 sm:px-8 py-8 sm:py-12">
             <motion.div
               initial={{ opacity: 0, y: -20 }}
@@ -230,7 +229,6 @@ const SignUpPage = () => {
                   </div>
                   {errors.confirmPassword && <p className="text-red-500 text-xs sm:text-sm mt-1">{errors.confirmPassword}</p>}
                 </div>
-                {/* TERMS & CONDITIONS SECTION */}
                 <div className="space-y-1.5 sm:space-y-2">
                   <label className="text-xs sm:text-sm font-medium text-gray-300">
                     Terms & Conditions

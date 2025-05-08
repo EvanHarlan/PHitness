@@ -1,4 +1,3 @@
-// SocialPage.jsx
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import COLORS from '../lib/constants';
@@ -7,6 +6,7 @@ import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import ProfileModal from '../components/ProfileModal';
 import NudgeListener from '../components/NudgeListener';
+//SOCIAL PAGE FOR FRIENDS
 
 axios.defaults.withCredentials = true;
 
@@ -34,7 +34,7 @@ const SocialPage = () => {
             setIsMobile(window.innerWidth < 768);
         };
         
-        handleResize(); // Check on initial load
+        handleResize();
         window.addEventListener('resize', handleResize);
         
         return () => window.removeEventListener('resize', handleResize);
@@ -46,7 +46,7 @@ const SocialPage = () => {
         delay: isMobile ? 0.1 : 0.2
     };
 
-    // Custom theme for tooltips with mobile optimization
+    // Custom theme for tooltips
     const tooltipTheme = createTheme({
         components: {
             MuiTooltip: {
@@ -109,7 +109,6 @@ const SocialPage = () => {
         fetchData();
     }, []);
 
-    // --- API Call Functions ---
     const fetchFriends = async () => {
         try {
             const response = await axios.get('/api/friend/list');
@@ -187,16 +186,15 @@ const SocialPage = () => {
         }
     };
 
-    // --- Profile Modal Handlers ---
     const handleViewProfile = async (friendId) => {
         setIsProfileLoading(true);
         setProfileError(null);
         setSelectedFriendProfile(null);
-        setIsProfileModalOpen(true); // Open the modal
+        setIsProfileModalOpen(true);
 
         try {
             const response = await axios.get(`/api/friend/profile/${friendId}`);
-            setSelectedFriendProfile(response.data); // Set the data
+            setSelectedFriendProfile(response.data); 
         } catch (error) {
             setProfileError(error.response?.data?.message || 'Failed to load profile.');
         } finally {
@@ -205,8 +203,7 @@ const SocialPage = () => {
     };
 
     const handleCloseModal = () => {
-        setIsProfileModalOpen(false); // Close the modal
-        // Optionally reset data after a short delay for animations
+        setIsProfileModalOpen(false); 
         setTimeout(() => {
              setSelectedFriendProfile(null);
              setProfileError(null);
@@ -222,7 +219,6 @@ const SocialPage = () => {
         }
     };
 
-    // --- Render Logic ---
     if (loading) {
         return (
             <div className="flex items-center justify-center min-h-screen p-4" style={{ backgroundColor: COLORS.BLACK }}>
@@ -261,7 +257,6 @@ const SocialPage = () => {
         <ThemeProvider theme={tooltipTheme}>
             <div className="min-h-screen p-4 sm:p-6" style={{ backgroundColor: COLORS.BLACK }}>
                 <div className="max-w-5xl mx-auto">
-                    {/* Notifications Section */}
                     <div className="mt-4 sm:mt-8 rounded-lg sm:rounded-xl shadow-sm p-4 sm:p-6 border mb-4" 
                         style={{ backgroundColor: COLORS.DARK_GRAY, borderColor: COLORS.MEDIUM_GRAY }}>
                         <h2 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4" style={{ color: COLORS.WHITE }}>
@@ -272,9 +267,7 @@ const SocialPage = () => {
                         </div>
                     </div>
                     
-                    {/* Search and Requests Sections */}
                     <div className="grid gap-6 sm:gap-8 mb-6 sm:mb-8">
-                        {/* Find Friends Section */}
                         <div className="rounded-lg sm:rounded-xl shadow-sm p-4 sm:p-6 border" 
                             style={{ backgroundColor: COLORS.DARK_GRAY, borderColor: COLORS.MEDIUM_GRAY }}>
                             <h2 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4 flex items-center" 
@@ -367,7 +360,6 @@ const SocialPage = () => {
                             </div>
                         </div>
                         
-                        {/* Friend Requests Section */}
                         <div className="rounded-lg sm:rounded-xl shadow-sm p-4 sm:p-6 border" 
                             style={{ backgroundColor: COLORS.DARK_GRAY, borderColor: COLORS.MEDIUM_GRAY }}>
                             <h2 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4 flex items-center" 
@@ -422,7 +414,6 @@ const SocialPage = () => {
                         </div>
                     </div>
                     
-                    {/* Friend Search Input */}
                     <div className="mb-4 flex gap-2">
                         <input
                             type="text"
@@ -446,7 +437,6 @@ const SocialPage = () => {
                         </button>
                     </div>
                     
-                    {/* Friends List */}
                     <div className="mt-4 sm:mt-8 rounded-lg sm:rounded-xl shadow-sm p-4 sm:p-6 border" 
                         style={{ backgroundColor: COLORS.DARK_GRAY, borderColor: COLORS.MEDIUM_GRAY }}>
                         <h2 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4 flex items-center" 
@@ -523,7 +513,6 @@ const SocialPage = () => {
                     </div>
                 </div>
 
-                {/* Profile Modal Component */}
                 <ProfileModal
                     isOpen={isProfileModalOpen}
                     onClose={handleCloseModal}

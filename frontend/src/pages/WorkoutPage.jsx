@@ -10,7 +10,7 @@ import SavedWorkoutsList from "../components/SavedWorkoutsList";
 import COLORS from '../lib/constants';
 import { useUserStore } from "../stores/useUserStore";
 import WorkoutStreak from "../components/WorkoutStreak";
-
+//WORKOUT PAGE
 const WorkoutPage = () => {
   // State variables
   const [workoutAmount, setWorkoutAmount] = useState(0);
@@ -32,7 +32,7 @@ const WorkoutPage = () => {
   const didInitialAutoFill = useRef(false);
   const [isMobile, setIsMobile] = useState(false);
 
-  // Health conditions options for the tag-based selection
+  // Health conditions options 
   const healthConditionsOptions = [
     { value: "none", label: "No known conditions" },
     { value: "back-pain", label: "Back Pain" },
@@ -49,10 +49,10 @@ const WorkoutPage = () => {
     { value: "limited-mobility", label: "Limited Mobility" }
   ];
 
-  // Form state for user parameters (updated to use array for healthConditions)
+  // Form state for user parameters 
   const [userParams, setUserParams] = useState({
-    heightFeet: "", // separate feet field
-    heightInches: "", // separate inches field
+    heightFeet: "",
+    heightInches: "", 
     weight: "",
     age: "",
     gender: "not-specified",
@@ -60,7 +60,7 @@ const WorkoutPage = () => {
     experienceLevel: "beginner",
     equipment: "minimal",
     timeFrame: "30-minutes",
-    healthConditions: [], // Changed to array for multiple selections
+    healthConditions: [], 
     frequency: "3-4"
   });
 
@@ -70,13 +70,13 @@ const WorkoutPage = () => {
       setIsMobile(window.innerWidth < 768);
     };
     
-    handleResize(); // Check on initial load
+    handleResize(); 
     window.addEventListener('resize', handleResize);
     
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Custom theme for tooltips to match the website
+  // Custom theme for tooltips 
   const tooltipTheme = createTheme({
     components: {
       MuiTooltip: {
@@ -98,7 +98,7 @@ const WorkoutPage = () => {
     }
   });
 
-  // Info tooltip component to match the website
+  // Info tooltip component
   const InfoTooltip = ({ title }) => (
     <Tooltip 
       title={title} 
@@ -116,17 +116,16 @@ const WorkoutPage = () => {
           cursor: 'pointer',
           padding: isMobile ? '2px' : '0',
           '&:hover': {
-            color: COLORS.LIGHT_GRAY, // Slightly lighter on hover for feedback
+            color: COLORS.LIGHT_GRAY, 
           }
         }}
       />
     </Tooltip>
   );
 
-  // Toggle a selected option (for tag-based selection)
+  // Toggle a selected optioN
   const toggleSelection = (value, field) => {
     setUserParams(prev => {
-      // Handle "none" option specially - if selecting "none", clear other selections
       if (value === "none") {
         return {
           ...prev,
@@ -134,7 +133,6 @@ const WorkoutPage = () => {
         };
       }
 
-      // If a value other than "none" is selected, remove "none" from the array if present
       let updatedArray = prev[field].includes(value)
         ? prev[field].filter(item => item !== value)
         : [...prev[field].filter(item => item !== "none"), value];
@@ -146,7 +144,6 @@ const WorkoutPage = () => {
     });
   };
 
-  // Custom Tag component for multi-select
   const SelectionTag = ({ label, selected, onClick, disabled = false }) => (
     <button
       type="button"
@@ -175,20 +172,17 @@ const WorkoutPage = () => {
 
   // Parse height from different formats into feet and inches components
   const parseHeight = (heightValue) => {
-    // If empty, return default empty values
     if (!heightValue) {
       return { feet: '', inches: '' };
     }
     
-    // If height is a number (total inches), convert to feet and inches
     if (!isNaN(heightValue) && typeof heightValue !== 'string') {
       const totalInches = parseInt(heightValue);
       const feet = Math.floor(totalInches / 12);
       const inches = totalInches % 12;
       return { feet: feet.toString(), inches: inches.toString() };
     }
-    
-    // If height is in "5'10"" format, extract feet and inches
+  
     if (typeof heightValue === 'string' && heightValue.includes("'")) {
       const match = heightValue.match(/(\d+)'(\d+)"/);
       if (match) {
@@ -199,7 +193,6 @@ const WorkoutPage = () => {
       }
     }
     
-    // If height is a string of just numbers (total inches), convert
     if (typeof heightValue === 'string' && !isNaN(heightValue)) {
       const totalInches = parseInt(heightValue);
       const feet = Math.floor(totalInches / 12);
@@ -207,7 +200,6 @@ const WorkoutPage = () => {
       return { feet: feet.toString(), inches: inches.toString() };
     }
     
-    // Return default empty values if we couldn't parse
     return { feet: '', inches: '' };
   };
 
@@ -225,7 +217,7 @@ const WorkoutPage = () => {
       // Parse height into feet and inches components
       const { feet, inches } = parseHeight(profile.height);
 
-      // Convert health conditions to array if needed
+      // Convert health conditions 
       let healthConditions = profile.healthConditions || [];
       if (typeof healthConditions === 'string' && healthConditions !== '') {
         healthConditions = [healthConditions];
@@ -268,7 +260,6 @@ const WorkoutPage = () => {
     }
   };
 
-  // Auto-fill on initial load if enabled
   useEffect(() => {
     if (autoFillEnabled) {
       fetchProfileData(!didInitialAutoFill.current);
@@ -470,7 +461,6 @@ const WorkoutPage = () => {
   }
 
   return (
-    // Wrap the entire display within the themeprovider to have access to the theme for the tooltip styling
     <ThemeProvider theme={tooltipTheme}>
       <div className="min-h-screen p-4 sm:p-6" style={{ backgroundColor: COLORS.BLACK }}>
         <header className="mb-6 sm:mb-10">
@@ -485,7 +475,6 @@ const WorkoutPage = () => {
         
         <div className="max-w-5xl mx-auto">
           <div className="grid gap-6 sm:gap-8 md:grid-cols-1 lg:grid-cols-2">
-            {/* Workout Parameters Form */}
             <div className="rounded-lg sm:rounded-xl shadow-sm p-4 sm:p-6 border" 
                  style={{ 
                    backgroundColor: COLORS.DARK_GRAY, 
@@ -542,7 +531,6 @@ const WorkoutPage = () => {
               />
             </div>
 
-            {/* Workout Tracker */}
             <div className="rounded-lg sm:rounded-xl shadow-sm p-4 sm:p-6 border" 
                  style={{ 
                    backgroundColor: COLORS.DARK_GRAY, 
@@ -598,7 +586,6 @@ const WorkoutPage = () => {
             </div>
           </div>
 
-          {/* Display saved workouts */}
           {showSavedWorkouts && (
             <div className="mt-6 sm:mt-8 rounded-lg sm:rounded-xl shadow-sm p-4 sm:p-6 border" 
                  style={{ backgroundColor: COLORS.DARK_GRAY, borderColor: COLORS.MEDIUM_GRAY }}>
@@ -611,7 +598,6 @@ const WorkoutPage = () => {
             </div>
           )}
           
-          {/* Add an element for workout results to scroll to */}
           {workoutData && <div id="workout-result" className="pt-4"></div>}
         </div>
       </div>
