@@ -118,6 +118,8 @@ let targetCalories = bmr * activityMultiplier;
     case 'muscle-gain':
         targetCalories *= 1.1; // Increase by 10% for muscle gain
     break;
+    case 'weight-gain':
+        targetCalories *= 1.2; // Increast by 29% for weight-gain
     default:
     break;
  }
@@ -132,6 +134,7 @@ const generateMealPlanTitle = (userData) => {
   // Map goals to descriptive titles
   const goalTitles = {
     'weight-loss': 'Weight Loss',
+    'weight-gain': 'Weight Gain',
     'muscle-gain': 'Muscle Gain',
     'healthy-eating': 'Healthy Eating',
     'increase-energy': 'Energy Boost',

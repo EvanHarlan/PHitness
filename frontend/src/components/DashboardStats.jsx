@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import StatsDisplay, { CHART_TYPES } from './StatsDisplay';
 import NutritionIntakeChart from './NutritionIntakeChart';
 import WeightNotification from './WeightNotification';
+import GenerationTimer from './GenerationTimer';
+import DailySatisfaction from './DailySatisfaction';
 import { COLORS } from '../lib/constants';
 import axios from 'axios';
 import {
@@ -19,6 +21,64 @@ const DashboardStats = ({ user }) => {
   const [workoutData, setWorkoutData] = useState([]);
   const [weightData, setWeightData] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [nextGenerationTimes, setNextGenerationTimes] = useState({
+    nutrition: null,
+    workout: null
+  });
+
+  useEffect(() => {
+    const fetchGenerationTimes = async () => {
+      try {
+        // Get the tracker for both meal plans and workouts
+        const response = await axios.get("http://localhost:5000/api/tracker", { withCredentials: true });
+        
+        // Find meal plan and workout trackers
+        const mealPlanTracker = response.data.find(t => t.type === "meal-plan");
+        const workoutTracker = response.data.find(t => t.type === "workout");
+        
+        // Calculate next generation times
+        const now = new Date();
+        
+        // Calculate nutrition next generation time
+        if (mealPlanTracker && mealPlanTracker.lastGenerationDate) {
+          const lastGenDate = new Date(mealPlanTracker.lastGenerationDate);
+          const isToday = lastGenDate.toDateString() === now.toDateString();
+          
+          if (isToday) {
+            const nextGen = new Date(lastGenDate);
+            nextGen.setHours(nextGen.getHours() + 24);
+            setNextGenerationTimes(prev => ({ ...prev, nutrition: nextGen }));
+          } else {
+            setNextGenerationTimes(prev => ({ ...prev, nutrition: now }));
+          }
+        } else {
+          setNextGenerationTimes(prev => ({ ...prev, nutrition: now }));
+        }
+        
+        // Calculate workout next generation time
+        if (workoutTracker && workoutTracker.lastWorkoutGenerationDate) {
+          const lastGenDate = new Date(workoutTracker.lastWorkoutGenerationDate);
+          const isToday = lastGenDate.toDateString() === now.toDateString();
+          
+          if (isToday) {
+            const nextGen = new Date(lastGenDate);
+            nextGen.setHours(nextGen.getHours() + 24);
+            setNextGenerationTimes(prev => ({ ...prev, workout: nextGen }));
+          } else {
+            setNextGenerationTimes(prev => ({ ...prev, workout: now }));
+          }
+        } else {
+          setNextGenerationTimes(prev => ({ ...prev, workout: now }));
+        }
+      } catch (error) {
+        console.error('Error fetching generation times:', error);
+      }
+    };
+
+    fetchGenerationTimes();
+    const interval = setInterval(fetchGenerationTimes, 1000);
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     const fetchWorkoutData = async () => {
@@ -185,6 +245,18 @@ const DashboardStats = ({ user }) => {
     <div className="space-y-8">
       <WeightNotification />
       
+      {/* Generation Timers */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <GenerationTimer 
+          nextTime={nextGenerationTimes.nutrition} 
+          type="Meal Plan" 
+        />
+        <GenerationTimer 
+          nextTime={nextGenerationTimes.workout} 
+          type="Workout" 
+        />
+      </div>
+      
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Workout Activity Chart */}
         <StatsDisplay 
@@ -246,6 +318,16 @@ const DashboardStats = ({ user }) => {
         
         {/* Nutrition Intake Chart */}
         <NutritionIntakeChart />
+        
+        {/* Daily Satisfaction Gauge */}
+        <div className="p-4 rounded-lg" style={{ backgroundColor: COLORS.DARK_GRAY }}>
+          <h3 className="text-lg font-semibold mb-4" style={{ color: COLORS.WHITE }}>
+            Daily Satisfaction
+          </h3>
+          <div className="flex justify-center">
+            <DailySatisfaction />
+          </div>
+        </div>
       </div>
     </div>
   );

@@ -284,37 +284,41 @@ const WorkoutDetailsPage = () => {
 
   return (
     <div className="min-h-screen pb-16" style={{ backgroundColor: COLORS.BLACK, color: COLORS.WHITE }}>
-      {/* Fixed header with blurred backdrop */}
-      <header className="sticky top-0 z-10 backdrop-blur-md border-b mb-8" 
-              style={{ backgroundColor: `${COLORS.BLACK}E6`, borderColor: COLORS.MEDIUM_GRAY }}>
-        <div className="max-w-6xl mx-auto p-6">
-          <div className="flex justify-between items-center">
+      {/* Header with blurred backdrop */}
+      <header className="border-b mb-8" 
+              style={{ 
+                backgroundColor: `${COLORS.BLACK}E6`, 
+                borderColor: COLORS.MEDIUM_GRAY,
+                boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
+              }}>
+        <div className="max-w-6xl mx-auto p-4 sm:p-6">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-0">
             <div>
-              <h1 className="text-3xl font-bold" style={{ color: COLORS.NEON_GREEN }}>
+              <h1 className="text-2xl sm:text-3xl font-bold" style={{ color: COLORS.NEON_GREEN }}>
                 {workout.name}
               </h1>
               <p className="text-sm opacity-75">Created {new Date(workout.createdAt).toLocaleDateString()}</p>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
               <button 
-                onClick={() => navigate('/workouts')} 
-                className="px-4 py-2 rounded-lg text-sm font-medium hidden md:flex items-center gap-2"
+                onClick={() => navigate('/workout')} 
+                className="flex-1 sm:flex-none px-3 sm:px-4 py-2 rounded-lg text-sm font-medium flex items-center justify-center gap-2"
                 style={{ backgroundColor: COLORS.DARK_GRAY, color: COLORS.WHITE, border: `1px solid ${COLORS.MEDIUM_GRAY}` }}
               >
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                 </svg>
-                Back
+                <span className="sm:hidden">Back</span>
               </button>
               <button
                 onClick={() => deleteWorkout()}
-                className="px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2"
+                className="flex-1 sm:flex-none px-3 sm:px-4 py-2 rounded-lg text-sm font-medium flex items-center justify-center gap-2"
                 style={{ backgroundColor: '#e74c3c', color: COLORS.WHITE }}
               >
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                 </svg>
-                Delete
+                <span className="sm:hidden">Delete</span>
               </button>
             </div>
           </div>

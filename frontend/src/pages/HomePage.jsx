@@ -51,7 +51,7 @@ const HomePage = () => {
         <section className="mb-8 sm:mb-12 md:mb-16">
           <h2 className="text-xl sm:text-2xl font-semibold mb-4 sm:mb-6 md:mb-8 flex items-center">
             <span className="inline-block w-1 h-6 mr-3 rounded" style={{ backgroundColor: COLORS.NEON_GREEN }}></span>
-            Your Progress
+            Your Statistics
           </h2>
           <DashboardStats user={user} />
         </section>

@@ -86,6 +86,9 @@ const MealDetailsPage = () => {
     }
   };
 
+  // Check if all meals are completed
+  const allMealsCompleted = mealPlan?.meals.every(meal => meal.completed);
+
   // Formatted nutrition component with progress bars
   const NutritionStat = ({ label, value, total, color, unit }) => {
     const percentage = (value / total) * 100;
@@ -543,17 +546,20 @@ const MealDetailsPage = () => {
             <div className="mt-8 sm:mt-12 flex justify-center">
               <button 
                 onClick={handleCompleteMealPlan}
-                className="px-6 sm:px-8 py-3 sm:py-4 rounded-lg text-sm sm:text-base font-medium flex items-center gap-2 transition-transform hover:scale-105"
+                disabled={!allMealsCompleted}
+                className={`px-6 sm:px-8 py-3 sm:py-4 rounded-lg text-sm sm:text-base font-medium flex items-center gap-2 transition-transform ${
+                  allMealsCompleted ? 'hover:scale-105' : 'opacity-50 cursor-not-allowed'
+                }`}
                 style={{ 
-                  backgroundColor: COLORS.NEON_GREEN, 
+                  backgroundColor: allMealsCompleted ? COLORS.NEON_GREEN : COLORS.MEDIUM_GRAY, 
                   color: COLORS.BLACK,
-                  boxShadow: `0 0 20px ${COLORS.NEON_GREEN}40`
+                  boxShadow: allMealsCompleted ? `0 0 20px ${COLORS.NEON_GREEN}40` : 'none'
                 }}
               >
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                   <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                 </svg>
-                Complete Meal Plan
+                {allMealsCompleted ? 'Complete Meal Plan' : 'Complete All Meals First'}
               </button>
             </div>
           )}

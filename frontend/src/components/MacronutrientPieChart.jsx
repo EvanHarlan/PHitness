@@ -66,26 +66,22 @@ const MacronutrientPieChart = () => {
 
       try {
         setLoading(true);
-        // Get the start and end dates for the current week
+        // Get today's date range
         const now = new Date();
-        const startOfWeek = new Date(now);
-        startOfWeek.setDate(now.getDate() - now.getDay()); // Start of current week
-        const endOfWeek = new Date(startOfWeek);
-        endOfWeek.setDate(startOfWeek.getDate() + 6); // End of current week
+        const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        const endOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59);
 
-
-        // Fetch meal plans for the date range
+        // Fetch meal plans for today only
         const response = await axios.get('/api/meal-plans', {
           headers: {
             Authorization: `Bearer ${localStorage.getItem('token')}`
           },
           params: {
-            startDate: startOfWeek.toISOString(),
-            endDate: endOfWeek.toISOString()
+            startDate: startOfDay.toISOString(),
+            endDate: endOfDay.toISOString()
           },
           withCredentials: true
         });
-
 
         // Process the data to get macronutrient totals from completed meals
         const processedData = processMacronutrientData(response.data);
@@ -208,8 +204,8 @@ const MacronutrientPieChart = () => {
       }}
     >
       <div className="mb-6">
-        <h3 className="text-xl font-bold" style={{ color: COLORS.NEON_GREEN }}>Macronutrient Contribution of Calories</h3>
-        <p className="text-sm opacity-70">Distribution of protein, carbs, and fats from completed meals</p>
+        <h3 className="text-xl font-bold" style={{ color: COLORS.NEON_GREEN }}>Today's Macronutrient Breakdown</h3>
+        <p className="text-sm opacity-70">Distribution of protein, carbs, and fats from completed meals today</p>
       </div>
       
       <div className="h-56 sm:h-64">

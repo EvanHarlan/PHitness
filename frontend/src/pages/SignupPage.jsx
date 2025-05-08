@@ -231,77 +231,44 @@ const SignUpPage = () => {
                   {errors.confirmPassword && <p className="text-red-500 text-xs sm:text-sm mt-1">{errors.confirmPassword}</p>}
                 </div>
 
-                {/* Age */}
-                <div className="space-y-1.5 sm:space-y-2">
-                    <label htmlFor="age" className="text-xs sm:text-sm font-medium text-gray-300">Age</label>
-                    <input
-                        id="age"
-                        type="number"
-                        value={formData.age}
-                        onChange={(e) => setFormData({ ...formData, age: e.target.value })}
-                        className="block w-full px-3 py-2 rounded-lg bg-[#0a0a0a]/90 text-gray-100 placeholder-gray-400 focus:outline-none"
-                        placeholder="Your age"
-                    />
-                </div>
-
-                {/* Weight */}
-                <div className="space-y-1.5 sm:space-y-2">
-                    <label htmlFor="weight" className="text-xs sm:text-sm font-medium text-gray-300">Weight (lbs)</label>
-                    <input
-                        id="weight"
-                        type="number"
-                        value={formData.weight}
-                        onChange={(e) => setFormData({ ...formData, weight: e.target.value })}
-                        className="block w-full px-3 py-2 rounded-lg bg-[#0a0a0a]/90 text-gray-100 placeholder-gray-400 focus:outline-none"
-                        placeholder="Your weight"
-                    />
-                </div>
-
-                {/* Height */}
-                <div className="space-y-1.5 sm:space-y-2">
-                    <label htmlFor="height" className="text-xs sm:text-sm font-medium text-gray-300">Height</label>
-                    <select
-                         id="height"
-                         value={formData.height}
-                         onChange={(e) => setFormData({ ...formData, height: e.target.value })}
-                         className="block w-full px-3 py-2 rounded-lg bg-[#0a0a0a]/90 text-gray-100 focus:outline-none"
-                    >
-                         <option value="">Select height</option>
-                         {[...Array(37)].map((_, i) => {
-                           const feet = Math.floor((i + 60) / 12);
-                           const inches = (i + 60) % 12;
-                           const height = `${feet}'${inches}"`;
-                           return <option key={height} value={height}>{height}</option>;
-                         })}
-                    </select>
-                </div>
-
-                {/* Gender */}
-                <div className="space-y-1.5 sm:space-y-2">
-                    <label htmlFor="gender" className="text-xs sm:text-sm font-medium text-gray-300">Gender</label>
-                    <select
-                         id="gender"
-                         value={formData.gender}
-                         onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
-                         className="block w-full px-3 py-2 rounded-lg bg-[#0a0a0a]/90 text-gray-100 focus:outline-none"
-                    >
-                         <option value="not-specified">Prefer not to say</option>
-                         <option value="male">Male</option>
-                         <option value="female">Female</option>
-                         <option value="other">Other</option>
-                    </select>
-                </div>
-
                 <div className="space-y-1.5 sm:space-y-2">
                   <label className="text-xs sm:text-sm font-medium text-gray-300">
                     Terms & Conditions
                   </label>
                   <div className="bg-[#0a0a0a]/70 text-gray-300 text-xs sm:text-sm border border-gray-600 rounded-lg sm:rounded-xl p-3 sm:p-4 max-h-32 sm:max-h-40 overflow-y-auto">
                     <p>
-                      Welcome! Please read these terms and conditions before signing up. By checking the box below, you agree to abide by our rules, data privacy policy, and community guidelines. Violations may result in account suspension or termination.
+                      Welcome, and thank you for choosing our platform. Before proceeding, please carefully review the following Terms and Conditions. By checking the box and using our services, you acknowledge and agree to the following:
                     </p>
                     <p className="mt-2">
-                      Your data is encrypted and secured. We do not sell your information to third parties. For any questions, please contact support.
+                      <strong>1. Acceptance of Terms:</strong> By accessing or using this website and any related services, you agree to comply with and be bound by these Terms and Conditions, our Privacy Policy, and our Community Guidelines. If you do not agree to any part of these terms, please do not use our services.
+                    </p>
+
+                    <p className="mt-2">
+                      <strong>2. No Professional Advice:</strong> The content provided on this platform, including but not limited to recommendations generated by AI, is for informational purposes only. We are not licensed health professionals, medical providers, or legal advisors. Any content should not be interpreted as medical, legal, or other professional advice. You should always consult with a qualified professional before making decisions related to your health, legal matters, or other critical areas.
+                    </p>
+
+                    <p className="mt-2">
+                      <strong>3. Limitation of Liability:</strong> Under no circumstances shall we be held liable for any loss, injury, or damage resulting from reliance on any content or recommendations provided on this platform, including AI-generated responses. Use of the platform is at your own risk.
+                    </p>
+
+                    <p className="mt-2">
+                      <strong>4. Data Privacy and Security:</strong> Your data is encrypted and securely stored. We are committed to maintaining the confidentiality of your personal information. We do not sell, rent, or share your data with third parties without your explicit consent, except as required by law. Please refer to our Privacy Policy for more detailed information.
+                    </p>
+
+                    <p className="mt-2">
+                      <strong>5. User Conduct:</strong> Users are expected to engage respectfully and responsibly. Any form of abuse, harassment, or violation of community standards may result in account suspension or permanent termination without prior notice.
+                    </p>
+
+                    <p className="mt-2">
+                      <strong>6. Modifications:</strong> We reserve the right to update or modify these Terms and Conditions at any time. Continued use of the platform after such changes constitutes your acceptance of the new terms.
+                    </p>
+
+                    <p className="mt-2">
+                      <strong>7. Contact:</strong> If you have any questions about these Terms and Conditions or our policies, please contact our support team at phitness@gmail.com.
+                    </p>
+
+                    <p className="mt-2">
+                      By checking the box, you confirm that you have read, understood, and agree to be bound by these Terms and Conditions.
                     </p>
                   </div>
 

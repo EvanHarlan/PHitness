@@ -154,13 +154,15 @@ const NutritionQuestionnaire = ({ userParams, setUserParams, onSubmit, loading, 
   // Height options array
   const heightOptions = [
     { value: "", label: "Select your height" },
-    ...[...Array(37)].map((_, i) => {
-      const feet = Math.floor((i + 60) / 12);
-      const inches = (i + 60) % 12;
+    ...[...Array(90 - 54 + 1)].map((_, i) => {
+      const totalInches = i + 54;
+      const feet = Math.floor(totalInches / 12);
+      const inches = totalInches % 12;
       const height = `${feet}'${inches}"`;
       return { value: height, label: height };
     })
   ];
+ 
 
   const ageOptions = [
     { value: "", label: "Select your age" },
@@ -181,6 +183,7 @@ const NutritionQuestionnaire = ({ userParams, setUserParams, onSubmit, loading, 
   const goalOptions = [
     { value: "", label: "Select your primary goal" },
     { value: "weight-loss", label: "Weight Loss" },
+    { value: "weight-gain", label: "Weight Gain"},
     { value: "muscle-gain", label: "Muscle Gain" },
     { value: "healthy-eating", label: "Improve Overall Health & Nutrition" },
     { value: "increase-energy", label: "Increase Energy Levels" },
@@ -304,8 +307,7 @@ const NutritionQuestionnaire = ({ userParams, setUserParams, onSubmit, loading, 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Basic Information - Left Column */}
         <div className="space-y-4">
-          {getFormField("Height", "height", "select", heightOptions)}
-          
+          {getFormField("Height", "height", "select", heightOptions, true)}
           <div className="space-y-2">
             <label className="block text-sm font-medium mb-1" style={{ color: COLORS.LIGHT_GRAY }}>
               Weight (lbs) <span className="text-red-500">*</span>
@@ -323,11 +325,10 @@ const NutritionQuestionnaire = ({ userParams, setUserParams, onSubmit, loading, 
               required
             />
           </div>
-          
-          {getFormField("Age", "age", "select", ageOptions)}
-          {getFormField("Gender", "gender", "select", genderOptions)}
+          {getFormField("Age", "age", "select", ageOptions, true)}
+          {getFormField("Gender", "gender", "select", genderOptions, true)}
           {getFormField("Primary Goal", "goal", "select", goalOptions, true)}
-          {getFormField("Typical Activity Level", "activityLevel", "select", activityLevelOptions)}
+          {getFormField("Typical Activity Level", "activityLevel", "select", activityLevelOptions, true)}
         </div>
 
         {/* Dietary Preferences - Right Column */}

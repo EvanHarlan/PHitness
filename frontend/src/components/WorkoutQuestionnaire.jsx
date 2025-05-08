@@ -52,12 +52,21 @@ const WorkoutQuestionnaire = ({ userParams, setUserParams, onSubmit, loading, ca
   // Height options array
   const heightOptions = [
     { value: "", label: "Select your height" },
-    ...[...Array(37)].map((_, i) => {
-      const feet = Math.floor((i + 60) / 12);
-      const inches = (i + 60) % 12;
+    ...[...Array(90 - 54 + 1)].map((_, i) => {
+      const totalInches = i + 54;
+      const feet = Math.floor(totalInches / 12);
+      const inches = totalInches % 12;
       const height = `${feet}'${inches}"`;
       return { value: height, label: height };
     })
+  ];
+
+  const ageOptions = [
+    { value: "", label: "Select your age" },
+    ...Array.from({ length: 83 }, (_, i) => ({ // From 18 to 100
+      value: 18 + i,
+      label: `${18 + i} years`,
+    })),
   ];
 
   // Other form field options
@@ -123,8 +132,8 @@ const WorkoutQuestionnaire = ({ userParams, setUserParams, onSubmit, loading, ca
         <div className="space-y-4">
           {getFormField("Height", "height", "select", heightOptions, true)}
           {getFormField("Weight (lbs)", "weight", "number", null, true)}
-          {getFormField("Age", "age", "number")}
-          {getFormField("Gender", "gender", "select", genderOptions)}
+          {getFormField("Age", "age", "select", ageOptions, true)}
+          {getFormField("Gender", "gender", "select", genderOptions, true)}
           {getFormField("Fitness Goal", "fitnessGoal", "select", fitnessGoalOptions, true)}
         </div>
         
