@@ -78,7 +78,6 @@ const StatsDisplay = ({
   yAxisKey = 'minutes',
   secondaryKey,
   pieColors = [COLORS.NEON_GREEN, '#36A2EB', '#FFCE56', '#4BC0C0'],
-  // You can pass in real data here later from MongoDB
   data = null
 }) => {
   // Use passed data or fallback to placeholder
@@ -87,6 +86,56 @@ const StatsDisplay = ({
   // Render different chart types based on the prop
   const renderChart = () => {
     switch(chartType) {
+      case CHART_TYPES.LINE:
+        return (
+          <ResponsiveContainer width="100%" height={height}>
+            <LineChart data={chartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke={COLORS.MEDIUM_GRAY} />
+              <XAxis 
+                dataKey={xAxisKey} 
+                stroke={COLORS.WHITE}
+                tick={{ fill: COLORS.WHITE }}
+              />
+              <YAxis 
+                yAxisId="left"
+                stroke={COLORS.WHITE}
+                tick={{ fill: COLORS.WHITE }}
+                label={{ value: 'Minutes', angle: -90, position: 'insideLeft', fill: COLORS.WHITE }}
+              />
+              <YAxis 
+                yAxisId="right"
+                orientation="right"
+                stroke={COLORS.WHITE}
+                tick={{ fill: COLORS.WHITE }}
+                label={{ value: 'Calories', angle: 90, position: 'insideRight', fill: COLORS.WHITE }}
+              />
+              <Tooltip content={<CustomTooltip />} />
+              <Legend />
+              <Line 
+                yAxisId="left"
+                type="monotone" 
+                dataKey={yAxisKey} 
+                stroke={COLORS.NEON_GREEN} 
+                strokeWidth={2}
+                dot={{ r: 4, fill: COLORS.NEON_GREEN }}
+                activeDot={{ r: 6, fill: COLORS.NEON_GREEN }}
+                name="Time Spent"
+              />
+              {secondaryKey && (
+                <Line 
+                  yAxisId="right"
+                  type="monotone" 
+                  dataKey={secondaryKey} 
+                  stroke="#36A2EB" 
+                  strokeWidth={2}
+                  dot={{ r: 4, fill: "#36A2EB" }}
+                  activeDot={{ r: 6, fill: "#36A2EB" }}
+                  name="Calories Burned"
+                />
+              )}
+            </LineChart>
+          </ResponsiveContainer>
+        );
       case CHART_TYPES.AREA:
         return (
           <ResponsiveContainer width="100%" height={height}>
@@ -153,57 +202,6 @@ const StatsDisplay = ({
               <Tooltip content={<CustomTooltip />} />
               <Legend />
             </PieChart>
-          </ResponsiveContainer>
-        );
-        
-      case CHART_TYPES.LINE:
-        return (
-          <ResponsiveContainer width="100%" height={height}>
-            <LineChart data={chartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke={COLORS.MEDIUM_GRAY} />
-              <XAxis 
-                dataKey={xAxisKey} 
-                stroke={COLORS.WHITE}
-                tick={{ fill: COLORS.WHITE }}
-              />
-              <YAxis 
-                yAxisId="left"
-                stroke={COLORS.WHITE}
-                tick={{ fill: COLORS.WHITE }}
-                label={{ value: 'Minutes', angle: -90, position: 'insideLeft', fill: COLORS.WHITE }}
-              />
-              <YAxis 
-                yAxisId="right"
-                orientation="right"
-                stroke={COLORS.WHITE}
-                tick={{ fill: COLORS.WHITE }}
-                label={{ value: 'Calories', angle: 90, position: 'insideRight', fill: COLORS.WHITE }}
-              />
-              <Tooltip content={<CustomTooltip />} />
-              <Legend />
-              <Line 
-                yAxisId="left"
-                type="monotone" 
-                dataKey={yAxisKey} 
-                stroke={COLORS.NEON_GREEN} 
-                strokeWidth={2}
-                dot={{ r: 4, fill: COLORS.NEON_GREEN }}
-                activeDot={{ r: 6, fill: COLORS.NEON_GREEN }}
-                name="Time Spent"
-              />
-              {secondaryKey && (
-                <Line 
-                  yAxisId="right"
-                  type="monotone" 
-                  dataKey={secondaryKey} 
-                  stroke="#36A2EB" 
-                  strokeWidth={2}
-                  dot={{ r: 4, fill: "#36A2EB" }}
-                  activeDot={{ r: 6, fill: "#36A2EB" }}
-                  name="Calories Burned"
-                />
-              )}
-            </LineChart>
           </ResponsiveContainer>
         );
     }

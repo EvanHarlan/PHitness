@@ -124,14 +124,14 @@ const WeightNotification = () => {
         </h3>
         <div className="mb-4 space-y-2">
           <p className="text-sm" style={{ color: COLORS.LIGHT_GRAY }}>
-            Current check-in period: {format(startOfWeek(new Date()), 'MMMM d')} - {format(addDays(startOfWeek(new Date()), 6), 'MMMM d')}
+            It's time to log your weight for the week of {format(startOfWeek(new Date()), 'MMMM d')} - {format(addDays(startOfWeek(new Date()), 6), 'MMMM d')}
           </p>
           <p className="text-sm" style={{ color: COLORS.LIGHT_GRAY }}>
-            Next check-in available: {format(addDays(startOfWeek(new Date()), 7), 'MMMM d')}
+            Next check-in will be available on {format(addDays(startOfWeek(new Date()), 7), 'MMMM d')}
           </p>
         </div>
         <p className="mb-4" style={{ color: COLORS.WHITE }}>
-          Please enter your weight for this week
+          Please enter your current weight to track your progress
         </p>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="flex space-x-2">

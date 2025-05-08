@@ -53,6 +53,7 @@ const HomePage = () => {
             <span className="inline-block w-1 h-6 mr-3 rounded" style={{ backgroundColor: COLORS.NEON_GREEN }}></span>
             Your Statistics
           </h2>
+          <WeightNotification />
           <DashboardStats user={user} />
         </section>
 
@@ -148,9 +149,6 @@ const HomePage = () => {
             ))}
           </div>
         </section>
-
-        {/* Add WeightNotification component */}
-        <WeightNotification />
       </>
     );
   };

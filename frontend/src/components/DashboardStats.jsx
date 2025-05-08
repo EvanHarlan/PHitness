@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import StatsDisplay, { CHART_TYPES } from './StatsDisplay';
 import NutritionIntakeChart from './NutritionIntakeChart';
-import WeightNotification from './WeightNotification';
 import GenerationTimer from './GenerationTimer';
 import DailySatisfaction from './DailySatisfaction';
 import { COLORS } from '../lib/constants';
@@ -163,16 +162,23 @@ const DashboardStats = ({ user }) => {
       
       // Transform the data for the chart, ensuring all values are properly formatted
       const formattedData = response.data
-        .map(entry => ({
-          // Convert date to timestamp for sorting
-          timestamp: new Date(entry.date).getTime(),
-          // Format date for display
-          formattedDate: formatDate(entry.date),
-          // Ensure weight is a number
-          weight: Number(entry.weight),
-          // Keep entry type as string
-          entryType: entry.entryType
-        }))
+        .map(entry => {
+          const entryDate = new Date(entry.date);
+          // Get the start of the week for this entry
+          const startOfWeek = new Date(entryDate);
+          startOfWeek.setDate(entryDate.getDate() - entryDate.getDay());
+          
+          return {
+            // Convert date to timestamp for sorting
+            timestamp: startOfWeek.getTime(),
+            // Format date for display (using start of week)
+            formattedDate: formatDate(startOfWeek),
+            // Ensure weight is a number
+            weight: Number(entry.weight),
+            // Keep entry type as string
+            entryType: entry.entryType
+          };
+        })
         .sort((a, b) => a.timestamp - b.timestamp)
         .map(entry => ({
           // Remove timestamp and use formatted date for display
@@ -199,6 +205,12 @@ const DashboardStats = ({ user }) => {
   // Custom tooltip component with properly formatted data
   const CustomTooltip = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
+      const date = new Date(label);
+      const startOfWeek = new Date(date);
+      startOfWeek.setDate(date.getDate() - date.getDay());
+      const endOfWeek = new Date(startOfWeek);
+      endOfWeek.setDate(startOfWeek.getDate() + 6);
+
       return (
         <div className="p-3 rounded-md shadow-lg" style={{ 
           backgroundColor: COLORS.DARK_GRAY,
@@ -206,7 +218,10 @@ const DashboardStats = ({ user }) => {
           color: COLORS.WHITE
         }}>
           <p className="font-medium">
-            {new Date(label).toLocaleDateString("en-US", {
+            Week of {startOfWeek.toLocaleDateString("en-US", {
+              month: "short",
+              day: "numeric"
+            })} - {endOfWeek.toLocaleDateString("en-US", {
               month: "short",
               day: "numeric",
               year: "numeric"
@@ -243,8 +258,6 @@ const DashboardStats = ({ user }) => {
 
   return (
     <div className="space-y-8">
-      <WeightNotification />
-      
       {/* Generation Timers */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <GenerationTimer 
@@ -272,10 +285,11 @@ const DashboardStats = ({ user }) => {
         />
         
         {/* Weight Progress Chart */}
-        <div className="p-4 rounded-lg" style={{ backgroundColor: COLORS.DARK_GRAY }}>
-          <h3 className="text-lg font-semibold mb-4" style={{ color: COLORS.WHITE }}>
-            Weight Progress
-          </h3>
+        <div className="p-4 rounded-xl shadow-md" style={{ backgroundColor: COLORS.DARK_GRAY }}>
+          <h3 className="text-lg font-semibold text-green-500 mb-1">Weight Progress</h3>
+          <p className="text-sm text-gray-300 mb-4">
+            Track how your weight has changed over the past weeks
+          </p>
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={weightData}>
@@ -284,11 +298,13 @@ const DashboardStats = ({ user }) => {
                   dataKey="date"
                   stroke={COLORS.LIGHT_GRAY}
                   tick={{ fill: COLORS.WHITE }}
-                  tickFormatter={(date) => new Date(date).toLocaleDateString("en-US", {
-                    month: "short",
-                    day: "numeric",
-                    year: "numeric"
-                  })}
+                  tickFormatter={(date) => {
+                    const d = new Date(date);
+                    return `Week of ${d.toLocaleDateString("en-US", {
+                      month: "short",
+                      day: "numeric"
+                    })}`;
+                  }}
                 />
                 <YAxis 
                   stroke={COLORS.LIGHT_GRAY}
@@ -301,11 +317,11 @@ const DashboardStats = ({ user }) => {
                   }}
                 />
                 <Tooltip content={<CustomTooltip />} />
-                <Legend />
-                <Line
-                  type="monotone"
-                  dataKey="weight"
-                  stroke={COLORS.NEON_GREEN}
+                <Legend verticalAlign="bottom" height={36} />
+                <Line 
+                  type="monotone" 
+                  dataKey="weight" 
+                  stroke={COLORS.NEON_GREEN} 
                   strokeWidth={2}
                   dot={<CustomDot />}
                   activeDot={{ r: 6 }}
@@ -321,7 +337,7 @@ const DashboardStats = ({ user }) => {
         
         {/* Daily Satisfaction Gauge */}
         <div className="p-4 rounded-lg" style={{ backgroundColor: COLORS.DARK_GRAY }}>
-          <h3 className="text-lg font-semibold mb-4" style={{ color: COLORS.WHITE }}>
+          <h3 className="text-lg font-semibold mb-4" style={{ color: COLORS.NEON_GREEN }}>
             Daily Satisfaction
           </h3>
           <div className="flex justify-center">
