@@ -4,7 +4,7 @@ const NudgeListener = () => {
   const [notifications, setNotifications] = useState([]);
 
   useEffect(() => {
-    // Fetch nudges on page load
+    // Fetch nudges 
     const fetchNudges = async () => {
       try {
         const response = await axios.get('http://localhost:5000/api/friend/nudges', { withCredentials: true });
@@ -15,7 +15,7 @@ const NudgeListener = () => {
 
     fetchNudges();
 
-    // Listen for real-time nudges (via SSE)
+    // Listen for nudges
     const eventSource = new EventSource('http://localhost:5000/api/friend/listenForNudges', { withCredentials: true });
 
     eventSource.onmessage = (event) => {
@@ -27,7 +27,7 @@ const NudgeListener = () => {
       eventSource.close();
     };
 
-    // Clean up when component is unmounted
+
     return () => {
       eventSource.close();
     };
@@ -35,10 +35,10 @@ const NudgeListener = () => {
 
   const handleDelete = async (index, nudgeId) => {
     try {
-      // Delete nudge from database (optional)
+      // Delete nudge from database 
       await axios.post('http://localhost:5000/api/friend/delete-nudge', { nudgeId }, { withCredentials: true });
 
-      // Remove nudge from local state
+      // Remove nudge from page
       setNotifications((prev) => prev.filter((_, i) => i !== index));
     } catch (error) {
     }

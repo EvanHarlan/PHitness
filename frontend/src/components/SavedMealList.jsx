@@ -33,7 +33,7 @@ const SavedMealsList = () => {
       setLoading(false);
     }
   };
-
+  // warning before deleting meal
   const handleDeleteMeal = async (mealId) => {
     if (!window.confirm('Are you sure you want to delete this meal plan?')) return;
 

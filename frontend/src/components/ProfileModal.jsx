@@ -1,8 +1,7 @@
 // src/components/ProfileModal.jsx
-import COLORS from '../lib/constants'; // Adjust path if needed
+import COLORS from '../lib/constants';
 
-// --- Define the avatar mapping ---
-// (Moved from SocialPage.jsx as it's specific to profile display)
+//define avatar mapping
 const avatarImages = {
   default: "../../public/profileIcon.png",
   avatar1: "../../public/avatar1.png",
@@ -24,11 +23,11 @@ const avatarImages = {
   avatar17: "../../public/avatar17.png",
   avatar18: "../../public/avatar18.png",
 };
-// Ensure these paths are correct relative to your public folder
+
 
 const ProfileModal = ({ isOpen, onClose, profileData, isLoading, error }) => {
 
-  // If the modal is not open, don't render anything
+  // If the modal is not open don't render anything
   if (!isOpen) {
     return null;
   }
@@ -49,11 +48,11 @@ const ProfileModal = ({ isOpen, onClose, profileData, isLoading, error }) => {
       <div
         className="rounded-xl shadow-xl p-6 border w-full max-w-lg relative animate-fade-in"
         style={{ backgroundColor: COLORS.DARK_GRAY, borderColor: COLORS.MEDIUM_GRAY, color: COLORS.WHITE }}
-        // Stop propagation is no longer needed on the inner div if using handleBackdropClick logic
+        
       >
         {/* Close Button */}
         <button
-          onClick={onClose} // Use the onClose prop passed from the parent
+          onClick={onClose}
           className="absolute top-3 right-4 text-3xl font-light leading-none hover:text-red-500 transition-colors"
           style={{ color: COLORS.LIGHT_GRAY }}
           aria-label="Close profile view"
@@ -82,7 +81,6 @@ const ProfileModal = ({ isOpen, onClose, profileData, isLoading, error }) => {
             {/* Header: Avatar + Names */}
             <div className="flex items-center space-x-4">
               <img
-                // Use profileData prop here
                 src={avatarImages[profileData.avatar] || avatarImages.default}
                 alt={`${profileData.username || 'User'}'s avatar`}
                 className="w-20 h-20 rounded-full object-cover border-2"
@@ -141,7 +139,7 @@ const ProfileModal = ({ isOpen, onClose, profileData, isLoading, error }) => {
         )}
         {/* Close button at the bottom */}
         <button
-          onClick={onClose} // Use the onClose prop
+          onClick={onClose}
           className="mt-6 w-full px-4 py-2 rounded transition font-medium"
           style={{ backgroundColor: COLORS.MEDIUM_GRAY, color: COLORS.LIGHT_GRAY }}
         >

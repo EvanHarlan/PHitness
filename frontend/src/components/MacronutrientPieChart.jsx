@@ -11,11 +11,11 @@ import { COLORS } from '../lib/constants';
 import axios from 'axios';
 import { useUserStore } from '../stores/useUserStore';
 
-// Color palette for the chart (using requested colors)
+// Color palette for the chart 
 const MACRO_COLORS = {
-  PROTEIN: '#FF4136', // Red for protein
-  CARBS: '#0074D9',   // Blue for carbs
-  FATS: '#FFDC00'     // Yellow for fats
+  PROTEIN: '#FF4136', 
+  CARBS: '#0074D9',   
+  FATS: '#FFDC00'     
 };
 
 // Custom tooltip component

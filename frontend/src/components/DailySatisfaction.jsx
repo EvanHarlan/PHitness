@@ -34,6 +34,7 @@ const CustomTooltip = ({ active, payload }) => {
   return null;
 };
 
+//logic for needle in graph
 const needle = (value, data, cx, cy, iR, oR, color) => {
   let total = 0;
   data.forEach((v) => {
