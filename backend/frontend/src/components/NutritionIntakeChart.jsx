@@ -48,7 +48,7 @@ const NutritionIntakeChart = () => {
 
 
         // Fetch meal plans for the date range
-        const response = await axios.get('http://localhost:5000/api/meal-plans', {
+        const response = await axios.get('/api/meal-plans', {
           params: {
             startDate: startOfWeek.toISOString(),
             endDate: endOfWeek.toISOString()

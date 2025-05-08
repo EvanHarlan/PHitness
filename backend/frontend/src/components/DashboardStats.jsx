@@ -30,7 +30,7 @@ const DashboardStats = ({ user }) => {
     const fetchGenerationTimes = async () => {
       try {
         // Get the tracker for both meal plans and workouts
-        const response = await axios.get("http://localhost:5000/api/tracker", { withCredentials: true });
+        const response = await axios.get("/api/tracker", { withCredentials: true });
         
         // Find meal plan and workout trackers
         const mealPlanTracker = response.data.find(t => t.type === "meal-plan");
@@ -91,7 +91,7 @@ const DashboardStats = ({ user }) => {
         endOfWeek.setDate(startOfWeek.getDate() + 6); // End of current week
 
 
-        const response = await axios.get('http://localhost:5000/api/workouts/by-date', {
+        const response = await axios.get('/api/workouts/by-date', {
           params: {
             startDate: startOfWeek.toISOString(),
             endDate: endOfWeek.toISOString()
@@ -154,7 +154,7 @@ const DashboardStats = ({ user }) => {
 
   const fetchWeightData = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/weight-tracking/history', {
+      const response = await axios.get('/api/weight-tracking/history', {
         withCredentials: true
       });
       

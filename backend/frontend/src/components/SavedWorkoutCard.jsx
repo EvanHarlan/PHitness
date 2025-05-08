@@ -18,7 +18,7 @@ const SavedWorkoutCard = ({ workout, onDeleteWorkout, onToggleFavorite }) => {
 
   const fetchLoggedExercises = async () => {
     try {
-      const response = await axios.get(`http://localhost:5000/api/exercise-tracking/workout/${workout._id}`, {
+      const response = await axios.get(`/api/exercise-tracking/workout/${workout._id}`, {
         withCredentials: true,
       });
       

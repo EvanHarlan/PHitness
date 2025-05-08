@@ -60,7 +60,7 @@ const WorkoutStreak = ({ onWorkoutLogged }) =>
 
                 try
                 {
-                    await axios.post("http://localhost:5000/api/auth/unlock-achievement", {
+                    await axios.post("/api/auth/unlock-achievement", {
                         title: `${milestone}-Day Workout Streak!`
                     }, { withCredentials: true });
 
@@ -84,7 +84,7 @@ const WorkoutStreak = ({ onWorkoutLogged }) =>
             {
                 try
                 {
-                    await axios.post("http://localhost:5000/api/auth/unlock-achievement", { title }, { withCredentials: true });
+                    await axios.post("/api/auth/unlock-achievement", { title }, { withCredentials: true });
                     setUnlockedAchievement({ title, description });
                     localStorage.setItem(key, "true");
                 } catch (err)

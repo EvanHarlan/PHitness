@@ -79,7 +79,7 @@ export default class DailySatisfaction extends PureComponent {
       const endOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59);
 
       // Fetch completed meals
-      const mealsResponse = await axios.get('http://localhost:5000/api/meal-plans', {
+      const mealsResponse = await axios.get('/api/meal-plans', {
         params: {
           startDate: startOfDay.toISOString(),
           endDate: endOfDay.toISOString()
@@ -88,7 +88,7 @@ export default class DailySatisfaction extends PureComponent {
       });
 
       // Fetch completed workouts and their exercises
-      const workoutsResponse = await axios.get('http://localhost:5000/api/workouts/by-date', {
+      const workoutsResponse = await axios.get('/api/workouts/by-date', {
         params: {
           startDate: startOfDay.toISOString(),
           endDate: endOfDay.toISOString()
@@ -100,7 +100,7 @@ export default class DailySatisfaction extends PureComponent {
       const completedExercises = new Set();
       for (const workout of workoutsResponse.data) {
         try {
-          const trackingResponse = await axios.get(`http://localhost:5000/api/exercise-tracking/workout/${workout._id}`, {
+          const trackingResponse = await axios.get(`/api/exercise-tracking/workout/${workout._id}`, {
             withCredentials: true
           });
           

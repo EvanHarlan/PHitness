@@ -69,7 +69,7 @@ const ExerciseTrackingModal = ({ exercise, workoutId, onClose }) => {
     setIsSubmitting(true);
     try {
       const response = await axios.post(
-        'http://localhost:5000/api/exercise-tracking/track',
+        '/api/exercise-tracking/track',
         {
           workoutId,
           exerciseId: exercise._id,

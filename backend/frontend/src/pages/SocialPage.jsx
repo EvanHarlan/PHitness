@@ -212,7 +212,7 @@ const SocialPage = () => {
 
     const sendNudge = async (friendId) => {
         try {
-          const response = await axios.post('http://localhost:5000/api/friend/nudge', { friendId },{ withCredentials: true });
+          const response = await axios.post('/api/friend/nudge', { friendId },{ withCredentials: true });
           alert(response.data.message || 'Nudge sent!');
         } catch (error) {
           setError("Failed to send nudge. Please try again.");

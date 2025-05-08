@@ -27,7 +27,7 @@ const MealDetailsPage = () => {
   useEffect(() => {
     const fetchMealDetails = async () => {
       try {
-        const response = await axios.get(`http://localhost:5000/api/meal-plans/${id}`, { withCredentials: true });
+        const response = await axios.get(`/api/meal-plans/${id}`, { withCredentials: true });
         if (response.status >= 200 && response.status < 300) {
           setMealPlan(response.data);
         } else {
@@ -60,7 +60,7 @@ const MealDetailsPage = () => {
   const handleCompleteMealPlan = async () => {
     try {
       const response = await axios.patch(
-        `http://localhost:5000/api/meal-plans/${mealPlan._id}/complete`,
+        `/api/meal-plans/${mealPlan._id}/complete`,
         {},
         { withCredentials: true }
       );
@@ -121,7 +121,7 @@ const MealDetailsPage = () => {
 
     const handleCompleteMeal = async () => {
       try {
-        const response = await axios.patch(`http://localhost:5000/api/meal-plans/${mealPlan._id}/meals/${index}/complete`, {}, { withCredentials: true });
+        const response = await axios.patch(`/api/meal-plans/${mealPlan._id}/meals/${index}/complete`, {}, { withCredentials: true });
 
         if (response.status === 200) {
           setIsCompleted(true);

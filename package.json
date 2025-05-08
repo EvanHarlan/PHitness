@@ -2,24 +2,25 @@
   "name": "phitness",
   "version": "1.0.0",
   "main": "backend/server.js",
+  "type": "module",
   "scripts": {
+    "start": "node backend/server.js",
     "dev": "nodemon backend/server.js",
-    "prod": "node backend/server.js"
+    "install-frontend": "cd backend/frontend && npm install",
+    "build-frontend": "cd backend/frontend && npx vite build",
+    "build": "npm install && cd backend && npm install && cd frontend && npm install && npx vite build",
+    "debug": "ls -la backend/frontend && mkdir -p backend/frontend/dist"
   },
   "keywords": [],
   "author": "",
-  "type": "module",
   "license": "ISC",
-  "description": "",
+  "description": "PHitness",
   "dependencies": {
     "@sendgrid/mail": "^8.1.5",
     "bcryptjs": "^3.0.2",
     "confetti": "^2.0.6",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
-    "crypto": "^1.0.1",
-    "date-fns": "^4.1.0",
-    "date-fns-tz": "^3.2.0",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "express-async-handler": "^1.2.0",
@@ -28,13 +29,10 @@
     "mongoose": "^8.12.1",
     "node-fetch": "^3.3.2",
     "nodemailer": "^6.10.1",
-    "openai": "^4.87.4",
-    "phitness": "file:",
-    "react": "^19.1.0",
-    "react-confetti": "^6.4.0",
-    "recharts": "^2.15.2"
+    "openai": "^4.87.4"
   },
   "devDependencies": {
-    "nodemon": "^3.1.9"
+    "nodemon": "^3.1.9",
+    "vite": "^6.3.5"
   }
 }

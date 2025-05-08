@@ -16,7 +16,7 @@ const MuscleGroupsRadarChart = () => {
         const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
         const endOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59);
 
-        const response = await axios.get('http://localhost:5000/api/workouts/by-date', {
+        const response = await axios.get('/api/workouts/by-date', {
           params: {
             startDate: startOfDay.toISOString(),
             endDate: endOfDay.toISOString()

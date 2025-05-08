@@ -211,7 +211,7 @@ const WorkoutPage = () => {
 
   const fetchProfileData = async (silent = false) => {
     try {
-      const res = await axios.get("http://localhost:5000/api/auth/profile", { withCredentials: true });
+      const res = await axios.get("/api/auth/profile", { withCredentials: true });
       const profile = res.data;
 
       // Parse height into feet and inches components
@@ -270,7 +270,7 @@ const WorkoutPage = () => {
   useEffect(() => {
     const checkHighestLift = async () => {
       try {
-        const response = await axios.get("http://localhost:5000/api/workouts", { withCredentials: true });
+        const response = await axios.get("/api/workouts", { withCredentials: true });
         const allWorkouts = response.data || [];
 
         let maxLift = 0;
@@ -282,7 +282,7 @@ const WorkoutPage = () => {
           });
         });
 
-        await axios.post("http://localhost:5000/api/auth/max-lift", { maxLift }, { withCredentials: true });
+        await axios.post("/api/auth/max-lift", { maxLift }, { withCredentials: true });
 
         if (user?.maxLift !== undefined && maxLift > user.maxLift) {
           setUnlockedAchievement({
@@ -304,7 +304,7 @@ const WorkoutPage = () => {
   useEffect(() => {
     const fetchWorkoutCount = async () => {
       try {
-        const response = await axios.get("http://localhost:5000/api/tracker/counts", { withCredentials: true });
+        const response = await axios.get("/api/tracker/counts", { withCredentials: true });
         setWorkoutAmount(response.data.workoutCount || 0);
         setFetchWorkoutCountError(null);
       } catch (error) {
@@ -319,7 +319,7 @@ const WorkoutPage = () => {
   useEffect(() => {
     const fetchLastWorkoutGeneration = async () => {
       try {
-        const response = await axios.get("http://localhost:5000/api/tracker", { withCredentials: true });
+        const response = await axios.get("/api/tracker", { withCredentials: true });
         const tracker = response.data.find(t => t.type === "workout");
         if (tracker && tracker.lastWorkoutGenerationDate) {
           setLastWorkoutGeneration(tracker.lastWorkoutGenerationDate);
@@ -402,7 +402,7 @@ const WorkoutPage = () => {
     setLoading(true);
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/workouts/generate",
+        "/api/workouts/generate",
         userParams,
         { withCredentials: true }
       );

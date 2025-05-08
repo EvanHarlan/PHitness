@@ -23,7 +23,9 @@ const __dirname = path.resolve();
 
 // Configure middleware
 app.use(cors({
-  origin: process.env.NODE_ENV === "production" ? false : ['http://localhost:5173', 'http://localhost:3000', 'http://localhost:5174'],
+  origin: process.env.NODE_ENV === "production" 
+    ? ['https://phitness.onrender.com', 'https://phitness.onrender.com'] 
+    : ['http://localhost:5173', 'http://localhost:3000', 'http://localhost:5174'],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
   allowedHeaders: ['Content-Type', 'Authorization']
@@ -54,9 +56,47 @@ app.post('/question', (req, res) => {
 
 // Production setup for frontend
 if (process.env.NODE_ENV === "production") {
-  app.use(express.static(path.join(__dirname, "/frontend/dist")));
+  const __dirname = path.resolve();
+  
+  // Log current directory for debugging
+  console.log('Current directory:', __dirname);
+  
+  // Define potential paths where the frontend build might be
+  const potentialPaths = [
+    path.join(__dirname, "backend/frontend/dist"),
+    path.join(__dirname, "frontend/dist"),
+    path.join(__dirname, "dist")
+  ];
+  
+  let clientBuildPath = null;
+  
+  // Find the first path that exists
+  try {
+    const fs = await import('fs');
+    for (const potentialPath of potentialPaths) {
+      if (fs.existsSync(potentialPath)) {
+        clientBuildPath = potentialPath;
+        console.log(`Found frontend build at: ${clientBuildPath}`);
+        console.log('Directory contains:', fs.readdirSync(clientBuildPath));
+        break;
+      }
+    }
+    
+    if (!clientBuildPath) {
+      console.error('Could not find frontend build in any of the expected locations:', potentialPaths);
+      // Fallback to a path even if it doesn't exist
+      clientBuildPath = path.join(__dirname, "backend/frontend/dist");
+      console.log('Falling back to:', clientBuildPath);
+    }
+  } catch (err) {
+    console.error('Error checking directories:', err);
+    // Default fallback path
+    clientBuildPath = path.join(__dirname, "backend/frontend/dist");
+  }
+  
+  app.use(express.static(clientBuildPath));
   app.get("*", (req, res) => {
-    res.sendFile(path.resolve(__dirname, "frontend", "dist", "index.html"));
+    res.sendFile(path.join(clientBuildPath, "index.html"));
   });
 }
 
@@ -67,7 +107,6 @@ app.use((req, res) => {
 
 // Error handler
 app.use((err, req, res, next) => {
-
   res.status(500).json({ error: 'Server error', message: err.message });
 });
 

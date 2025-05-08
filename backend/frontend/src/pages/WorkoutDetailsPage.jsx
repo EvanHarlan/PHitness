@@ -35,7 +35,7 @@ const WorkoutDetailsPage = () => {
   const fetchWorkoutDetails = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`http://localhost:5000/api/workouts/${workoutId}`, {
+      const response = await axios.get(`/api/workouts/${workoutId}`, {
         withCredentials: true,
       });
       setWorkout(response.data);
@@ -61,7 +61,7 @@ const WorkoutDetailsPage = () => {
 
   const fetchLoggedExercises = async () => {
     try {
-      const response = await axios.get(`http://localhost:5000/api/exercise-tracking/workout/${workoutId}`, {
+      const response = await axios.get(`/api/exercise-tracking/workout/${workoutId}`, {
         withCredentials: true,
       });
       
@@ -83,7 +83,7 @@ const WorkoutDetailsPage = () => {
   const deleteWorkout = async () => {
     if (window.confirm('Are you sure you want to delete this workout?')) {
       try {
-        await axios.delete(`http://localhost:5000/api/workouts/${workoutId}`, {
+        await axios.delete(`/api/workouts/${workoutId}`, {
           withCredentials: true,
         });
         toast.success('Workout deleted successfully!', {
@@ -158,7 +158,7 @@ const WorkoutDetailsPage = () => {
   const handleSaveExerciseProgress = async (progress) => {
     try {
       const response = await axios.post(
-        `http://localhost:5000/api/workouts/${workoutId}/exercises/${progress.exerciseId}/progress`,
+        `/api/workouts/${workoutId}/exercises/${progress.exerciseId}/progress`,
         {
           weight: progress.weight,
           reps: progress.reps,
@@ -198,14 +198,14 @@ const WorkoutDetailsPage = () => {
   const handleCompleteWorkout = async () => {
     try {
       const response = await axios.post(
-        `http://localhost:5000/api/workouts/${workoutId}/complete`,
+        `/api/workouts/${workoutId}/complete`,
         {},
         { withCredentials: true }
       );
 
       if (response.data.success) {
         await axios.post(
-          "http://localhost:5000/api/tracker",
+          "/api/tracker",
           { type: "workout" },
           { withCredentials: true }
         );

@@ -19,7 +19,7 @@ const SavedMealsList = () => {
   const fetchMeals = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('http://localhost:5000/api/meal-plans', { withCredentials: true });
+      const response = await axios.get('/api/meal-plans', { withCredentials: true });
       setMeals(response.data);
     } catch (error) {
       toast.error('Failed to load your meals', {
@@ -38,7 +38,7 @@ const SavedMealsList = () => {
     if (!window.confirm('Are you sure you want to delete this meal plan?')) return;
 
     try {
-      await axios.delete(`http://localhost:5000/api/meal-plans/${mealId}`, { withCredentials: true });
+      await axios.delete(`/api/meal-plans/${mealId}`, { withCredentials: true });
       setMeals(meals.filter(meal => meal._id !== mealId));
       
       // Dispatch a custom event to notify parent components
@@ -66,7 +66,7 @@ const SavedMealsList = () => {
   const handleToggleFavorite = async (mealId) => {
     try {
       const response = await axios.patch(
-        `http://localhost:5000/api/meal-plans/${mealId}/favorite`,
+        `/api/meal-plans/${mealId}/favorite`,
         {},
         { withCredentials: true }
       );

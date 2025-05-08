@@ -177,7 +177,7 @@ const NutritionPage = () => {
   {
       try
       {
-          const res = await axios.get("http://localhost:5000/api/auth/profile", { withCredentials: true });
+          const res = await axios.get("/api/auth/profile", { withCredentials: true });
           const profile = res.data;
 
           setUserParams(prev => ({
@@ -236,7 +236,7 @@ const NutritionPage = () => {
   useEffect(() => {
     const fetchMealCount = async () => {
       try {
-        const response = await axios.get("http://localhost:5000/api/tracker/counts", { withCredentials: true });
+        const response = await axios.get("/api/tracker/counts", { withCredentials: true });
         setMealAmount(response.data.mealCount || 0);
         setFetchMealCountError(null); 
       } catch (error) {
@@ -252,7 +252,7 @@ const NutritionPage = () => {
     const fetchLastMealPlanGeneration = async () => {
       try {
         // Get the tracker for meal plans
-        const response = await axios.get("http://localhost:5000/api/tracker", { withCredentials: true });
+        const response = await axios.get("/api/tracker", { withCredentials: true });
         const tracker = response.data.find(t => t.type === "meal-plan");
         
         if (tracker && tracker.lastGenerationDate) {
@@ -351,7 +351,7 @@ const NutritionPage = () => {
       };
 
       const response = await axios.post(
-        "http://localhost:5000/api/meal-plans/generate",
+        "/api/meal-plans/generate",
         payload,
         { withCredentials: true }
       );

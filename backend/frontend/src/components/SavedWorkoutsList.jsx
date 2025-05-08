@@ -19,7 +19,7 @@ const SavedWorkoutsList = () => {
   const fetchWorkouts = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('http://localhost:5000/api/workouts', { withCredentials: true });
+      const response = await axios.get('/api/workouts', { withCredentials: true });
       setWorkouts(response.data);
     } catch (error) {
       toast.error('Failed to load your workouts', {
@@ -38,7 +38,7 @@ const SavedWorkoutsList = () => {
     if (!window.confirm('Are you sure you want to delete this workout?')) return;
     
     try {
-      await axios.delete(`http://localhost:5000/api/workouts/${workoutId}`, { withCredentials: true });
+      await axios.delete(`/api/workouts/${workoutId}`, { withCredentials: true });
       setWorkouts(workouts.filter(workout => workout._id !== workoutId));
       toast.success('Workout deleted successfully', {
         style: {
@@ -60,7 +60,7 @@ const SavedWorkoutsList = () => {
 
   const handleToggleFavorite = async (workoutId) => {
     try {
-      const response = await axios.patch(`http://localhost:5000/api/workouts/${workoutId}/favorite`, {}, { withCredentials: true });
+      const response = await axios.patch(`/api/workouts/${workoutId}/favorite`, {}, { withCredentials: true });
       
       if (response.data.success) {
         setWorkouts(workouts.map(workout => 

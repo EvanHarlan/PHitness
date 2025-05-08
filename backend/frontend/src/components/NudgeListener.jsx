@@ -8,7 +8,7 @@ const NudgeListener = () => {
     // Fetch nudges 
     const fetchNudges = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/api/friend/nudges', { withCredentials: true });
+        const response = await axios.get('/api/friend/nudges', { withCredentials: true });
         setNotifications(response.data.nudges);
       } catch (error) {
       }
@@ -17,7 +17,7 @@ const NudgeListener = () => {
     fetchNudges();
 
     // Listen for nudges
-    const eventSource = new EventSource('http://localhost:5000/api/friend/listenForNudges', { withCredentials: true });
+    const eventSource = new EventSource('/api/friend/listenForNudges', { withCredentials: true });
 
     eventSource.onmessage = (event) => {
       const data = JSON.parse(event.data);
@@ -37,7 +37,7 @@ const NudgeListener = () => {
   const handleDelete = async (index, nudgeId) => {
     try {
       // Delete nudge from database 
-      await axios.post('http://localhost:5000/api/friend/delete-nudge', { nudgeId }, { withCredentials: true });
+      await axios.post('/api/friend/delete-nudge', { nudgeId }, { withCredentials: true });
 
       // Remove nudge from page
       setNotifications((prev) => prev.filter((_, i) => i !== index));
