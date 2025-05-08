@@ -285,7 +285,7 @@ const DashboardStats = ({ user }) => {
         />
         
         {/* Weight Progress Chart */}
-        <div className="p-4 rounded-xl shadow-md" style={{ backgroundColor: COLORS.DARK_GRAY }}>
+        <div className="p-4 rounded-lg" style={{ backgroundColor: COLORS.MEDIUM_GRAY, border: `1px solid ${COLORS.DARK_GRAY}` }}>
           <h3 className="text-lg font-semibold text-green-500 mb-1">Weight Progress</h3>
           <p className="text-sm text-gray-300 mb-4">
             Track how your weight has changed over the past weeks
@@ -336,7 +336,7 @@ const DashboardStats = ({ user }) => {
         <NutritionIntakeChart />
         
         {/* Daily Satisfaction Gauge */}
-        <div className="p-4 rounded-lg" style={{ backgroundColor: COLORS.DARK_GRAY }}>
+        <div className="p-4 rounded-lg" style={{ backgroundColor: COLORS.MEDIUM_GRAY, border: `1px solid ${COLORS.DARK_GRAY}` }}>
           <h3 className="text-lg font-semibold mb-4" style={{ color: COLORS.NEON_GREEN }}>
             Daily Satisfaction
           </h3>
