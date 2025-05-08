@@ -2,7 +2,7 @@ import jwt from "jsonwebtoken";
 import User from "../models/user.model.js";
 // FUNCTION FOR AUTHENTICATING USERS AND MAKING SURE API ROUTES ARE PROTECTED (USER IS AUTHENTICATED)
 
-// --- NEED TO REMOVE SENSITIVE CONSOLE LOGS ---
+// protected route to prevent unwarranted acces to api routes for users that are NOT logged in
 export const protectRoute = async (req, res, next) => {
 	try {
 		const accessToken = req.cookies.accessToken;

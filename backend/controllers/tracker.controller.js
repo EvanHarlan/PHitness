@@ -3,6 +3,9 @@ import User from "../models/user.model.js";
 import Workout from "../models/workout.model.js";
 import MealPlan from "../models/mealPlan.model.js";
 
+// FOR TRACKING ACHIEVEMENT BASED TOTALS
+
+// functionality for adding the meal or workout to the database
 export const addTrackerEntry = async (req, res) =>
 {
     try
@@ -18,7 +21,7 @@ export const addTrackerEntry = async (req, res) =>
             return res.status(400).json({ message: "Invalid tracker type" })
         }
 
-
+        // update entry in db
         const entry = await Tracker.findOneAndUpdate(
             { user: req.user._id, type },
             { $inc: { amount: 1 } },
@@ -33,6 +36,7 @@ export const addTrackerEntry = async (req, res) =>
     }
 };
 
+// function for obtaining all trackers associated with the user
 export const getAllTrackerEntries = async (req, res) =>
 {
     try
@@ -69,6 +73,7 @@ export const getTrackerCounts = async (req, res) => {
     }
 };
 
+// logic for updating workout streak
 export const updateWorkoutStreak = async (req, res) => {
   try {
     const user = await User.findById(req.user._id);
@@ -79,6 +84,7 @@ export const updateWorkoutStreak = async (req, res) => {
     const isSameDay = last && last.toDateString() === today.toDateString();
     const isYesterday = last && new Date(today.setDate(today.getDate() - 1)).toDateString() === last.toDateString();
 
+    // make sure users can only log a workout once a day
     if (isSameDay) {
       return res.status(200).json({ streak: user.dailyStreak.current, message: "Already logged today" });
     }

@@ -255,9 +255,7 @@ const SocialPage = () => {
     }
 
     const filteredFriends = friends.filter(friend =>
-        friend.name.toLowerCase().includes(friendSearchTerm.toLowerCase()) ||
-        friend.email.toLowerCase().includes(friendSearchTerm.toLowerCase())
-    );
+        friend.name.toLowerCase().includes(friendSearchTerm.toLowerCase()));
 
     return (
         <ThemeProvider theme={tooltipTheme}>
@@ -282,12 +280,12 @@ const SocialPage = () => {
                             <h2 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4 flex items-center" 
                                 style={{ color: COLORS.WHITE }}>
                                 Find Friends
-                                <InfoTooltip title="Search for users by name or email and send friend requests." />
+                                <InfoTooltip title="Search for users by name and a send friend request." />
                             </h2>
                             <div className="flex gap-2 mb-4">
                                 <input
                                     type="text"
-                                    placeholder="Search by name or email..."
+                                    placeholder="Search by name..."
                                     value={searchTerm}
                                     onChange={(e) => {
                                         const value = e.target.value;
@@ -322,7 +320,7 @@ const SocialPage = () => {
                                 )}
                                 {searchResults.length === 0 && !searchTerm && (
                                     <p className="text-center py-3 sm:py-4 text-sm sm:text-base" style={{ color: COLORS.LIGHT_GRAY }}>
-                                        Enter a name or email to find users.
+                                        Enter a name to find users.
                                     </p>
                                 )}
                                 {searchResults.map(user => {
@@ -338,9 +336,6 @@ const SocialPage = () => {
                                                 <h3 className="font-medium text-sm sm:text-base" style={{ color: COLORS.WHITE }}>
                                                     {user.name}
                                                 </h3>
-                                                <p className="text-xs sm:text-sm truncate" style={{ color: COLORS.LIGHT_GRAY }}>
-                                                    {user.email}
-                                                </p>
                                             </div>
 
                                             {isAlreadyFriend ? (
@@ -403,9 +398,6 @@ const SocialPage = () => {
                                                 <h3 className="font-medium text-sm sm:text-base" style={{ color: COLORS.WHITE }}>
                                                     {request.name}
                                                 </h3>
-                                                <p className="text-xs sm:text-sm" style={{ color: COLORS.LIGHT_GRAY }}>
-                                                    {request.email}
-                                                </p>
                                             </div>
                                             <div className="flex gap-2">
                                                 <button 
@@ -499,10 +491,6 @@ const SocialPage = () => {
                                                     style={{ color: COLORS.WHITE }}>
                                                     {friend.name}
                                                 </h3>
-                                                <p className="text-xs sm:text-sm mb-2 sm:mb-3 truncate" 
-                                                    style={{ color: COLORS.LIGHT_GRAY }}>
-                                                    {friend.email}
-                                                </p>
                                             </div>
                                             <div className="flex flex-wrap gap-2 mt-2">
                                                 <button

@@ -1,8 +1,9 @@
 import OpenAI from 'openai';
 import { calculateMacroLimits, getMacroRatio } from '../lib/macroHelpers.js';
 
-// SERVICE FOR CONNECTING TO THE OPENAI API
+// USED FOR GENERATING MEAL PLAN USING OPENAI API
 
+// connect to openai
 const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY
 });

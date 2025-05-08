@@ -25,6 +25,7 @@ const generateTokens = (userId) => {
 
 // function for storing the refresh token for 7 days in the redis (quick store/cache)
 const storeRefreshToken = async (userId, refreshToken) => {
+	// storing refresh token with the associated user id
 	await redis.set(`refresh_token:${userId}`, refreshToken, "EX", 7 * 24 * 60 * 60); // 7days
 };
 
@@ -68,7 +69,7 @@ export const signup = async (req, res) => {
 			_id: user._id,
 			name: user.name,
 			email: user.email,
-			role: user.role,
+			age: user.age
 		});
 	} catch (error) {
 		res.status(500).json({ message: error.message });
@@ -90,7 +91,6 @@ export const login = async (req, res) => {
 				_id: user._id,
 				name: user.name,
 				email: user.email,
-				role: user.role,
 				accessToken,
 				refreshToken
 			});
@@ -215,7 +215,7 @@ export const updateProfile = async (req, res) => {
 	}
   };
 
-  // function for handling achievement unlocking capabilities
+// function for handling achievement unlocking capabilities
 export const unlockAchievement = async (req, res) =>
 {
 	try
@@ -332,7 +332,7 @@ export const searchUsers = async (req, res) => {
 	}
 };
 
-// function for handling profile update requests
+// function for updating email and password on the users profile
 export const updateUserProfile = async (req, res) => {
 	const { newEmail, newPassword } = req.body; 
   
@@ -371,14 +371,13 @@ export const forgotPassword = async (req, res) => {
   
 	  user.password = tempPassword;
 	  await user.save();
-  
 	  
 	  const message = `
 		Hey its PHitness! This email is being sent to you because you requested for your email to be reset. Here is your new temporary password:
   
 		${tempPassword}
   
-		Please log in and change it immediately in the edit profile scetion of the profile page.
+		Please log in and change it immediately in the edit profile section of the profile page.
 	  `;
   
 	  await sendEmail(email, "Temporary Password", message);

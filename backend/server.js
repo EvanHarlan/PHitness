@@ -46,10 +46,6 @@ app.use("/api/meal-plans", mealPlanRoutes);
 app.use("/api/exercise-tracking", exerciseTrackingRoutes);
 app.use('/api/weight-tracking', weightTrackingRoutes);
 
-// Health & test routes
-app.get('/health', (req, res) => {
-  res.status(200).send('OK');
-});
 
 // Question route for AI
 app.post('/question', (req, res) => {

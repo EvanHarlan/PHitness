@@ -2,14 +2,14 @@ import express from 'express';
 import { protectRoute } from '../middleware/auth.middleware.js'; // Ensure this middleware correctly attaches req.user
 
 import {
-    generateMealPlan,       // Generates AND saves
-    saveMealPlan,           // Explicit save (review necessity)
-    getUserMealPlans,       // Get all plans (history) / filter favorites
-    getMealPlanById,        // Get specific plan details
-    toggleFavoriteMealPlan, // Mark/unmark as favorite
-    deleteMealPlan,         // Remove a plan
-    completeMeal,           // Complete a meal
-    completeMealPlan        // Complete a meal plan
+    generateMealPlan,
+    saveMealPlan,
+    getUserMealPlans,
+    getMealPlanById,
+    toggleFavoriteMealPlan,
+    deleteMealPlan,
+    completeMeal,
+    completeMealPlan
 } from '../controllers/mealPlan.controller.js';
 
 const router = express.Router();

@@ -41,6 +41,7 @@ weightTrackingSchema.pre('save', function(next) {
 });
 
 // Virtual field for weight change from previous week
+// calculate difference in weight change from previous week
 weightTrackingSchema.virtual('weightChange').get(async function() {
   const previousEntry = await this.constructor.findOne({
     user: this.user,

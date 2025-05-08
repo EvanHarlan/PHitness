@@ -1,27 +1,10 @@
 import asyncHandler from 'express-async-handler';
-import { generateMealPlanWithGPT } from '../lib/openai.service.js';
+import { generateMealPlanWithGPT } from '../lib/openai.service.js'; // used to prompt the openai api and generate a meal plan
 import { calculateMacroLimits, getMacroRatio } from '../lib/macroHelpers.js';
-// import { rotateMealType } from '../lib/mealHelpers.js'; // Keep if used, otherwise remove
-import crypto from 'crypto';
 import MealPlan from '../models/mealPlan.model.js';
 import Tracker from '../models/tracker.model.js';
 
-// Simple in-memory cache for last generated meal plans (Optional: Review if still needed with robust saving)
-const lastPlanCache = new Map();
-
-// Helper to generate a hash of a meal plan (Optional: Review if still needed)
-const hashMealPlan = (mealPlan) => {
-        if (!mealPlan || !Array.isArray(mealPlan.meals)) {
-            return crypto.createHash('md5').update(Date.now().toString()).digest('hex');
-        }
-        const mealSignatures = mealPlan.meals.map(m =>
-            `${m.name}-${m.time}-${m.calories}-${m.protein}-${m.carbs}-${m.fats}`
-         ).join('|');
-
-        return crypto.createHash('md5').update(mealSignatures).digest('hex');
-};
-
-
+// function for getting meal plans associated with a user
 export const getUserMealPlans = asyncHandler(async (req, res) => {
     const filter = { user: req.user._id };
     
@@ -39,7 +22,7 @@ export const getUserMealPlans = asyncHandler(async (req, res) => {
     res.json(mealPlans);
 });
 
-
+// function for getting individual meal plans by its ID
 export const getMealPlanById = asyncHandler(async (req, res) => {
         const mealPlan = await MealPlan.findById(req.params.id);
         if (!mealPlan) {
@@ -53,6 +36,7 @@ export const getMealPlanById = asyncHandler(async (req, res) => {
         res.json(mealPlan);
 });
 
+// function for adding a meal plan to favorites
 export const toggleFavoriteMealPlan = asyncHandler(async (req, res) => {
     const mealPlan = await MealPlan.findById(req.params.id);
     if (!mealPlan) {
@@ -68,7 +52,7 @@ export const toggleFavoriteMealPlan = asyncHandler(async (req, res) => {
     res.json(updatedMealPlan);
 });
 
-
+// function for handling the deletion of a meal plan
 export const deleteMealPlan = asyncHandler(async (req, res) => {
         const mealPlan = await MealPlan.findById(req.params.id);
         if (!mealPlan) {
@@ -83,7 +67,7 @@ export const deleteMealPlan = asyncHandler(async (req, res) => {
         res.json({ message: 'Meal plan removed' });
 });
 
-// Function to calculate target calories using Mifflin-St Jeor equation
+// Function to calculate target calories
 const calculateTargetCalories = (userData) => {
     const { weight, height, age, gender, activityLevel, goal } = userData;
 
@@ -102,11 +86,11 @@ if (gender === 'male') {
     bmr = (10 * weightKg) + (6.25 * heightCm) - (5 * age) + 5;
 }
 
-    // Adjust for activity level
+// Adjust for activity level
 let activityMultiplier;
 switch (activityLevel) {
     case 'sedentary':
-        activityMultiplier = 1.2;
+        activityMultiplier = 1.2; // baseline activity level
     break;
     case 'lightly-active':
         activityMultiplier = 1.375;
@@ -121,8 +105,8 @@ switch (activityLevel) {
         activityMultiplier = 1.9;
     break;
     default:
-        activityMultiplier = 1.2; // Default to sedentary
- }
+        activityMultiplier = 1.2; // Default
+}
 
 let targetCalories = bmr * activityMultiplier;
 
@@ -134,7 +118,6 @@ let targetCalories = bmr * activityMultiplier;
     case 'muscle-gain':
         targetCalories *= 1.1; // Increase by 10% for muscle gain
     break;
-     // For other goals (healthy-eating, increase-energy, etc.), we can keep the calculated TDEE
     default:
     break;
  }
@@ -184,9 +167,7 @@ const generateMealPlanTitle = (userData) => {
   return title;
 };
 
-// @desc    Generate AND SAVE a new meal plan
-// @route   POST /api/meal-plans/generate
-// @access  Private
+// functionality for generating the meal plan
 export const generateMealPlan = asyncHandler(async (req, res) => {
     try {
         // Check if user has already generated a meal plan today
@@ -220,7 +201,7 @@ export const generateMealPlan = asyncHandler(async (req, res) => {
         if (missingFields.length > 0) {
             return res.status(400).json({ message: `Missing required fields: ${missingFields.join(', ')}` });
         }
-
+        // normalized parameters to send to openai
         const normalizedBody = {
             goal: req.body.goal,
             weight: Number(req.body.weight),
@@ -253,7 +234,7 @@ export const generateMealPlan = asyncHandler(async (req, res) => {
             return res.status(400).json({ message: `Failed to calculate target calories: ${calorieError.message}` });
         }
 
-        // Set initial macro targets (these might be adjusted by GPT)
+        // Set initial macro targets
         const macroRatios = getMacroRatio(normalizedBody.goal);
         normalizedBody.targetProtein = Math.round((normalizedBody.targetCalories * macroRatios.protein) / 4); // Protein: 4 calories per gram
         normalizedBody.targetCarbs = Math.round((normalizedBody.targetCalories * macroRatios.carbs) / 4);   // Carbs: 4 calories per gram
@@ -281,7 +262,7 @@ export const generateMealPlan = asyncHandler(async (req, res) => {
             // Generate meal plan with GPT
             generatedPlanData = await generateMealPlanWithGPT(normalizedBody);
 
-            // Check GPT Output: Now only check for the meals array
+            // check to make sure the meals array is populated
             if (!generatedPlanData || !Array.isArray(generatedPlanData.meals) || generatedPlanData.meals.length === 0) {
                 return res.status(502).json({ message: 'AI service failed to generate a valid meal plan structure (missing meals).' });
             }
@@ -305,7 +286,7 @@ export const generateMealPlan = asyncHandler(async (req, res) => {
                 totalFats: totalNutrition.fats
             });
 
-            // ** SAVE THE GENERATED PLAN TO MONGODB **
+            // SAVE THE GENERATED PLAN TO MONGODB
             newPlan = await MealPlan.create({
                 user: req.user._id,
                 title: title,
@@ -350,26 +331,22 @@ export const generateMealPlan = asyncHandler(async (req, res) => {
         const statusCode = error.status || (error.name === 'ValidationError' ? 400 : 500); // Determine status code
         res.status(statusCode).json({
             message: error.message || "Failed to generate meal plan due to an internal server error.",
-            ...(process.env.NODE_ENV === 'development' && { stack: error.stack }), // Show stack in dev only
+            ...(process.env.NODE_ENV === 'development' && { stack: error.stack }),
             details: error.details // Pass along any details attached to the error
         });
     }
 });
 
-
+// function for saving a meal plan after generation
 export const saveMealPlan = asyncHandler(async (req, res) => {
 try {
-
-     // --- Start Validation ---
+     // validate meal plan array
      if (!req.body.meals || !Array.isArray(req.body.meals) || req.body.meals.length === 0) {
          return res.status(400).json({ message: "Valid meals array is required" });
      }
      if (!req.body.totalNutrition || typeof req.body.totalNutrition !== 'object') {
          return res.status(400).json({ message: "Total nutrition object is required" });
      }
-     // Add more detailed validation if needed...
-     // --- End Validation ---
-
 
     const newPlan = await MealPlan.create({
      user: req.user._id,
@@ -396,6 +373,7 @@ try {
  }
 });
 
+// function for marking a meal as complete
 export const completeMeal = asyncHandler(async (req, res) => {
   const { mealPlanId, mealIndex } = req.params;
 
@@ -422,6 +400,7 @@ export const completeMeal = asyncHandler(async (req, res) => {
   res.status(200).json(mealPlan);
 });
 
+// functionality for completing an entire meal plan (all meals within the plan)
 export const completeMealPlan = async (req, res) => {
   try {
     const mealPlan = await MealPlan.findById(req.params.id);

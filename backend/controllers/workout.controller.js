@@ -2,8 +2,9 @@ import OpenAI from "openai";
 import Workout from "../models/workout.model.js";
 import Tracker from "../models/tracker.model.js";
 
+// handle user input, ai prompt, returned response and saving functionality
 export default async (req, res) => {
-  // Extract structured parameters from request body
+  // Extract structured response from teh questionnaire users fill out
   const { 
     height, 
     weight, 
@@ -15,7 +16,7 @@ export default async (req, res) => {
     timeFrame,
     healthConditions,
     frequency,
-    question // Keep backward compatibility with free-form questions
+    question
   } = req.body;
 
   // Determine if we're handling a structured fitness request or a free-form question
@@ -45,16 +46,16 @@ export default async (req, res) => {
       }
     }
 
-    
+    // define connection to OpenAI api for workout generation
     const openai = new OpenAI({
       apiKey: process.env.OPENAI_API_KEY
     });
     
-    let content;
-    let systemPrompt;
+    let content; // user data
+    let systemPrompt; // prompt sent to openai
     
     if (isStructuredRequest) {
-      // Using backticks for multi-line strings
+      // prompt being sent to the OpenAI api providing user details and response format requirements
       systemPrompt = `You are a fitness coach providing exactly ONE workout routine. Your response should be detailed and comprehensive, focusing on content quality rather than styling.
 
 RESPONSE FORMAT:
@@ -134,6 +135,7 @@ IMPORTANT GUIDELINES:
         'daily': 'Daily workouts'
       };
       
+      // send information relative to the user inputs
       const healthInfo = healthConditions ? `Health Considerations: ${healthConditionMap[healthConditions] || healthConditions}\n` : '';
       const ageInfo = age ? `Age: ${age}\n` : '';
       const genderInfo = gender && gender !== 'not-specified' ? `Gender: ${gender.charAt(0).toUpperCase() + gender.slice(1)}\n` : '';
@@ -158,7 +160,7 @@ Provide this workout as structured JSON with exactly 5 exercises - NO HTML forma
       content = question;
     }
     
-    
+    // send response to openai - define model, prompt and user data
     const response = await openai.chat.completions.create({
       model: "gpt-4o",
       messages: [
@@ -171,16 +173,18 @@ Provide this workout as structured JSON with exactly 5 exercises - NO HTML forma
           content: content
         }
       ],
-      max_tokens: 1000,
-      response_format: isStructuredRequest ? { type: "json_object" } : { type: "text" }
+      max_tokens: 1000, // limit token usage
+      response_format: isStructuredRequest ? { type: "json_object" } : { type: "text" } // formatted response to fit defined schema
     });
     
     let responseContent = response.choices[0].message.content;
     
     if (isStructuredRequest) {
       try {
+        // parse json response returned from the openai api
         const workoutData = JSON.parse(responseContent);
         
+        // map exercise information
         const exercises = workoutData.exercises.map(exercise => ({
           name: exercise.name,
           sets: parseInt(exercise.sets),
@@ -193,6 +197,7 @@ Provide this workout as structured JSON with exactly 5 exercises - NO HTML forma
           videoKeywords: exercise.videoKeywords
         }));
 
+        // create workout based on response from openai
         const workout = new Workout({
           user: req.user._id,
           name: workoutData.title || `Custom ${timeFrame} ${fitnessGoal} Workout`,
@@ -204,7 +209,7 @@ Provide this workout as structured JSON with exactly 5 exercises - NO HTML forma
           progression: workoutData.progression
         });
 
-        await workout.save();
+        await workout.save(); // save workout after generation
 
         // Update workout tracker with last generation date
         await Tracker.findOneAndUpdate(
@@ -215,7 +220,7 @@ Provide this workout as structured JSON with exactly 5 exercises - NO HTML forma
           },
           { new: true, upsert: true }
         );
-
+        // return generated workout
         return res.status(200).json({
           success: true,
           message: "Workout generated successfully",
@@ -229,16 +234,9 @@ Provide this workout as structured JSON with exactly 5 exercises - NO HTML forma
           details: error.message
         });
       }
-    } else {
-      // Return free-form question response
-      return res.status(200).json({ 
-        success: true,
-        message: "Question answered successfully",
-        answer: responseContent 
-      });
     }
   } catch (error) {
-    
+    // openai api error handling
     if (error.response) {
       return res.status(500).json({
         success: false,
@@ -255,6 +253,7 @@ Provide this workout as structured JSON with exactly 5 exercises - NO HTML forma
   }
 };
 
+// funtionality to handle favorites
 export const toggleFavorite = async (req, res) => {
   try {
     const workoutId = req.params.id;

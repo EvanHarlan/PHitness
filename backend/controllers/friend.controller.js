@@ -1,6 +1,7 @@
 // friend.controller.js
 import User from '../models/user.model.js';
 import Nudge from '../models/nudge.model.js';
+
 // Send friend request
 export const sendFriendRequest = async (req, res) => {
   try {
@@ -149,7 +150,7 @@ export const removeFriend = async (req, res) => {
   }
 };
 
-// Get Friend Profile (respecting visibility)
+// Get Friend Profile
 export const getFriendProfile = async (req, res) => {
   try {
       const requestedFriendId = req.params.friendId; // Get the ID of the profile being requested from URL param
@@ -186,7 +187,7 @@ export const getFriendProfile = async (req, res) => {
           canView = isSelf;
       }
 
-      // Important: Even if they are friends, only allow viewing if the requesting user IS a friend
+      // even if they are friends, only allow viewing if the requesting user IS a friend
       // This handles the case where someone might try to access a 'friends' profile they aren't friends with
       if (!isFriend && !isSelf && requestedFriendUser.profileVisibility !== 'public') {
            return res.status(403).json({ message: 'You do not have permission to view this profile.' });
@@ -201,11 +202,10 @@ export const getFriendProfile = async (req, res) => {
       const profileData = {
           _id: requestedFriendUser._id,
           username: requestedFriendUser.username,
-          name: requestedFriendUser.name, // Include name
+          name: requestedFriendUser.name,
           avatar: requestedFriendUser.avatar,
           bio: requestedFriendUser.bio,
           achievements: requestedFriendUser.achievements,
-          // Add any other *safe* fields you want to display
       };
 
       res.status(200).json(profileData);
@@ -229,14 +229,15 @@ const activeConnections = {};
    });
  };
  
+ // function for sending anudge
  export const nudgeFriend = async (req, res) => {
    try {
      const { friendId } = req.body;
      const userId = req.user._id;
- 
+    // verify the user exists before sending the nudge
      const friend = await User.findById(friendId);
      if (!friend) return res.status(404).json({ message: 'User not found' });
- 
+    // verify the nudge is coming from an existing user
      const sender = await User.findById(userId);
      if (!sender) return res.status(404).json({ message: 'Sender not found' });
 
@@ -248,7 +249,7 @@ const activeConnections = {};
  
      if (activeConnections[friendId]) {
        activeConnections[friendId].write(
-         `data: ${JSON.stringify({ from: userId, fromName: sender.name, message: 'nudged you!' })}\n\n`
+         `data: ${JSON.stringify({ from: userId, fromName: sender.name, message: 'Nudged you! Its time to get to work!' })}\n\n`
        );
      }
  
@@ -258,6 +259,7 @@ const activeConnections = {};
    }
  };
 
+ // obtain any nudges sent
  export const getNudges = async (req, res) => {
   try {
     const userId = req.user._id;
@@ -273,6 +275,7 @@ const activeConnections = {};
   }
 };
 
+// function to delete sent nudges
 export const deleteNudge = async (req, res) => {
   try {
     const { nudgeId } = req.body;

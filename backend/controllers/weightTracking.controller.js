@@ -12,12 +12,7 @@ const isMoreThanWeekOld = (date) => {
   return isBefore(date, oneWeekAgo);
 };
 
-/**
- * Weight submission strategy:
- * - Only one weight entry is allowed per user per week
- * - If an entry exists for the same week, it will be updated
- * - This ensures data consistency for charts and statistics
- */
+// functionality for handling weight submission details
 export const submitWeight = async (req, res) => {
   try {
     const { weight, userId } = req.body;
@@ -78,6 +73,7 @@ export const submitWeight = async (req, res) => {
   }
 };
 
+// check last entry weekly (start of each week - monday)
 export const checkWeeklyWeightStatus = async (req, res) => {
   try {
     const userId = req.user._id;
@@ -118,6 +114,7 @@ export const checkWeeklyWeightStatus = async (req, res) => {
   }
 };
 
+// funcitonality for obtaining previous weeks weight history
 export const getWeightHistory = async (req, res) => {
   try {
     const userId = req.user._id;
