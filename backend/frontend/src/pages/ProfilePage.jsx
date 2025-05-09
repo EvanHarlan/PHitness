@@ -582,6 +582,7 @@ const ProfilePage = () => {
                 <h2 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4" style={{ color: COLORS.NEON_GREEN }}>
                     Achievements
                 </h2>
+                <a href="https://www.flaticon.com/free-icons/profile" title="profile icons">Profile icons created by KP Arts - Flaticon</a>
 
                 {Object.entries(categorizedAchievements).map(([category, list]) => (
                     <div key={category} className="mb-4 sm:mb-6">
