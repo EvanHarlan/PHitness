@@ -1,4 +1,15 @@
 ## Initial Setup
+Locally: 
+1. Install Node.js 
+2. Pull main branch repository from Github 
+3. Drop .env file into root 
+4. Install all dependencies listed in README file using "npm i “Dependency name""
+5. Make two separate terminals in frontend and backend folders
+6. run npm run dev in both terminals
+
+View live App here: https://phitness.onrender.com 
+
+
 
 ## Packages
 - **express**: Web framework for Node.js
@@ -12,6 +23,13 @@
 - **lucide-react**: React icon package
 - **recharts**: React charting
 - **prop-types**: React typechecking
+- **react-confetti**: does confetti animation
+- **nodemailer**: sends email
+- **cors**: autorization
+- **framer-motion**:
+- **openai**: handles ai
+- **date-fns**: stores date
+- **@sendgrid/mail**: uses sendgrid to send mail
 
 ## Project Structure
 ```bash
@@ -30,8 +48,10 @@
 │   └── src/
 │       ├── components/ # Reusable UI components
 │       ├── pages/ # Page-level components
-│       ├── services/ # API communication layer
-│       ├── App.js # Root React component
+│       ├── lib/ # Accessory files
+│       ├── stores/ # Authentication and user state management
+│       ├── App.js/ # Root React component
+|       ├── config.js/ # API config
 │       ├── index.css # Global styles with Tailwind imports
 │       └── Main.js # ReactDOM render point
 │
