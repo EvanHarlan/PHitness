@@ -344,6 +344,7 @@ const ProfilePage = () => {
                                 <p className="text-sm sm:text-base text-[#B0B0B0] text-center sm:text-left">
                                     Bio: {user?.bio || "No bio provided"}
                                 </p>
+                                <a href="https://www.flaticon.com/free-icons/profile" title="profile icons">Profile icons created by KP Arts - Flaticon</a>
                             </div>
                         ) : (
                             <div className="flex flex-col sm:flex-row gap-6 w-full">
