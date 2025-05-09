@@ -19,7 +19,7 @@ import { useNavigate } from 'react-router-dom';
  
  const handleDeleteAccount = async () => {
    try {
-     const res = await fetch('/api/auth/delete', {
+     const res = await fetch('http://localhost:5000/api/auth/delete', {
        method: 'DELETE',
        credentials: 'include', 
      });
@@ -99,7 +99,7 @@ const ProfilePage = () => {
     useEffect(() => {
         const fetchProfileAndCounts = async () => {
             try {
-                const profileResponse = await axios.get("/api/auth/profile", {
+                const profileResponse = await axios.get("http://localhost:5000/api/auth/profile", {
                     withCredentials: true,
                 });
 
@@ -118,7 +118,7 @@ const ProfilePage = () => {
                     fitnessGoal: profileResponse.data.fitnessGoal || ""
                 });
 
-                const countsResponse = await axios.get("/api/tracker/counts", {
+                const countsResponse = await axios.get("http://localhost:5000/api/tracker/counts", {
                     withCredentials: true,
                 });
 
@@ -246,7 +246,7 @@ const ProfilePage = () => {
                 } else {
                     try {
                         await axios.post(
-                            "/api/auth/unlock-achievement",
+                            "http://localhost:5000/api/auth/unlock-achievement",
                             { title: achievement.title },
                             { withCredentials: true }
                         );
