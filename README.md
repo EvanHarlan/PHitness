@@ -51,7 +51,7 @@ View live App here: https://phitness.onrender.com
 │       ├── lib/ # Accessory files
 │       ├── stores/ # Authentication and user state management
 │       ├── App.js/ # Root React component
-|       ├── config.js/ # API config
+│       ├── config.js/ # API config
 │       ├── index.css # Global styles with Tailwind imports
 │       └── Main.js # ReactDOM render point
 │
