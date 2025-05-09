@@ -99,7 +99,7 @@ const ProfilePage = () => {
     useEffect(() => {
         const fetchProfileAndCounts = async () => {
             try {
-                const profileResponse = await axios.get("http://localhost:5000/api/auth/profile", {
+                const profileResponse = await axios.get("/api/auth/profile", {
                     withCredentials: true,
                 });
 
@@ -118,7 +118,7 @@ const ProfilePage = () => {
                     fitnessGoal: profileResponse.data.fitnessGoal || ""
                 });
 
-                const countsResponse = await axios.get("http://localhost:5000/api/tracker/counts", {
+                const countsResponse = await axios.get("/api/tracker/counts", {
                     withCredentials: true,
                 });
 
@@ -246,7 +246,7 @@ const ProfilePage = () => {
                 } else {
                     try {
                         await axios.post(
-                            "http://localhost:5000/api/auth/unlock-achievement",
+                            "/api/auth/unlock-achievement",
                             { title: achievement.title },
                             { withCredentials: true }
                         );
@@ -344,6 +344,7 @@ const ProfilePage = () => {
                                 <p className="text-sm sm:text-base text-[#B0B0B0] text-center sm:text-left">
                                     Bio: {user?.bio || "No bio provided"}
                                 </p>
+                                <a href="https://www.flaticon.com/free-icons/profile" title="profile icons">Profile icons created by KP Arts - Flaticon</a>
                             </div>
                         ) : (
                             <div className="flex flex-col sm:flex-row gap-6 w-full">
@@ -581,6 +582,7 @@ const ProfilePage = () => {
                 <h2 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4" style={{ color: COLORS.NEON_GREEN }}>
                     Achievements
                 </h2>
+                <a href="https://www.flaticon.com/free-icons/profile" title="profile icons">Profile icons created by KP Arts - Flaticon</a>
 
                 {Object.entries(categorizedAchievements).map(([category, list]) => (
                     <div key={category} className="mb-4 sm:mb-6">
